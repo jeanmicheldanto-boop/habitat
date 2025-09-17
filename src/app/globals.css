@@ -1,26 +1,157 @@
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* =============== Variables =============== */
+:root{
+  --white: #fff;
+  --text-dark: #1f2937;
+  /* Overlay allégé pour que le hero reste lumineux */
+  --overlay: linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.28));
+  --btn-border: rgba(255,255,255,.55);
+  --btn-bg: rgba(255,255,255,.14);
+  --btn-bg-hover: rgba(255,255,255,.22);
+  --radius: 14px;
+  --accent:#ff7a00;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* =============== Reset minimal =============== */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+a{color:inherit;text-decoration:none}
+
+/* =============== Container =============== */
+.container{ width:min(1100px, 92vw); margin-inline:auto; }
+
+/* =============== HERO plein écran =============== */
+.hero{
+  position: relative;
+  min-height: 92vh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.hero__bg { position:absolute; inset:0; }
+.hero__bg img{
+  object-fit: cover;
+  object-position: center;
+  /* image un peu plus lumineuse */
+  filter: saturate(1) contrast(1.02) brightness(1.06);
+}
+.hero__bg::after{
+  content:"";
+  position:absolute; inset:0;
+  background: var(--overlay); /* lisibilité du texte */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Afficher UNE image selon la largeur */
+.hero__img--mobile { display: none; }
+.hero__img--desktop { display: block; }
+@media (max-width: 720px){
+  .hero__img--desktop { display: none; }
+  .hero__img--mobile { display: block; }
+  /* sur mobile on peut remonter un peu le contraste si besoin */
+  .hero__bg::after{
+    background: linear-gradient(180deg, rgba(0,0,0,.16), rgba(0,0,0,.34));
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Ancien deuxième voile (désactivé) */
+.hi-hero__scrim{ display:none; }
+
+.hero__content{
+  position: relative; z-index: 1;
+  color: var(--white);
+  text-align: center;
+  padding: 24px;
 }
+.hero__title{
+  font-size: clamp(1.8rem, 3.4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: .2px;
+  margin: 0 0 18px 0;
+}
+.hero__actions{
+  display: flex; gap: 14px;
+  flex-wrap: wrap; justify-content: center;
+}
+
+/* =============== Boutons =============== */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding: 12px 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--btn-border);
+  color: var(--white);
+  font-weight: 700;
+  backdrop-filter: blur(2px);
+  transition: background .2s ease, transform .06s ease, border-color .2s ease;
+}
+.btn:hover{ transform: translateY(-1px); }
+.btn--primary{ background: var(--btn-bg); }
+.btn--primary:hover{ background: var(--btn-bg-hover); }
+.btn--outline{ background: transparent; }
+.btn--outline:hover{ background: rgba(255,255,255,.10); }
+.btn--accent{
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid rgba(0,0,0,.1);
+  box-shadow: 0 4px 14px rgba(0,0,0,.15);
+}
+.btn--accent:hover{ filter: brightness(.95); transform: translateY(-1px); }
+
+/* =============== Header (logo + manuscrite) =============== */
+.site-header{
+  position: absolute; top: 0; left: 0; right: 0; z-index: 50;
+  padding: 12px 0;
+}
+.header-inner{ display:flex; align-items:center; }
+.brand{
+  display:inline-flex; align-items:center; gap:10px;
+  color:#fff; text-decoration:none;
+  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 999px;
+  padding: 6px 12px;
+  backdrop-filter: blur(2px);
+}
+.brand-title{
+  font-size: clamp(1.1rem, 2.4vw, 1.6rem);
+  line-height: 1;
+  letter-spacing: .2px;
+  text-shadow: 0 2px 10px rgba(0,0,0,.35);
+}
+
+/* =============== Pages éditoriales =============== */
+.section{ padding: 84px 0 64px; }  /* 84px pour ne pas passer sous le header */
+.section .container{
+  background:#fff; border:1px solid #eee; border-radius:14px; padding:24px;
+}
+.section h1{ margin:0 0 10px; color: var(--text-dark); }
+.section p{ color: #4b5563; }
+
+/* Sommaire en pilules (page Aides) */
+.pill-nav{ display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 18px; }
+.pill-btn{
+  display:inline-flex; align-items:center; gap:.5ch;
+  padding:8px 12px; border-radius:999px;
+  background:#f5f6f7; border:1px solid #e7e7e7; color:#1f2937;
+  font-weight:600; text-decoration:none;
+  transition: background .2s ease, transform .06s ease;
+}
+.pill-btn:hover{ background:#eee; transform: translateY(-1px); }
+
+/* Rythme typographique */
+.prose h2{ margin:24px 0 8px; color:#111827; }
+.prose p, .prose li{ color:#4b5563; }
+
+/* =============== Footer de la home =============== */
+.home-footer{
+  position:absolute; left:0; right:0; bottom:16px; z-index:2;
+}
+.home-footer__inner{
+  display:flex; align-items:center; justify-content:center; gap:14px;
+}
+.home-footer__legal{
+  font-size: .9rem;
+  color: #e5e7eb;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.home-footer__legal:hover{ color:#ffffff; }
