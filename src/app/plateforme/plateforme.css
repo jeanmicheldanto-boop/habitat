@@ -1,0 +1,61 @@
+/* Styles professionnels pour la sidebar de filtres et les boutons */
+.filtre-label {
+  font-weight: 600;
+  color: #a85b2b;
+  font-size: 1.07em;
+  margin-bottom: 0.5em;
+}
+.filtre-input {
+  width: 100%;
+  padding: 0.5em 0.9em;
+  border-radius: 8px;
+  border: 1.5px solid #e0e2e6;
+  background: #faf9f7;
+  font-size: 1em;
+  margin-bottom: 0.2em;
+}
+.filtre-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+}
+.filtre-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: 0.98em;
+  color: #444;
+  font-weight: 500;
+}
+.filtre-btn-group {
+  display: flex;
+  gap: 0.7em;
+  margin-top: 0.2em;
+}
+.filtre-btn {
+  border: 1.5px solid #e0e2e6;
+  background: #f6f6f6;
+  color: #888;
+  border-radius: 8px;
+  padding: 0.45em 1.1em;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.filtre-btn.selected,
+.filtre-btn:active {
+  background: #ffe5c7;
+  color: #a85b2b;
+  border: 2px solid #e0a800;
+}
+.prix-btn.selected {
+  background: #ffe5c7;
+  color: #e0a800;
+  border: 2px solid #e0a800;
+}
+.logement-btn.selected {
+  background: #e0a800;
+  color: #fff;
+  border: 2px solid #e0a800;
+}
