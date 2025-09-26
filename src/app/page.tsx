@@ -25,7 +25,7 @@ export default function HomePage() {
       </div>
 
       <div className="hero__content">
-  <h1 className="hero__title">Plateforme experte du logement inclusif pour séniors</h1>
+  <h1 className="hero__title">XPlateforme experte du logement inclusif pour séniors</h1>
 
         {/* Barre de recherche centrale */}
         <form
