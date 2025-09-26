@@ -60,6 +60,16 @@ export default function Page() {
   ];
   const [selectedPublicCible, setSelectedPublicCible] = useState<string[]>([]);
   const [selectedDepartement, setSelectedDepartement] = useState<string>("");
+  // Sticky responsive: top = 80px (desktop), 120px (mobile)
+  const [stickyTop, setStickyTop] = useState(80);
+  useEffect(() => {
+    function handleResize() {
+      setStickyTop(window.innerWidth < 700 ? 120 : 80);
+    }
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const [selectedCommune, setSelectedCommune] = useState<string>("");
 
   useEffect(() => {
@@ -170,8 +180,7 @@ export default function Page() {
   return (
   <main style={{ background: "#f3f3f3", minHeight: "100vh", padding: 0, fontSize: "0.95rem" }}>
     <HeaderSubnavGate />
-    {/* Sticky header vide pour conserver l'espace si besoin (optionnel) */}
-    <div style={{ height: 24, background: '#f6f6f6', width: '100%' }} />
+  
     {/* Ligne principale : sidebar, sticky top bar (search+tabs), contenu */}
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 36, maxWidth: 1600, margin: '0 auto', padding: '0 1.5rem', marginTop: 0 }}>
       {/* Sidebar filtres sticky sous le header */}
@@ -308,7 +317,7 @@ export default function Page() {
         {/* Sticky block: search bar + tabs */}
         <div style={{
           position: 'sticky',
-          top: 88,
+          top: stickyTop,
           zIndex: 20,
           background: '#f3f3f3',
           borderRadius: '0 0 18px 18px',
