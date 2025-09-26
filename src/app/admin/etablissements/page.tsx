@@ -64,6 +64,8 @@ type EtabListItem = {
   nom: string;
   commune: string | null;
   departement: string | null;
+  statut_editorial?: string;
+  habitat_type?: string;
 };
 
 export default function EtablissementsAdminPage() {
@@ -79,7 +81,7 @@ export default function EtablissementsAdminPage() {
       setLoading(true);
       let query = supabase
         .from("etablissements")
-        .select("id, nom, commune, departement");
+        .select("id, nom, commune, departement, statut_editorial, habitat_type");
       if (departement) {
         query = query.eq("departement", departement);
       }
@@ -161,6 +163,8 @@ export default function EtablissementsAdminPage() {
                 <div className="text-sm text-gray-600 flex gap-4">
                   <span>{etab.commune || "Commune inconnue"}</span>
                   <span>{etab.departement || ""}</span>
+                  {etab.habitat_type && <span className="bg-blue-100 px-2 py-1 rounded text-xs">{etab.habitat_type}</span>}
+                  {etab.statut_editorial && <span className={`px-2 py-1 rounded text-xs ${etab.statut_editorial === 'publie' ? 'bg-green-100' : 'bg-yellow-100'}`}>{etab.statut_editorial}</span>}
                 </div>
 
                 <EtabInfos etabId={etab.id} />

@@ -1,0 +1,76 @@
+-- Insertion de quelques établissements de test
+INSERT INTO etablissements (
+  nom, 
+  description, 
+  adresse, 
+  ville, 
+  code_postal, 
+  latitude, 
+  longitude, 
+  telephone, 
+  email, 
+  habitat_type, 
+  capacite_totale, 
+  prix_min, 
+  prix_max, 
+  statut,
+  commune,
+  departement
+) VALUES 
+(
+  'Résidence Les Jardins',
+  'Résidence étudiante moderne au cœur de la ville',
+  '123 Avenue des Étudiants',
+  'Lyon',
+  '69000',
+  45.764043,
+  4.835659,
+  '04 72 12 34 56',
+  'contact@jardins-lyon.fr',
+  'residence',
+  120,
+  450.00,
+  650.00,
+  'publie',
+  'Lyon',
+  'Rhône'
+),
+(
+  'Foyer Universitaire Central',
+  'Logement étudiant abordable avec services inclus',
+  '45 Rue de la République',
+  'Toulouse',
+  '31000',
+  43.604652,
+  1.444209,
+  '05 61 23 45 67',
+  'info@foyer-toulouse.fr',
+  'logement_independant',
+  80,
+  380.00,
+  520.00,
+  'publie',
+  'Toulouse',
+  'Haute-Garonne'
+),
+(
+  'Habitat Partagé Solidaire',
+  'Colocation solidaire pour jeunes actifs et étudiants',
+  '78 Boulevard Saint-Michel',
+  'Paris',
+  '75005',
+  48.843775,
+  2.337592,
+  '01 43 54 76 89',
+  'contact@habitat-paris.fr',
+  'habitat_partage',
+  45,
+  520.00,
+  780.00,
+  'publie',
+  'Paris',
+  'Paris'
+);
+
+-- Vérification des données insérées
+SELECT nom, ville, habitat_type, statut FROM etablissements;

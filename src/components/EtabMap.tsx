@@ -73,9 +73,9 @@ export default function EtabMap({ etablissements }: EtabMapProps) {
   {/* @ts-ignore: center prop is valid for MapContainer but TS types may be outdated */}
   <MapContainer center={DEFAULT_CENTER as [number, number]} zoom={6} style={{ height: '100%', width: '100%' }} scrollWheelZoom={true} attributionControl={true}>
         <TileLayer
-          url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png"
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
           // @ts-ignore
-          attribution="© OpenStreetMap"
+          attribution="© OpenStreetMap © CartoDB"
         />
         {markers.map(etab => (
           <Marker

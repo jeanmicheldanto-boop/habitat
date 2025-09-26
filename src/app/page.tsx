@@ -25,7 +25,7 @@ export default function HomePage() {
       </div>
 
       <div className="hero__content">
-  <h1 className="hero__title">XPlateforme experte du logement inclusif pour séniors</h1>
+  <h1 className="hero__title" style={{ marginTop: "4rem" }}>Plateforme experte du logement inclusif pour séniors</h1>
 
         {/* Barre de recherche centrale */}
         <form
@@ -83,6 +83,134 @@ export default function HomePage() {
         <div style={{ marginTop: "2rem", textAlign: "center", display: "flex", justifyContent: "center", gap: 24 }}>
           <OblongButtonLink href="/aides">Faire le point sur les aides</OblongButtonLink>
           <OblongButtonLink href="/solutions">Choisir sa solution logement</OblongButtonLink>
+        </div>
+      </div>
+
+      {/* Section Gestionnaire - En bas après l'image de fond */}
+      <div style={{ 
+        position: "relative",
+        background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+        padding: "4rem 2rem",
+        marginTop: "2rem"
+      }}>
+        <div style={{ 
+          margin: "0 auto", 
+          maxWidth: 800, 
+          textAlign: "center"
+        }}>
+          <h2 style={{ 
+            fontSize: "2rem", 
+            fontWeight: 700, 
+            color: "#2c3e50", 
+            marginBottom: 16,
+            textAlign: "center"
+          }}>
+            Vous proposez de l'habitat intermédiaire ?
+          </h2>
+          <p style={{ 
+            color: "#495057", 
+            fontSize: "1.1rem", 
+            marginBottom: 40, 
+            lineHeight: 1.6,
+            maxWidth: 600,
+            margin: "0 auto 40px"
+          }}>
+            Rejoignez notre réseau de partenaires et donnez de la visibilité à votre établissement. 
+            Gérez facilement vos annonces et connectez-vous avec les personnes recherchant des solutions d'habitat adapté.
+          </p>
+          
+          <div style={{ 
+            display: "flex", 
+            gap: 20, 
+            justifyContent: "center", 
+            flexWrap: "wrap",
+            marginBottom: 32
+          }}>
+            {/* Bouton Ajouter - Plus grand */}
+            <Link 
+              href="/gestionnaire/create"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 12,
+                background: "linear-gradient(135deg, #3498db 0%, #2980b9 100%)",
+                color: "white",
+                textDecoration: "none",
+                borderRadius: 16,
+                padding: "18px 36px",
+                fontSize: "1.1rem",
+                fontWeight: 600,
+                transition: "all 0.3s ease",
+                boxShadow: "0 6px 24px rgba(52, 152, 219, 0.4)",
+                border: "none",
+                cursor: "pointer"
+              }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+              </svg>
+              Ajouter mon habitat
+            </Link>
+
+            {/* Bouton Espace Gestionnaire - Plus grand */}
+            <Link 
+              href="/gestionnaire/login"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 12,
+                background: "linear-gradient(135deg, #e67e22 0%, #d35400 100%)",
+                color: "white",
+                textDecoration: "none",
+                borderRadius: 16,
+                padding: "18px 36px",
+                fontSize: "1.1rem",
+                fontWeight: 600,
+                transition: "all 0.3s ease",
+                boxShadow: "0 6px 24px rgba(230, 126, 34, 0.4)",
+                border: "none",
+                cursor: "pointer"
+              }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2.5"/>
+              </svg>
+              Espace gestionnaire
+            </Link>
+          </div>
+
+          {/* Petite ligne d'informations */}
+          <div style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 32,
+            flexWrap: "wrap",
+            fontSize: "0.95rem",
+            color: "#6c757d"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="22,4 12,14.01 9,11.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Référencement gratuit
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Mise en ligne rapide
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Support dédié
+            </div>
+          </div>
         </div>
       </div>
 

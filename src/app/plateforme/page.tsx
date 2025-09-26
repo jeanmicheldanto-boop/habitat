@@ -4,17 +4,26 @@ import dynamic from "next/dynamic";
 import HeaderSubnavGate from "@/components/HeaderSubnavGate";
 import { supabase } from "../../lib/supabaseClient";
 import './plateforme.css';
-// Palette de couleurs pour les types d'habitat (sous-catégories)
+// Palette de couleurs pour les sous-catégories (affichage des tags)
 const TAG_COLORS: Record<string, string> = {
   "résidence autonomie": "#a85b2b",
   "résidence services": "#2b7fa8",
+  "résidence service séniors": "#2b7fa8",
   "colocation": "#2ba85b",
   "maison partagée": "#a82b7f",
   "béguinage": "#e0a800",
   "ehpad": "#a82b2b",
   "foyer logement": "#2b2ba8",
   "habitat inclusif": "#2ba8a8",
+  "accueil familial": "#8b4513",
+  "logement accompagné": "#9932cc",
   "autre": "#888"
+};
+
+const HABITAT_TYPE_LABELS: Record<string, string> = {
+  "logement_independant": "Logement indépendant",
+  "residence": "Résidence",
+  "habitat_partage": "Habitat partagé"
 };
 
 export default function Page() {
@@ -28,6 +37,54 @@ export default function Page() {
   const [search, setSearch] = useState("");
   const [sousCategories, setSousCategories] = useState<string[]>([]);
   const [selectedSousCategories, setSelectedSousCategories] = useState<string[]>([]);
+  
+  // Nouveaux filtres pour habitat_type
+  const HABITAT_TYPE_OPTIONS = [
+    { 
+      key: "logement_independant", 
+      label: "Logement indépendant",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 21h18"/>
+          <path d="M5 21V7l8-4v18"/>
+          <path d="M19 21V11l-6-4"/>
+          <path d="M9 9v.01"/>
+          <path d="M9 12v.01"/>
+          <path d="M9 15v.01"/>
+          <path d="M9 18v.01"/>
+        </svg>
+      )
+    },
+    { 
+      key: "residence", 
+      label: "Résidence",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 21h18"/>
+          <path d="M4 21V8a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v13"/>
+          <path d="M14 21V8a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v13"/>
+          <path d="M8 12h2"/>
+          <path d="M8 16h2"/>
+          <path d="M16 12h2"/>
+          <path d="M16 16h2"/>
+          <path d="M8 7V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v3"/>
+        </svg>
+      )
+    },
+    { 
+      key: "habitat_partage", 
+      label: "Habitat partagé",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      )
+    }
+  ];
+  const [selectedHabitatTypes, setSelectedHabitatTypes] = useState<string[]>([]);
   const PRICE_UI_TO_DB: Record<string, string> = { '€': 'euro', '€€': 'deux_euros', '€€€': 'trois_euros' };
   const PRICE_DB_TO_UI: Record<string, string> = { 'euro': '€', 'deux_euros': '€€', 'trois_euros': '€€€' };
   const [selectedPrices, setSelectedPrices] = useState<Array<'€'|'€€'|'€€€'>>([]);
@@ -75,7 +132,16 @@ export default function Page() {
   useEffect(() => {
     async function fetchData() {
       const { data, error } = await supabase.from("v_liste_publication_geoloc").select("*").limit(500);
-      if (error) setError(error.message);
+      if (error) {
+        console.error("Erreur lors du chargement des données:", error);
+        setError(error.message);
+      } else {
+        console.log("Données chargées:", data?.length || 0, "établissements");
+        // Debug: afficher les premiers établissements
+        if (data && data.length > 0) {
+          console.log("Premier établissement:", data[0]);
+        }
+      }
       setData(data || []);
       setLoading(false);
     }
@@ -83,27 +149,39 @@ export default function Page() {
     async function fetchSousCategories() {
       const { data } = await supabase
         .from("v_liste_publication_geoloc")
-        .select("sous_categories, services, logements_types")
+        .select("sous_categories, services, logements_types, habitat_type")
         .limit(500);
       if (data) {
         const allSousCat = data.flatMap((row:any) => row.sous_categories || []);
-        setSousCategories(Array.from(new Set(allSousCat)).sort());
+        const uniqueSousCat = Array.from(new Set(allSousCat)).sort();
+        console.log("Sous-catégories disponibles:", uniqueSousCat);
+        setSousCategories(uniqueSousCat);
+        
         const allServ = data.flatMap((row:any) => row.services || []);
-        setAllServices(Array.from(new Set(allServ)).sort());
+        const uniqueServices = Array.from(new Set(allServ)).sort();
+        console.log("Services disponibles:", uniqueServices);
+        setAllServices(uniqueServices);
+        
         const allLogTypes = data.flatMap((row:any) => (row.logements_types || []).map((lt:any) => lt.libelle).filter(Boolean));
         setAllLogementTypes(Array.from(new Set(allLogTypes)).sort());
+
+        // Debug: afficher les types d'habitat disponibles
+        const allHabitatTypes = data.map((row:any) => row.habitat_type).filter(Boolean);
+        const uniqueHabitatTypes = Array.from(new Set(allHabitatTypes));
+        console.log("Types d'habitat disponibles (habitat_type):", uniqueHabitatTypes);
       }
     }
     fetchSousCategories();
   }, []);
 
   function getFilteredData() {
-    return data.filter((etab:any) => {
-      // Type d'habitat
-      if (selectedSousCategories.length > 0) {
-        if (!Array.isArray(etab.sous_categories)) return false;
-        if (!selectedSousCategories.some(sc => etab.sous_categories.includes(sc))) return false;
+    let filtered = data.filter((etab:any) => {
+      // Type d'habitat (utilisation du champ habitat_type)
+      if (selectedHabitatTypes.length > 0) {
+        if (!etab.habitat_type) return false;
+        if (!selectedHabitatTypes.includes(etab.habitat_type)) return false;
       }
+      
       // Prix
       if (selectedPrices.length > 0) {
         const dbValue = etab.fourchette_prix;
@@ -111,23 +189,28 @@ export default function Page() {
         const uiValue = PRICE_DB_TO_UI[dbValue] as "€"|"€€"|"€€€"|undefined;
         if (!uiValue || !selectedPrices.includes(uiValue)) return false;
       }
-      // Services dynamiques
+      
+      // Services dynamiques (au moins un des services sélectionnés doit être présent)
       if (selectedServices.length > 0) {
         if (!etab.services || !Array.isArray(etab.services)) return false;
-        if (!selectedServices.every(s => etab.services.includes(s))) return false;
+        const hasServiceMatch = selectedServices.some(s => etab.services.includes(s));
+        if (!hasServiceMatch) return false;
       }
+      
       // Restauration (toutes les cases cochées doivent être vraies)
       if (Object.values(selectedRestauration).some(Boolean)) {
         for (const key of Object.keys(selectedRestauration)) {
           if (selectedRestauration[key] && !etab[key]) return false;
         }
       }
+      
       // Types de logement (au moins un type sélectionné doit être présent)
       if (selectedLogementTypes.length > 0) {
         if (!Array.isArray(etab.logements_types)) return false;
         const found = etab.logements_types.some((lt:any) => selectedLogementTypes.includes(lt.libelle));
         if (!found) return false;
       }
+      
       // Caractéristiques (toutes les cases cochées doivent être vraies sur au moins un logement)
       if (
         selectedCaracteristiques.meuble ||
@@ -155,14 +238,17 @@ export default function Page() {
         });
         if (!found) return false;
       }
+      
       // Public cible (au moins une case cochée doit être présente)
       if (selectedPublicCible.length > 0) {
         if (!Array.isArray(etab.public_cible)) return false;
         if (!selectedPublicCible.some(pc => etab.public_cible.includes(pc))) return false;
       }
+      
       // Localisation (correction : match exact ou partiel, insensible à la casse)
       if (selectedDepartement && etab.departement && !etab.departement.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(selectedDepartement.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, ''))) return false;
       if (selectedCommune && etab.commune && !etab.commune.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(selectedCommune.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, ''))) return false;
+      
       // Recherche texte
       if (search && !(
         (etab.nom && etab.nom.toLowerCase().includes(search.toLowerCase())) ||
@@ -170,8 +256,20 @@ export default function Page() {
         (etab.commune && etab.commune.toLowerCase().includes(search.toLowerCase())) ||
         (etab.departement && etab.departement.toLowerCase().includes(search.toLowerCase()))
       )) return false;
+      
       return true;
     });
+
+    // Debug logging
+    if (selectedHabitatTypes.length > 0 || selectedServices.length > 0) {
+      console.log(`Filtres appliqués:`, {
+        habitatTypes: selectedHabitatTypes,
+        services: selectedServices,
+        resultats: filtered.length
+      });
+    }
+
+    return filtered;
   }
 
   // Import dynamique de la carte pour SSR
@@ -184,7 +282,45 @@ export default function Page() {
     {/* Ligne principale : sidebar, sticky top bar (search+tabs), contenu */}
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 36, maxWidth: 1600, margin: '0 auto', padding: '0 1.5rem', marginTop: 0 }}>
       {/* Sidebar filtres sticky sous le header */}
-  <aside style={{ minWidth: 290, maxWidth: 340, width: 320, background: '#fff', borderRadius: 18, boxShadow: '0 2px 12px 0 rgba(0,0,0,0.07)', padding: '2.2rem 1.5rem 1.5rem 1.5rem', display: 'flex', flexDirection: 'column', gap: 22, position: 'sticky', top: 64, height: 'calc(100vh - 64px)', zIndex: 10, marginTop: 0, overflowY: 'auto', fontSize: '0.89rem' }}>
+  <aside style={{ minWidth: 290, maxWidth: 340, width: 320, background: '#fff', borderRadius: 18, boxShadow: '0 2px 12px 0 rgba(0,0,0,0.07)', padding: '2.2rem 1.5rem 1.5rem 1.5rem', display: 'flex', flexDirection: 'column', gap: 22, position: 'sticky', top: 64, height: 'calc(100vh - 64px)', zIndex: 10, marginTop: 0, overflowY: 'auto', fontSize: '0.82rem' }}>
+        
+        {/* Section Gestionnaire - En haut des filtres */}
+        <div style={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          borderRadius: 16,
+          padding: '20px 18px',
+          textAlign: 'center',
+          color: 'white',
+          marginBottom: 8
+        }}>
+          <div style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 8 }}>
+            Proposez votre habitat ?
+          </div>
+          <div style={{ fontSize: '0.8rem', marginBottom: 16, opacity: 0.9, lineHeight: 1.3 }}>
+            Référencez votre établissement sur la plateforme
+          </div>
+          <button
+            onClick={() => window.location.href = '/gestionnaire/create'}
+            style={{
+              background: 'rgba(255,255,255,0.2)',
+              backdropFilter: 'blur(10px)',
+              color: 'white',
+              border: '1px solid rgba(255,255,255,0.3)',
+              borderRadius: 8,
+              padding: '10px 16px',
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              width: '100%'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+          >
+            ✨ Ajouter mon habitat
+          </button>
+        </div>
+
         {/* Localisation */}
         <div>
           <div className="filtre-label">Localisation</div>
@@ -194,12 +330,58 @@ export default function Page() {
         {/* Type d'habitat */}
         <div>
           <div className="filtre-label">Type d'habitat</div>
-          <div className="filtre-checkbox-group">
-            {sousCategories.map(sc => (
-              <label key={sc} className="filtre-checkbox-label">
-                <input type="checkbox" checked={selectedSousCategories.includes(sc)} onChange={e => setSelectedSousCategories(arr => e.target.checked ? [...arr, sc] : arr.filter(x => x !== sc))} />
-                {sc}
-              </label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+            {HABITAT_TYPE_OPTIONS.map(option => (
+              <button
+                key={option.key}
+                type="button"
+                onClick={() => setSelectedHabitatTypes(arr => 
+                  arr.includes(option.key) 
+                    ? arr.filter(x => x !== option.key) 
+                    : [...arr, option.key]
+                )}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '0.8rem 1rem',
+                  borderRadius: 12,
+                  border: '1.5px solid',
+                  borderColor: selectedHabitatTypes.includes(option.key) ? '#a85b2b' : '#e0e2e6',
+                  background: selectedHabitatTypes.includes(option.key) ? '#a85b2b' : '#fff',
+                  color: selectedHabitatTypes.includes(option.key) ? '#fff' : '#444',
+                  fontSize: '0.88rem',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  textAlign: 'left',
+                  width: '100%',
+                  boxShadow: selectedHabitatTypes.includes(option.key) 
+                    ? '0 2px 8px 0 rgba(168,91,43,0.12)' 
+                    : '0 1px 3px 0 rgba(0,0,0,0.04)',
+                }}
+                onMouseOver={e => {
+                  if (!selectedHabitatTypes.includes(option.key)) {
+                    e.currentTarget.style.borderColor = '#a85b2b';
+                    e.currentTarget.style.backgroundColor = '#fef9f5';
+                  }
+                }}
+                onMouseOut={e => {
+                  if (!selectedHabitatTypes.includes(option.key)) {
+                    e.currentTarget.style.borderColor = '#e0e2e6';
+                    e.currentTarget.style.backgroundColor = '#fff';
+                  }
+                }}
+              >
+                <span style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  color: selectedHabitatTypes.includes(option.key) ? '#fff' : '#a85b2b' 
+                }}>
+                  {option.icon}
+                </span>
+                <span>{option.label}</span>
+              </button>
             ))}
           </div>
         </div>
@@ -296,17 +478,10 @@ export default function Page() {
         <div>
           <div className="filtre-label">Services</div>
           <div className="filtre-checkbox-group">
-            {[
-              "Intervention d'un médecin",
-              "Personnel de nuit",
-              "Espace partagé",
-              "Activités organisées",
-              "Conciergerie",
-              "Commerce à pied"
-            ].map(label => (
-              <label key={label} className="filtre-checkbox-label">
-                <input type="checkbox" checked={selectedServices.includes(label)} onChange={e => setSelectedServices(arr => e.target.checked ? [...arr, label] : arr.filter(x => x !== label))} />
-                {label}
+            {allServices.map(service => (
+              <label key={service} className="filtre-checkbox-label">
+                <input type="checkbox" checked={selectedServices.includes(service)} onChange={e => setSelectedServices(arr => e.target.checked ? [...arr, service] : arr.filter(x => x !== service))} />
+                {service}
               </label>
             ))}
           </div>
@@ -322,7 +497,7 @@ export default function Page() {
           background: '#f3f3f3',
           borderRadius: '0 0 18px 18px',
           padding: '0.5rem 0 0.3rem 0',
-          marginBottom: 0,
+          marginBottom: 12,
           minHeight: 64,
           display: 'flex',
           flexDirection: 'column',
@@ -383,10 +558,10 @@ export default function Page() {
             >Carte</span>
           </div>
         </div>
-  <section style={{ flex: 1, minWidth: 0, marginTop: 0, fontSize: '0.89rem' }}>
+  <section style={{ flex: 1, minWidth: 0, marginTop: 12, fontSize: '0.82rem' }}>
               {!loading && !error && (
                 tab === 'carte' ? (
-                  <div style={{ width: "100%", maxWidth: 900, margin: '0 auto' }}>
+                  <div style={{ width: "100%", maxWidth: 900, margin: '8px auto 0' }}>
                     {mounted && (
                       <EtabMap etablissements={getFilteredData().map((etab:any) => ({
                         ...etab,
@@ -396,7 +571,7 @@ export default function Page() {
                     )}
                   </div>
                 ) : (
-                  <div style={{ display: "grid", gap: "1rem", margin: 0, padding: 0, width: "100%", maxWidth: 900, marginLeft: 'auto', marginRight: 'auto', fontSize: '0.89rem' }}>
+                  <div style={{ display: "grid", gap: "1rem", margin: 0, padding: 0, width: "100%", maxWidth: 900, marginLeft: 'auto', marginRight: 'auto', fontSize: '0.82rem' }}>
                     {getFilteredData().map((etab:any) => (
                       <div
                         key={etab.etab_id}
@@ -428,19 +603,19 @@ export default function Page() {
                             );
                           })()}
                         </div>
-                        <div style={{ flex: 1, padding: "1rem 1.3rem", display: "flex", flexDirection: "column", gap: "0.5rem", justifyContent: "center", fontSize: "0.97rem" }}>
+                        <div style={{ flex: 1, padding: "1rem 1.3rem", display: "flex", flexDirection: "column", gap: "0.5rem", justifyContent: "center", fontSize: "0.91rem" }}>
                           {/* ...existing code for card text... */}
                           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 2, justifyContent: "space-between" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                               {(() => {
-                                const type = Array.isArray(etab.sous_categories) && etab.sous_categories.length > 0 ? etab.sous_categories[0] : "autre";
-                                const color = TAG_COLORS[type?.toLowerCase()] || TAG_COLORS["autre"];
+                                const sousCategorie = Array.isArray(etab.sous_categories) && etab.sous_categories.length > 0 ? etab.sous_categories[0] : "autre";
+                                const color = TAG_COLORS[sousCategorie?.toLowerCase()] || TAG_COLORS["autre"];
                                 return (
                                   <span style={{
                                     display: "inline-block",
                                     minWidth: 0,
                                     padding: "0.18em 0.7em",
-                                    fontSize: "0.91rem",
+                                    fontSize: "0.86rem",
                                     fontWeight: 600,
                                     borderRadius: 7,
                                     background: color,
@@ -449,17 +624,17 @@ export default function Page() {
                                     boxShadow: "0 2px 8px 0 rgba(0,0,0,0.06)",
                                     marginRight: 2
                                   }}>
-                                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                                    {sousCategorie?.charAt(0).toUpperCase() + sousCategorie?.slice(1) || "Autre"}
                                   </span>
                                 );
                               })()}
-                              <div style={{ fontWeight: "bold", fontSize: "1.08rem", color: "#a85b2b" }}>
+                              <div style={{ fontWeight: "bold", fontSize: "1.02rem", color: "#a85b2b" }}>
                                 {etab.nom}
                               </div>
                               <div style={{ display: "flex", gap: 3, alignItems: "center", marginLeft: 8 }}>
-                                <span style={{ fontSize: "1.08rem", color: etab.fourchette_prix === "euro" ? "#a85b2b" : "#e0e2e6", fontWeight: 700 }}>€</span>
-                                <span style={{ fontSize: "1.08rem", color: etab.fourchette_prix === "deux_euros" ? "#a85b2b" : "#e0e2e6", fontWeight: 700 }}>€€</span>
-                                <span style={{ fontSize: "1.08rem", color: etab.fourchette_prix === "trois_euros" ? "#a85b2b" : "#e0e2e6", fontWeight: 700 }}>€€€</span>
+                                <span style={{ fontSize: "1.02rem", color: etab.fourchette_prix === "euro" ? "#a85b2b" : "#e0e2e6", fontWeight: 700 }}>€</span>
+                                <span style={{ fontSize: "1.02rem", color: etab.fourchette_prix === "deux_euros" ? "#a85b2b" : "#e0e2e6", fontWeight: 700 }}>€€</span>
+                                <span style={{ fontSize: "1.02rem", color: etab.fourchette_prix === "trois_euros" ? "#a85b2b" : "#e0e2e6", fontWeight: 700 }}>€€€</span>
                               </div>
                             </div>
                             <a
@@ -488,15 +663,15 @@ export default function Page() {
                               Voir la fiche
                             </a>
                           </div>
-                          <div style={{ color: "#444", marginBottom: "0.3rem", fontSize: "0.99rem", overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+                          <div style={{ color: "#444", marginBottom: "0.3rem", fontSize: "0.92rem", overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
                             {etab.presentation}
                           </div>
-                          <div style={{ color: "#888", fontSize: "0.95rem" }}>
+                          <div style={{ color: "#888", fontSize: "0.88rem" }}>
                             {etab.commune} ({etab.departement}, {etab.region}) {etab.code_postal}
                           </div>
                           <div style={{ background: "#f6f6f6", borderRadius: 10, padding: "0.4em 0.8em", margin: "0.5em 0 0.2em 0", display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
                             {PUBLIC_CIBLE_OPTIONS.map(opt => etab.public_cible && etab.public_cible.includes(opt.key) && (
-                              <span key={opt.key} style={{ display: "flex", alignItems: "center", gap: 4, color: "#a85b2b", fontWeight: 500, fontSize: "0.97em" }}>
+                              <span key={opt.key} style={{ display: "flex", alignItems: "center", gap: 4, color: "#a85b2b", fontWeight: 500, fontSize: "0.90em" }}>
                                 {opt.label}
                               </span>
                             ))}
@@ -504,13 +679,13 @@ export default function Page() {
                           {Array.isArray(etab.services) && etab.services.length > 0 && (
                             <div style={{ background: "#f6f6f6", borderRadius: 10, padding: "0.4em 0.8em", margin: "0.2em 0", display: "flex", gap: 10, flexWrap: "wrap" }}>
                               {etab.services.map((s:string, idx:number) => (
-                                <span key={idx} style={{ color: "#2ba85b", fontWeight: 500, fontSize: "0.97em" }}>{s === "espace_partage" ? "Espace Partagé" : s}</span>
+                                <span key={idx} style={{ color: "#2ba85b", fontWeight: 500, fontSize: "0.90em" }}>{s === "espace_partage" ? "Espace Partagé" : s}</span>
                               ))}
                             </div>
                           )}
                           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", margin: "0.2rem 0" }}>
                             {RESTAURATION_OPTIONS.map(opt => etab[opt.key] && (
-                              <span key={opt.key} style={{ background: "#e0e2e6", color: "#444", borderRadius: 8, padding: "0.18em 0.7em", fontSize: "0.91rem", fontWeight: 500 }}>{opt.label}</span>
+                              <span key={opt.key} style={{ background: "#e0e2e6", color: "#444", borderRadius: 8, padding: "0.18em 0.7em", fontSize: "0.84rem", fontWeight: 500 }}>{opt.label}</span>
                             ))}
                           </div>
                         </div>

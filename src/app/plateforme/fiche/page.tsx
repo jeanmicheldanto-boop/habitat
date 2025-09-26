@@ -1,6 +1,7 @@
 import { supabase } from "../../../lib/supabaseClient";
 import React from "react";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 
 export default async function FichePage({ searchParams }: { searchParams: { id?: string } }) {
   const etabId = searchParams.id;
@@ -63,6 +64,83 @@ export default async function FichePage({ searchParams }: { searchParams: { id?:
         {data.portage_repas && <li>Portage repas</li>}
       </ul>
       {/* Source supprimée */}
+      
+      {/* Section Gestionnaire */}
+      <div style={{ marginTop: 48, paddingTop: 32, borderTop: "2px solid #f0f0f0" }}>
+        <h2 style={{ fontSize: "1.2rem", color: "#a85b2b", marginBottom: 20, textAlign: "center" }}>Vous êtes concerné par cet établissement ?</h2>
+        <div style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap" }}>
+          
+          {/* Bouton Correction */}
+          <div style={{ 
+            background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)", 
+            borderRadius: 12, 
+            padding: "24px", 
+            textAlign: "center", 
+            border: "1px solid #dee2e6",
+            minWidth: 280,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.04)"
+          }}>
+            <div style={{ fontSize: "1.1rem", fontWeight: 600, color: "#495057", marginBottom: 8 }}>
+              Une information à corriger ?
+            </div>
+            <div style={{ fontSize: "0.95rem", color: "#6c757d", marginBottom: 16, lineHeight: 1.4 }}>
+              Aidez-nous à maintenir des informations à jour
+            </div>
+            <Link 
+              href={`/suggestion-correction/modifier?etablissement=${etabId}`}
+              style={{
+                display: "inline-block",
+                background: "linear-gradient(135deg, #6c757d 0%, #495057 100%)",
+                color: "white",
+                textDecoration: "none",
+                borderRadius: 8,
+                padding: "12px 24px",
+                fontSize: "0.95rem",
+                fontWeight: 500,
+                transition: "all 0.2s ease",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+              }}
+            >
+              Proposer une correction
+            </Link>
+          </div>
+
+          {/* Bouton Gestionnaire */}
+          <div style={{ 
+            background: "linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%)", 
+            borderRadius: 12, 
+            padding: "24px", 
+            textAlign: "center", 
+            border: "1px solid #f1c40f",
+            minWidth: 280,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.04)"
+          }}>
+            <div style={{ fontSize: "1.1rem", fontWeight: 600, color: "#856404", marginBottom: 8 }}>
+              Vous êtes le gestionnaire ?
+            </div>
+            <div style={{ fontSize: "0.95rem", color: "#856404", marginBottom: 16, lineHeight: 1.4 }}>
+              Accédez à votre espace de gestion dédié
+            </div>
+            <Link 
+              href="/gestionnaire/login"
+              style={{
+                display: "inline-block",
+                background: "linear-gradient(135deg, #f39c12 0%, #e67e22 100%)",
+                color: "white",
+                textDecoration: "none",
+                borderRadius: 8,
+                padding: "12px 24px",
+                fontSize: "0.95rem",
+                fontWeight: 500,
+                transition: "all 0.2s ease",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+              }}
+            >
+              Espace gestionnaire
+            </Link>
+          </div>
+        </div>
+      </div>
     </main>
   );
 }

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import AddressAutocomplete from "@/components/AddressAutocomplete";
 import type { Database } from "@/lib/database.types";
 import Link from "next/link";
 
@@ -188,6 +189,10 @@ export default function AdminCreateEtablissement() {
     setForm((f) => ({ ...f, [name]: value }));
   }
 
+  function handleAddressChange(field: string, value: string | number) {
+    setForm((f) => ({ ...f, [field]: value }));
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -236,23 +241,23 @@ export default function AdminCreateEtablissement() {
           <label className="block font-semibold mb-1">Nom *</label>
           <input type="text" name="nom" value={form.nom} onChange={handleChange} className="w-full border rounded px-3 py-2" required />
         </div>
-        <div>
-          <label className="block font-semibold mb-1">Adresse ligne 1</label>
-          <input type="text" name="adresse_l1" value={form.adresse_l1} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+        
+        {/* Section adresse avec autocomplétion */}
+        <div className="border-t border-gray-200 pt-4 mt-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Adresse</h3>
+          <AddressAutocomplete
+            value={form.adresse_l1}
+            onChange={handleAddressChange}
+            codePostal={form.code_postal}
+            ville={form.commune}
+            required={true}
+            placeholder="Commencez à taper l'adresse..."
+          />
         </div>
+
         <div>
           <label className="block font-semibold mb-1">Adresse ligne 2</label>
           <input type="text" name="adresse_l2" value={form.adresse_l2} onChange={handleChange} className="w-full border rounded px-3 py-2" />
-        </div>
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <label className="block font-semibold mb-1">Code postal</label>
-            <input type="text" name="code_postal" value={form.code_postal} onChange={handleChange} className="w-full border rounded px-3 py-2" />
-          </div>
-          <div className="flex-1">
-            <label className="block font-semibold mb-1">Commune *</label>
-            <input type="text" name="commune" value={form.commune} onChange={handleChange} className="w-full border rounded px-3 py-2" required />
-          </div>
         </div>
         <div>
           <label className="block font-semibold mb-1">Département *</label>
