@@ -38,10 +38,6 @@ export const HABITAT_TAXONOMY: HabitatCategory[] = [
         label: "Accueil familial"
       },
       {
-        key: "beguinage",
-        label: "Béguinage"
-      },
-      {
         key: "colocation_avec_services",
         label: "Colocation avec services"
       },
@@ -69,6 +65,10 @@ export const HABITAT_TAXONOMY: HabitatCategory[] = [
     label: "Logement individuel en résidence",
     icon: "🏢",
     sousCategories: [
+      {
+        key: "beguinage",
+        label: "Béguinage"
+      },
       {
         key: "marpa",
         label: "MARPA"

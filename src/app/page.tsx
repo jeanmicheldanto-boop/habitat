@@ -40,9 +40,9 @@ export default function HomePage() {
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <input
               id="search-location"
-              name="location"
+              name="search"
               type="text"
-              placeholder="Ville, département..."
+              placeholder="Ville, département, type d'habitat, nom..."
               style={{
                 flex: 1,
                 padding: "0.75rem 1.2rem",
@@ -72,17 +72,26 @@ export default function HomePage() {
               }}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="11" stroke="#bbb" strokeWidth="2" fill="none" />
-                <path d="M8 12h8M14 8l4 4-4 4" stroke="#bbb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                <circle cx="11" cy="11" r="8" stroke="#bbb" strokeWidth="2" fill="none" />
+                <path d="M21 21l-4.35-4.35" stroke="#bbb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
               </svg>
             </button>
           </div>
         </form>
 
-        {/* Boutons oblong pour aides et solutions */}
-        <div style={{ marginTop: "2rem", textAlign: "center", display: "flex", justifyContent: "center", gap: 24 }}>
+        {/* Boutons oblong pour aides, qui sommes-nous et solutions */}
+        <div style={{ 
+          marginTop: "2rem", 
+          textAlign: "center", 
+          display: "flex", 
+          justifyContent: "center", 
+          gap: 20, 
+          flexWrap: "wrap",
+          padding: "0 1rem" 
+        }}>
           <OblongButtonLink href="/aides">Faire le point sur les aides</OblongButtonLink>
-          <OblongButtonLink href="/solutions">Choisir sa solution logement</OblongButtonLink>
+          <OblongButtonLink href="/contact" variant="orange">Qui sommes-nous</OblongButtonLink>
+          <OblongButtonLink href="/solutions">Faire le point sur son projet d'habitat</OblongButtonLink>
         </div>
       </div>
 
@@ -90,8 +99,10 @@ export default function HomePage() {
       <div style={{ 
         position: "relative",
         background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
-        padding: "4rem 2rem",
-        marginTop: "2rem"
+        padding: "4rem 1rem",
+        marginTop: "2rem",
+        borderRadius: "24px",
+        margin: "2rem 1rem 0"
       }}>
         <div style={{ 
           margin: "0 auto", 
@@ -214,10 +225,9 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Pied de page de la home : bouton Contact + lien Mentions légales */}
+      {/* Pied de page de la home : lien Mentions légales */}
       <div className="home-footer">
         <div className="home-footer__inner">
-          <Link href="/contact" className="btn btn--accent">Qui sommes-nous</Link>
           <Link href="/mentions-legales" className="home-footer__legal">Mentions légales</Link>
         </div>
       </div>

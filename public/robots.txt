@@ -1,0 +1,22 @@
+# Robots.txt pour Habitat Intermédiaire
+# Site web dédié aux logements pour seniors
+
+User-agent: *
+Allow: /
+
+# Pages prioritaires pour l'indexation
+Allow: /plateforme
+Allow: /solutions
+Allow: /aides
+Allow: /contact
+
+# Disallow admin pages
+Disallow: /admin/
+Disallow: /gestionnaire/login
+Disallow: /gestionnaire/register
+
+# Sitemap
+Sitemap: https://habitat-intermediaire.fr/sitemap.xml
+
+# Crawl-delay pour éviter la surcharge serveur
+Crawl-delay: 1

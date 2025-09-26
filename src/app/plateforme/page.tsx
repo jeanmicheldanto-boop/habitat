@@ -1,8 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+import { Metadata } from "next";
 import HeaderSubnavGate from "@/components/HeaderSubnavGate";
 import DepartmentAutocomplete from "@/components/DepartmentAutocomplete";
+import MobileFilters from "@/components/MobileFilters";
+import MobileResultsList from "@/components/MobileResultsList";
 import { supabase } from "../../lib/supabaseClient";
 import { HABITAT_TAXONOMY, getSousCategorieColor, getAllSousCategories, getCategoryByKey } from "@/lib/habitatTaxonomy";
 import './plateforme.css';
@@ -36,7 +39,22 @@ const HABITAT_TYPE_LABELS: Record<string, string> = {
 export default function Page() {
   // --- HOOKS ET LOGIQUE ---
   const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => { 
+    setMounted(true);
+    
+    // Détection mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
   const [tab, setTab] = useState<'liste'|'carte'>('liste');
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,6 +108,17 @@ export default function Page() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   const [selectedCommune, setSelectedCommune] = useState<string>("");
+
+  // Récupérer le paramètre de recherche depuis l'URL
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const searchParam = urlParams.get('search');
+      if (searchParam) {
+        setSearch(searchParam);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
@@ -229,13 +258,58 @@ export default function Page() {
       }
       if (selectedCommune && etab.commune && !etab.commune.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(selectedCommune.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, ''))) return false;
       
-      // Recherche texte
-      if (search && !(
-        (etab.nom && etab.nom.toLowerCase().includes(search.toLowerCase())) ||
-        (etab.presentation && etab.presentation.toLowerCase().includes(search.toLowerCase())) ||
-        (etab.commune && etab.commune.toLowerCase().includes(search.toLowerCase())) ||
-        (etab.departement && etab.departement.toLowerCase().includes(search.toLowerCase()))
-      )) return false;
+      // Recherche texte - recherche globale dans tous les champs pertinents
+      if (search) {
+        const searchLower = search.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+        const searchTerms = searchLower.split(/\s+/).filter(term => term.length > 1);
+        
+        const matchesSearch = searchTerms.every(term => {
+          // Recherche dans le nom de l'établissement
+          if (etab.nom && etab.nom.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
+          
+          // Recherche dans la présentation
+          if (etab.presentation && etab.presentation.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
+          
+          // Recherche dans la localisation (commune, département, région)
+          if (etab.commune && etab.commune.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
+          if (etab.departement && etab.departement.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
+          if (etab.region && etab.region.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
+          
+          // Recherche dans le type d'habitat
+          if (etab.habitat_type) {
+            const habitatLabel = HABITAT_TYPE_LABELS[etab.habitat_type] || etab.habitat_type;
+            if (habitatLabel.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
+          }
+          
+          // Recherche dans les sous-catégories
+          if (Array.isArray(etab.sous_categories)) {
+            if (etab.sous_categories.some((sc: string) => 
+              sc.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)
+            )) return true;
+          }
+          
+          // Recherche dans les services
+          if (Array.isArray(etab.services)) {
+            if (etab.services.some((service: string) => 
+              service.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)
+            )) return true;
+          }
+          
+          // Recherche dans le gestionnaire
+          if (etab.gestionnaire && etab.gestionnaire.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
+          
+          // Recherche dans les types de logement
+          if (Array.isArray(etab.logements_types)) {
+            if (etab.logements_types.some((lt: any) => 
+              lt.libelle && lt.libelle.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)
+            )) return true;
+          }
+          
+          return false;
+        });
+        
+        if (!matchesSearch) return false;
+      }
       
       return true;
     });
@@ -255,7 +329,193 @@ export default function Page() {
 
   // Import dynamique de la carte pour SSR
   const EtabMap = dynamic(() => import("../../components/EtabMap"), { ssr: false });
+  
+  const filteredData = getFilteredData();
+  
   // --- RENDU JSX ---
+  if (isMobile) {
+    return (
+      <main style={{ background: "#f8f8f8", minHeight: "100vh", fontSize: "0.95rem" }}>
+        <HeaderSubnavGate />
+        
+        {/* Barre de recherche mobile */}
+        <div style={{
+          background: '#fff',
+          padding: '16px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+          position: 'sticky',
+          top: 64,
+          zIndex: 100
+        }}>
+          <div style={{
+            background: '#f8f8f8',
+            borderRadius: 25,
+            padding: '12px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12
+          }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="M21 21l-4.35-4.35"></path>
+            </svg>
+            <input
+              type="text"
+              placeholder="Nom, ville, département, type d'habitat..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{
+                flex: 1,
+                border: 'none',
+                background: 'transparent',
+                fontSize: '1rem',
+                outline: 'none',
+                color: '#333'
+              }}
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '4px',
+                  cursor: 'pointer',
+                  color: '#999'
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            )}
+          </div>
+          
+          {/* Indicateur de recherche active */}
+          {search && (
+            <div style={{ 
+              textAlign: 'center', 
+              fontSize: '0.8rem', 
+              color: '#666', 
+              marginTop: '8px',
+              background: 'rgba(168, 91, 43, 0.1)',
+              padding: '4px 12px',
+              borderRadius: '12px',
+              display: 'inline-block',
+              width: '100%'
+            }}>
+              <strong>Recherche :</strong> "{search}" dans tous les champs
+            </div>
+          )}
+        </div>
+
+        {/* Onglets Liste/Carte mobile */}
+        <div style={{
+          background: '#fff',
+          display: 'flex',
+          borderBottom: '1px solid #eee'
+        }}>
+          <button
+            onClick={() => setTab('liste')}
+            style={{
+              flex: 1,
+              padding: '16px',
+              background: 'none',
+              border: 'none',
+              borderBottom: tab === 'liste' ? '3px solid #a85b2b' : '3px solid transparent',
+              color: tab === 'liste' ? '#a85b2b' : '#666',
+              fontWeight: 600,
+              fontSize: '1rem',
+              cursor: 'pointer'
+            }}
+          >
+            📋 Liste ({filteredData.length})
+          </button>
+          <button
+            onClick={() => setTab('carte')}
+            style={{
+              flex: 1,
+              padding: '16px',
+              background: 'none',
+              border: 'none',
+              borderBottom: tab === 'carte' ? '3px solid #a85b2b' : '3px solid transparent',
+              color: tab === 'carte' ? '#a85b2b' : '#666',
+              fontWeight: 600,
+              fontSize: '1rem',
+              cursor: 'pointer'
+            }}
+          >
+            🗺️ Carte
+          </button>
+        </div>
+
+        {/* Contenu mobile */}
+        {!loading && !error && (
+          tab === 'carte' ? (
+            <div style={{ height: 'calc(100vh - 200px)', padding: '16px' }}>
+              {mounted && (
+                <EtabMap etablissements={filteredData.map((etab:any) => ({
+                  ...etab,
+                  longitude: etab.geom?.coordinates?.[0],
+                  latitude: etab.geom?.coordinates?.[1],
+                }))} />
+              )}
+            </div>
+          ) : (
+            <MobileResultsList 
+              results={filteredData}
+              publicCibleOptions={PUBLIC_CIBLE_OPTIONS}
+              restaurationOptions={RESTAURATION_OPTIONS}
+            />
+          )
+        )}
+        
+        {loading && (
+          <div style={{ textAlign: "center", color: "#888", marginTop: 40, padding: '40px' }}>
+            <div style={{ fontSize: '2rem', marginBottom: 16 }}>⏳</div>
+            <div>Chargement des établissements...</div>
+          </div>
+        )}
+        
+        {error && (
+          <div style={{ textAlign: "center", color: "#a82b2b", marginTop: 40, padding: '40px' }}>
+            <div style={{ fontSize: '2rem', marginBottom: 16 }}>⚠️</div>
+            <div>Erreur : {error}</div>
+          </div>
+        )}
+
+        {/* Filtres mobiles */}
+        <MobileFilters
+          selectedHabitatCategories={selectedHabitatCategories}
+          setSelectedHabitatCategories={setSelectedHabitatCategories}
+          selectedSousCategories={selectedSousCategories}
+          setSelectedSousCategories={setSelectedSousCategories}
+          selectedDepartement={selectedDepartement}
+          setSelectedDepartement={setSelectedDepartement}
+          selectedCommune={selectedCommune}
+          setSelectedCommune={setSelectedCommune}
+          selectedPrices={selectedPrices}
+          setSelectedPrices={setSelectedPrices}
+          selectedPublicCible={selectedPublicCible}
+          setSelectedPublicCible={setSelectedPublicCible}
+          selectedServices={selectedServices}
+          setSelectedServices={setSelectedServices}
+          selectedRestauration={selectedRestauration}
+          setSelectedRestauration={setSelectedRestauration}
+          selectedLogementTypes={selectedLogementTypes}
+          setSelectedLogementTypes={setSelectedLogementTypes}
+          selectedCaracteristiques={selectedCaracteristiques}
+          setSelectedCaracteristiques={setSelectedCaracteristiques}
+          allServices={allServices}
+          allLogementTypes={allLogementTypes}
+          resultsCount={filteredData.length}
+        />
+      </main>
+    );
+  }
+  
+  // Version desktop
   return (
   <main style={{ background: "#f3f3f3", minHeight: "100vh", padding: 0, fontSize: "0.95rem" }}>
     <HeaderSubnavGate />
@@ -267,7 +527,7 @@ export default function Page() {
         
         {/* Section Gestionnaire - En haut des filtres */}
         <div style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'linear-gradient(135deg, #6c6c6c 0%, #d35400 100%)',
           borderRadius: 16,
           padding: '20px 18px',
           textAlign: 'center',
@@ -528,7 +788,7 @@ export default function Page() {
               <div style={{ background: '#fff', borderRadius: 32, boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', width: 420, padding: '0.2em 0.3em' }}>
                 <input
                   type="text"
-                  placeholder="Rechercher par nom, commune, département..."
+                  placeholder="Nom, ville, département, type d'habitat, service..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   className="search-oblong"
@@ -536,12 +796,29 @@ export default function Page() {
                 />
                 <button type="submit" className="search-btn" style={{ border: 'none', background: 'none', marginLeft: -44, zIndex: 2, cursor: 'pointer', padding: 0 }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, borderRadius: '50%', background: '#e0e2e6' }}>
-                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M7 10.5l3 3 6-6" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="7" stroke="#888" strokeWidth="2"/><path d="m16 16-3-3" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </span>
                 </button>
               </div>
             </form>
           </div>
+          
+          {/* Indicateur de recherche active */}
+          {search && (
+            <div style={{ 
+              textAlign: 'center', 
+              fontSize: '0.85rem', 
+              color: '#666', 
+              marginTop: '0.5rem',
+              background: 'rgba(168, 91, 43, 0.1)',
+              padding: '0.4rem 1rem',
+              borderRadius: '16px',
+              display: 'inline-block',
+              margin: '0.5rem auto 0',
+            }}>
+              <strong>Recherche :</strong> "{search}" dans noms, villes, départements, types d'habitat, services...
+            </div>
+          )}
           {/* Onglets Liste / Carte sous la barre de recherche */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0, fontWeight: 600, fontSize: '0.93rem', background: 'none', borderRadius: 0, marginBottom: 0, marginTop: 2 }}>
             <span
@@ -582,7 +859,7 @@ export default function Page() {
                 tab === 'carte' ? (
                   <div style={{ width: "100%", maxWidth: 900, margin: '8px auto 0' }}>
                     {mounted && (
-                      <EtabMap etablissements={getFilteredData().map((etab:any) => ({
+                      <EtabMap etablissements={filteredData.map((etab:any) => ({
                         ...etab,
                         longitude: etab.geom?.coordinates?.[0],
                         latitude: etab.geom?.coordinates?.[1],
@@ -591,7 +868,7 @@ export default function Page() {
                   </div>
                 ) : (
                   <div style={{ display: "grid", gap: "1rem", margin: 0, padding: 0, width: "100%", maxWidth: 900, marginLeft: 'auto', marginRight: 'auto', fontSize: '0.82rem' }}>
-                    {getFilteredData().map((etab:any) => (
+                    {filteredData.map((etab:any) => (
                       <div
                         key={etab.etab_id}
                         style={{
