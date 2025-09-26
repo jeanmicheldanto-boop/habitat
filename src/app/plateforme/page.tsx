@@ -4,9 +4,11 @@ import dynamic from "next/dynamic";
 import HeaderSubnavGate from "@/components/HeaderSubnavGate";
 import DepartmentAutocomplete from "@/components/DepartmentAutocomplete";
 import { supabase } from "../../lib/supabaseClient";
+import { HABITAT_TAXONOMY, getSousCategorieColor, getAllSousCategories, getCategoryByKey } from "@/lib/habitatTaxonomy";
 import './plateforme.css';
-// Palette de couleurs pour les sous-catégories (affichage des tags)
+// Palette de couleurs pour les sous-catégories (maintenant gérée par la taxonomie)
 const TAG_COLORS: Record<string, string> = {
+  // Ancienne palette pour compatibilité - sera migrée vers getSousCategorieColor
   "résidence autonomie": "#a85b2b",
   "résidence services": "#2b7fa8",
   "résidence service séniors": "#2b7fa8",
@@ -22,9 +24,13 @@ const TAG_COLORS: Record<string, string> = {
 };
 
 const HABITAT_TYPE_LABELS: Record<string, string> = {
+  // Anciens labels - remplacés par la taxonomie
   "logement_independant": "Logement indépendant",
-  "residence": "Résidence",
-  "habitat_partage": "Habitat partagé"
+  "residence": "Résidence", 
+  "habitat_partage": "Habitat partagé",
+  // Nouveaux labels de la taxonomie
+  "habitat_individuel": "Habitat individuel",
+  "logement_individuel_en_residence": "Logement individuel en résidence"
 };
 
 export default function Page() {
@@ -37,55 +43,10 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [sousCategories, setSousCategories] = useState<string[]>([]);
-  const [selectedSousCategories, setSelectedSousCategories] = useState<string[]>([]);
   
-  // Nouveaux filtres pour habitat_type
-  const HABITAT_TYPE_OPTIONS = [
-    { 
-      key: "logement_independant", 
-      label: "Logement indépendant",
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 21h18"/>
-          <path d="M5 21V7l8-4v18"/>
-          <path d="M19 21V11l-6-4"/>
-          <path d="M9 9v.01"/>
-          <path d="M9 12v.01"/>
-          <path d="M9 15v.01"/>
-          <path d="M9 18v.01"/>
-        </svg>
-      )
-    },
-    { 
-      key: "residence", 
-      label: "Résidence",
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 21h18"/>
-          <path d="M4 21V8a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v13"/>
-          <path d="M14 21V8a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v13"/>
-          <path d="M8 12h2"/>
-          <path d="M8 16h2"/>
-          <path d="M16 12h2"/>
-          <path d="M16 16h2"/>
-          <path d="M8 7V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v3"/>
-        </svg>
-      )
-    },
-    { 
-      key: "habitat_partage", 
-      label: "Habitat partagé",
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-        </svg>
-      )
-    }
-  ];
-  const [selectedHabitatTypes, setSelectedHabitatTypes] = useState<string[]>([]);
+  // Nouveaux filtres pour habitat_type - Utilisation de la taxonomie
+  const [selectedHabitatCategories, setSelectedHabitatCategories] = useState<string[]>([]);
+  const [selectedSousCategories, setSelectedSousCategories] = useState<string[]>([]);
   const PRICE_UI_TO_DB: Record<string, string> = { '€': 'euro', '€€': 'deux_euros', '€€€': 'trois_euros' };
   const PRICE_DB_TO_UI: Record<string, string> = { 'euro': '€', 'deux_euros': '€€', 'trois_euros': '€€€' };
   const [selectedPrices, setSelectedPrices] = useState<Array<'€'|'€€'|'€€€'>>([]);
@@ -177,10 +138,17 @@ export default function Page() {
 
   function getFilteredData() {
     let filtered = data.filter((etab:any) => {
-      // Type d'habitat (utilisation du champ habitat_type)
-      if (selectedHabitatTypes.length > 0) {
+      // Catégories d'habitat (nouvelles catégories principales)
+      if (selectedHabitatCategories.length > 0) {
         if (!etab.habitat_type) return false;
-        if (!selectedHabitatTypes.includes(etab.habitat_type)) return false;
+        if (!selectedHabitatCategories.includes(etab.habitat_type)) return false;
+      }
+      
+      // Sous-catégories d'habitat
+      if (selectedSousCategories.length > 0) {
+        if (!etab.sous_categories || !Array.isArray(etab.sous_categories)) return false;
+        const hasMatch = selectedSousCategories.some(sc => etab.sous_categories.includes(sc));
+        if (!hasMatch) return false;
       }
       
       // Prix
@@ -273,9 +241,10 @@ export default function Page() {
     });
 
     // Debug logging
-    if (selectedHabitatTypes.length > 0 || selectedServices.length > 0) {
+    if (selectedHabitatCategories.length > 0 || selectedSousCategories.length > 0 || selectedServices.length > 0) {
       console.log(`Filtres appliqués:`, {
-        habitatTypes: selectedHabitatTypes,
+        habitatCategories: selectedHabitatCategories,
+        sousCategories: selectedSousCategories,
         services: selectedServices,
         resultats: filtered.length
       });
@@ -344,65 +313,98 @@ export default function Page() {
           />
           <input type="text" placeholder="Commune" value={selectedCommune} onChange={e => setSelectedCommune(e.target.value)} className="filtre-input" style={{ marginTop: 8 }} />
         </div>
-        {/* Type d'habitat */}
+        {/* Types d'habitat - Nouvelle structure hiérarchique */}
         <div>
-          <div className="filtre-label">Type d'habitat</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
-            {HABITAT_TYPE_OPTIONS.map(option => (
-              <button
-                key={option.key}
-                type="button"
-                onClick={() => setSelectedHabitatTypes(arr => 
-                  arr.includes(option.key) 
-                    ? arr.filter(x => x !== option.key) 
-                    : [...arr, option.key]
-                )}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '0.8rem 1rem',
-                  borderRadius: 12,
-                  border: '1.5px solid',
-                  borderColor: selectedHabitatTypes.includes(option.key) ? '#a85b2b' : '#e0e2e6',
-                  background: selectedHabitatTypes.includes(option.key) ? '#a85b2b' : '#fff',
-                  color: selectedHabitatTypes.includes(option.key) ? '#fff' : '#444',
-                  fontSize: '0.88rem',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  textAlign: 'left',
-                  width: '100%',
-                  boxShadow: selectedHabitatTypes.includes(option.key) 
-                    ? '0 2px 8px 0 rgba(168,91,43,0.12)' 
-                    : '0 1px 3px 0 rgba(0,0,0,0.04)',
-                }}
-                onMouseOver={e => {
-                  if (!selectedHabitatTypes.includes(option.key)) {
-                    e.currentTarget.style.borderColor = '#a85b2b';
-                    e.currentTarget.style.backgroundColor = '#fef9f5';
-                  }
-                }}
-                onMouseOut={e => {
-                  if (!selectedHabitatTypes.includes(option.key)) {
-                    e.currentTarget.style.borderColor = '#e0e2e6';
-                    e.currentTarget.style.backgroundColor = '#fff';
-                  }
-                }}
-              >
-                <span style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  color: selectedHabitatTypes.includes(option.key) ? '#fff' : '#a85b2b' 
-                }}>
-                  {option.icon}
-                </span>
-                <span>{option.label}</span>
-              </button>
-            ))}
+          <div className="filtre-label">Types d'habitat</div>
+          
+          {/* Catégories principales */}
+          <div style={{ marginTop: 8, marginBottom: 16 }}>
+            <div className="text-xs font-medium text-gray-600 mb-2">Catégories principales</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {HABITAT_TAXONOMY.map(category => (
+                <button
+                  key={category.key}
+                  type="button"
+                  onClick={() => setSelectedHabitatCategories(arr => 
+                    arr.includes(category.key) 
+                      ? arr.filter(x => x !== category.key) 
+                      : [...arr, category.key]
+                  )}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '0.6rem 0.8rem',
+                    borderRadius: 10,
+                    border: '1.5px solid',
+                    borderColor: selectedHabitatCategories.includes(category.key) ? '#a85b2b' : '#e0e2e6',
+                    background: selectedHabitatCategories.includes(category.key) ? '#a85b2b' : '#fff',
+                    color: selectedHabitatCategories.includes(category.key) ? '#fff' : '#444',
+                    fontSize: '0.85rem',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    textAlign: 'left',
+                    width: '100%',
+                    boxShadow: selectedHabitatCategories.includes(category.key) 
+                      ? '0 2px 6px 0 rgba(168,91,43,0.10)' 
+                      : '0 1px 2px 0 rgba(0,0,0,0.03)',
+                  }}
+                  onMouseOver={e => {
+                    if (!selectedHabitatCategories.includes(category.key)) {
+                      e.currentTarget.style.borderColor = '#a85b2b';
+                      e.currentTarget.style.backgroundColor = '#fef9f5';
+                    }
+                  }}
+                  onMouseOut={e => {
+                    if (!selectedHabitatCategories.includes(category.key)) {
+                      e.currentTarget.style.borderColor = '#e0e2e6';
+                      e.currentTarget.style.backgroundColor = '#fff';
+                    }
+                  }}
+                >
+                  <span style={{ fontSize: '1rem' }}>{category.icon}</span>
+                  <span>{category.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Sous-catégories */}
+          <div>
+            <div className="text-xs font-medium text-gray-600 mb-2">Sous-catégories</div>
+            <div className="filtre-checkbox-group" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+              {getAllSousCategories().map(sousCategorie => {
+                const parentCategory = getCategoryByKey(
+                  HABITAT_TAXONOMY.find(cat => 
+                    cat.sousCategories.some(sc => sc.key === sousCategorie.key)
+                  )?.key || ''
+                );
+                return (
+                  <label key={sousCategorie.key} className="filtre-checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedSousCategories.includes(sousCategorie.key)} 
+                      onChange={e => setSelectedSousCategories(arr => 
+                        e.target.checked 
+                          ? [...arr, sousCategorie.key] 
+                          : arr.filter(x => x !== sousCategorie.key)
+                      )} 
+                    />
+                    <span style={{ 
+                      color: getSousCategorieColor(sousCategorie.key),
+                      fontSize: '0.82rem'
+                    }}>
+                      {parentCategory?.icon} {sousCategorie.label}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
           </div>
         </div>
-        {/* Public cible (immédiatement après type d'habitat) */}
+        
+        {/* Public cible */}
         <div>
           <div className="filtre-label">Public cible</div>
           <div className="filtre-checkbox-group">
@@ -625,8 +627,9 @@ export default function Page() {
                           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 2, justifyContent: "space-between" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                               {(() => {
-                                const sousCategorie = Array.isArray(etab.sous_categories) && etab.sous_categories.length > 0 ? etab.sous_categories[0] : "autre";
-                                const color = TAG_COLORS[sousCategorie?.toLowerCase()] || TAG_COLORS["autre"];
+                                const sousCategorie = Array.isArray(etab.sous_categories) && etab.sous_categories.length > 0 ? etab.sous_categories[0] : "habitat_alternatif";
+                                // Utiliser la nouvelle fonction de couleur de la taxonomie
+                                const color = getSousCategorieColor(sousCategorie) || getSousCategorieColor("habitat_alternatif");
                                 return (
                                   <span style={{
                                     display: "inline-block",
@@ -641,7 +644,11 @@ export default function Page() {
                                     boxShadow: "0 2px 8px 0 rgba(0,0,0,0.06)",
                                     marginRight: 2
                                   }}>
-                                    {sousCategorie?.charAt(0).toUpperCase() + sousCategorie?.slice(1) || "Autre"}
+                                    {(() => {
+                                      // Chercher le label de la sous-catégorie dans la taxonomie
+                                      const sousCat = getAllSousCategories().find(sc => sc.key === sousCategorie);
+                                      return sousCat?.label || sousCategorie?.charAt(0).toUpperCase() + sousCategorie?.slice(1) || "Autre";
+                                    })()}
                                   </span>
                                 );
                               })()}

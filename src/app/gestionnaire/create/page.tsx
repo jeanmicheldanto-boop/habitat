@@ -7,6 +7,7 @@ import Link from 'next/link';
 import AddressAutocomplete from '@/components/AddressAutocomplete';
 import ImageUpload from '@/components/ImageUpload';
 import DepartmentAutocomplete from '@/components/DepartmentAutocomplete';
+import { HABITAT_TAXONOMY, getAllSousCategories } from '@/lib/habitatTaxonomy';
 
 interface FormData {
   nom: string;
@@ -20,7 +21,7 @@ interface FormData {
   telephone?: string;
   email?: string;
   site_web?: string;
-  habitat_type: 'logement_independant' | 'residence' | 'habitat_partage';
+  habitat_type: 'habitat_individuel' | 'habitat_partage' | 'logement_individuel_en_residence';
   sous_categories: string[];
   capacite_totale?: number;
   prix_min?: number;
@@ -39,7 +40,7 @@ export default function CreateEtablissement() {
     ville: '',
     code_postal: '',
     departement: '',
-    habitat_type: 'logement_independant',
+    habitat_type: 'habitat_individuel',
     sous_categories: [],
     equipements: [],
     services: []
@@ -287,10 +288,47 @@ export default function CreateEtablissement() {
                     onChange={handleInputChange}
                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="logement_independant">Logement indépendant</option>
-                    <option value="residence">Résidence</option>
-                    <option value="habitat_partage">Habitat partagé</option>
+                    {HABITAT_TAXONOMY.map(category => (
+                      <option key={category.key} value={category.key}>
+                        {category.icon} {category.label}
+                      </option>
+                    ))}
                   </select>
+                </div>
+
+                {/* Sous-catégories - Affichage conditionnel selon la catégorie sélectionnée */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Sous-catégories
+                  </label>
+                  <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-3 bg-gray-50">
+                    {(() => {
+                      const selectedCategory = HABITAT_TAXONOMY.find(cat => cat.key === formData.habitat_type);
+                      return selectedCategory?.sousCategories.map(sousCategorie => (
+                        <label key={sousCategorie.key} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={formData.sous_categories.includes(sousCategorie.key)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  sous_categories: [...prev.sous_categories, sousCategorie.key]
+                                }));
+                              } else {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  sous_categories: prev.sous_categories.filter(sc => sc !== sousCategorie.key)
+                                }));
+                              }
+                            }}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">{sousCategorie.label}</span>
+                        </label>
+                      )) || <p className="text-sm text-gray-500">Sélectionnez d'abord un type d'habitat</p>;
+                    })()}
+                  </div>
                 </div>
               </div>
 
