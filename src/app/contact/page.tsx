@@ -1,95 +1,186 @@
-export const metadata = {export const metadata = {
+export const metadata = {export const metadata = {export const metadata = {
 
   title: "Contact & Qui sommes-nous · Habitat Intermédiaire",
 
-};  title: "Contact & Qui sommes-nous · Habitat Intermédiaire",export const metadata = {
+};  title: "Contact & Qui sommes-nous · Habitat Intermédiaire",
 
 
 
-export default function ContactPage() {};  title: "Contact & Qui sommes-nous · Habitat Intermédiaire",
+export default function ContactPage() {};  title: "Contact & Qui sommes-nous · Habitat Intermédiaire",export const metadata = {
 
   return (
 
-    <section className="section">};
+    <section className="section">
 
       <div className="container max-w-4xl mx-auto py-8">
 
-        export default function ContactPage() {
+        {/* Section Contact */}export default function ContactPage() {};  title: "Contact & Qui sommes-nous · Habitat Intermédiaire",
 
-        {/* Section Contact */}
+        <div className="mb-12">
 
-        <div className="mb-12">  return (export default function ContactPage() {
+          <h1 className="text-3xl font-bold mb-6">Contactez-nous</h1>  return (
+
+
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">    <section className="section">};
+
+            <div className="bg-blue-50 rounded-lg p-6">
+
+              <h3 className="text-xl font-semibold text-blue-900 mb-4">📧 Contact général</h3>      <div className="container max-w-4xl mx-auto py-8">
+
+              <p className="text-blue-800 mb-2">
+
+                <strong>Email :</strong> contact@habitat-intermediaire.fr        export default function ContactPage() {
+
+              </p>
+
+              <p className="text-blue-700 text-sm">        {/* Section Contact */}
+
+                Pour toute question générale, demande d'information ou suggestion d'amélioration.
+
+              </p>        <div className="mb-12">  return (export default function ContactPage() {
+
+            </div>
 
           <h1 className="text-3xl font-bold mb-6">Contactez-nous</h1>
 
-              <section className="section">  return (
+            <div className="bg-green-50 rounded-lg p-6">
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <h3 className="text-xl font-semibold text-green-900 mb-4">🏢 Gestionnaires & Professionnels</h3>              <section className="section">  return (
 
-            <div className="bg-blue-50 rounded-lg p-6">      <div className="container max-w-4xl mx-auto py-8">    <section className="section">
+              <p className="text-green-800 mb-2">
 
-              <h3 className="text-xl font-semibold text-blue-900 mb-4">📧 Contact général</h3>
-
-              <p className="text-blue-800 mb-2">              <div className="container max-w-4xl mx-auto py-8">
-
-                <strong>Email :</strong> contact@habitat-intermediaire.fr
-
-              </p>        {/* Section Contact */}        
-
-              <p className="text-blue-700 text-sm">
-
-                Pour toute question générale, demande d'information ou suggestion d'amélioration.        <div className="mb-12">        {/* Section Contact */}
+                <strong>Email :</strong> gestionnaires@habitat-intermediaire.fr          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
 
               </p>
 
-            </div>          <h1 className="text-3xl font-bold mb-6">Contactez-nous</h1>        <div className="mb-12">
+              <p className="text-green-700 text-sm">            <div className="bg-blue-50 rounded-lg p-6">      <div className="container max-w-4xl mx-auto py-8">    <section className="section">
+
+                Pour les demandes d'ajout d'établissement, imports en masse (CSV), partenariats professionnels.
+
+              </p>              <h3 className="text-xl font-semibold text-blue-900 mb-4">📧 Contact général</h3>
+
+            </div>
+
+          </div>              <p className="text-blue-800 mb-2">              <div className="container max-w-4xl mx-auto py-8">
 
 
 
-            <div className="bg-green-50 rounded-lg p-6">                    <h1 className="text-3xl font-bold mb-6">Contactez-nous</h1>
+          {/* Section Import CSV */}                <strong>Email :</strong> contact@habitat-intermediaire.fr
 
-              <h3 className="text-xl font-semibold text-green-900 mb-4">🏢 Gestionnaires & Professionnels</h3>
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 mb-8">
 
-              <p className="text-green-800 mb-2">          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">          
+            <div className="flex items-start space-x-4">              </p>        {/* Section Contact */}        
 
-                <strong>Email :</strong> gestionnaires@habitat-intermediaire.fr
+              <div className="flex-shrink-0">
 
-              </p>            <div className="bg-blue-50 rounded-lg p-6">          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <svg className="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">              <p className="text-blue-700 text-sm">
 
-              <p className="text-green-700 text-sm">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
 
-                Pour les demandes d'ajout d'établissement, imports en masse (CSV), partenariats professionnels.              <h3 className="text-xl font-semibold text-blue-900 mb-4">📧 Contact général</h3>            <div className="bg-blue-50 rounded-lg p-6">
+                </svg>                Pour toute question générale, demande d'information ou suggestion d'amélioration.        <div className="mb-12">        {/* Section Contact */}
 
-              </p>
+              </div>
 
-            </div>              <p className="text-blue-800 mb-2">              <h3 className="text-xl font-semibold text-blue-900 mb-4">📧 Contact général</h3>
+              <div>              </p>
 
-          </div>
+                <h3 className="text-xl font-semibold text-orange-900 mb-2">Import en masse de données</h3>
+
+                <p className="text-orange-800 mb-3">            </div>          <h1 className="text-3xl font-bold mb-6">Contactez-nous</h1>        <div className="mb-12">
+
+                  Vous gérez plusieurs établissements ? Nous proposons un service d'import en masse à partir de vos fichiers CSV ou Excel.
+
+                </p>
+
+                <div className="text-sm text-orange-700">
+
+                  <p className="mb-2"><strong>Service inclus :</strong></p>            <div className="bg-green-50 rounded-lg p-6">                    <h1 className="text-3xl font-bold mb-6">Contactez-nous</h1>
+
+                  <ul className="list-disc list-inside space-y-1 ml-4 mb-4">
+
+                    <li>Analyse et validation de vos données</li>              <h3 className="text-xl font-semibold text-green-900 mb-4">🏢 Gestionnaires & Professionnels</h3>
+
+                    <li>Import automatisé de vos établissements</li>
+
+                    <li>Mapping de vos champs vers notre structure</li>              <p className="text-green-800 mb-2">          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">          
+
+                    <li>Support technique personnalisé</li>
+
+                    <li>Formation à l'utilisation de la plateforme</li>                <strong>Email :</strong> gestionnaires@habitat-intermediaire.fr
+
+                  </ul>
+
+                  <p className="font-medium">              </p>            <div className="bg-blue-50 rounded-lg p-6">          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+
+                    📧 Contactez-nous à{' '}
+
+                    <a href="mailto:gestionnaires@habitat-intermediaire.fr" className="underline hover:no-underline">              <p className="text-green-700 text-sm">
+
+                      gestionnaires@habitat-intermediaire.fr
+
+                    </a>{' '}                Pour les demandes d'ajout d'établissement, imports en masse (CSV), partenariats professionnels.              <h3 className="text-xl font-semibold text-blue-900 mb-4">📧 Contact général</h3>            <div className="bg-blue-50 rounded-lg p-6">
+
+                    avec vos fichiers exemples pour étudier votre demande.
+
+                  </p>              </p>
+
+                </div>
+
+              </div>            </div>              <p className="text-blue-800 mb-2">              <h3 className="text-xl font-semibold text-blue-900 mb-4">📧 Contact général</h3>
+
+            </div>
+
+          </div>          </div>
+
+        </div>
 
                 <strong>Email :</strong> contact@habitat-intermediaire.fr              <p className="text-blue-800 mb-2">
 
-          {/* Section Import CSV */}
+        {/* Section Qui sommes-nous */}
 
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 mb-8">              </p>                <strong>Email :</strong> contact@habitat-intermediaire.fr
+        <div className="border-t border-gray-200 pt-12">          {/* Section Import CSV */}
 
-            <div className="flex items-start space-x-4">
+          <h2 className="text-2xl font-bold mb-6">Qui sommes-nous ?</h2>
 
-              <div className="flex-shrink-0">              <p className="text-blue-700 text-sm">              </p>
+          <p className="mb-4">          <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 mb-8">              </p>                <strong>Email :</strong> contact@habitat-intermediaire.fr
 
-                <svg className="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <strong>Habitat-intermediaire.fr</strong> est une plateforme experte dédiée à la lisibilité et à l'accessibilité des solutions de logement inclusif pour séniors, entre le domicile et l'EHPAD&nbsp;: logements adaptés, résidences autonomie, habitats partagés, etc.
 
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />                Pour toute question générale, demande d'information ou suggestion d'amélioration.              <p className="text-blue-700 text-sm">
+          </p>            <div className="flex items-start space-x-4">
 
-                </svg>
+          <p className="mb-4">
 
-              </div>              </p>                Pour toute question générale, demande d'information ou suggestion d'amélioration.
+            <strong>Notre objectif</strong> : offrir une information claire, gratuite et indépendante sur toutes les solutions non médicalisées qui permettent de penser un cadre de vie adapté au projet de vie, pour préparer sereinement l'avenir. Nous mettons en avant la diversité des solutions, les aides disponibles, et nous nous engageons à délivrer un message non institutionnel, accessible à tous.              <div className="flex-shrink-0">              <p className="text-blue-700 text-sm">              </p>
 
-              <div>
+          </p>
 
-                <h3 className="text-xl font-semibold text-orange-900 mb-2">Import en masse de données</h3>            </div>              </p>
+          <p className="mb-4">                <svg className="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 
-                <p className="text-orange-800 mb-3">
+            <strong>Notre originalité</strong> : la gratuité, la focalisation sur les solutions alternatives à l'institution, et la volonté de donner à chacun les moyens de choisir un habitat qui corresponde à ses besoins et à ses envies, sans pression commerciale ni jargon administratif.
 
+          </p>                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />                Pour toute question générale, demande d'information ou suggestion d'amélioration.              <p className="text-blue-700 text-sm">
+
+          <p className="mb-4">
+
+            <strong>Qui sommes-nous&nbsp;?</strong> Habitat-intermediaire.fr est édité par <strong>Danto &amp; Frère</strong>, une société qui met les technologies au service du grand âge et du handicap. Notre mission&nbsp;: faciliter l'accès à l'information, accompagner les parcours de vie, et promouvoir l'innovation sociale au bénéfice des personnes âgées et de leurs proches.                </svg>
+
+          </p>
+
+          <p className="mb-4">              </div>              </p>                Pour toute question générale, demande d'information ou suggestion d'amélioration.
+
+            Pour toute question ou suggestion, contactez-nous&nbsp;: <a href="mailto:jeanmichel.danto@gmail.com" className="text-blue-600 underline">jeanmichel.danto@gmail.com</a>
+
+          </p>              <div>
+
+        </div>
+
+      </div>                <h3 className="text-xl font-semibold text-orange-900 mb-2">Import en masse de données</h3>            </div>              </p>
+
+    </section>
+
+  );                <p className="text-orange-800 mb-3">
+
+}
                   Vous gérez plusieurs établissements ? Nous proposons un service d'import en masse à partir de vos fichiers CSV ou Excel.            </div>
 
                 </p>

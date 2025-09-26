@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import HeaderSubnavGate from "@/components/HeaderSubnavGate";
+import DepartmentAutocomplete from "@/components/DepartmentAutocomplete";
 import { supabase } from "../../lib/supabaseClient";
 import './plateforme.css';
 // Palette de couleurs pour les sous-catégories (affichage des tags)
@@ -245,8 +246,19 @@ export default function Page() {
         if (!selectedPublicCible.some(pc => etab.public_cible.includes(pc))) return false;
       }
       
-      // Localisation (correction : match exact ou partiel, insensible à la casse)
-      if (selectedDepartement && etab.departement && !etab.departement.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(selectedDepartement.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, ''))) return false;
+      // Localisation - Support des codes et noms de départements
+      if (selectedDepartement && etab.departement) {
+        // Si selectedDepartement est un code (2-3 chiffres ou lettres), on compare directement
+        // Sinon on fait une recherche textuelle dans le nom du département
+        const isCode = /^[\d]{1,3}[AB]?$/.test(selectedDepartement);
+        if (isCode) {
+          // Comparaison exacte avec le code
+          if (etab.departement !== selectedDepartement) return false;
+        } else {
+          // Recherche textuelle dans le nom (pour compatibilité)
+          if (!etab.departement.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(selectedDepartement.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, ''))) return false;
+        }
+      }
       if (selectedCommune && etab.commune && !etab.commune.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(selectedCommune.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, ''))) return false;
       
       // Recherche texte
@@ -324,7 +336,12 @@ export default function Page() {
         {/* Localisation */}
         <div>
           <div className="filtre-label">Localisation</div>
-          <input type="text" placeholder="Département" value={selectedDepartement} onChange={e => setSelectedDepartement(e.target.value)} className="filtre-input" />
+          <DepartmentAutocomplete 
+            value={selectedDepartement}
+            onChange={setSelectedDepartement}
+            placeholder="Département"
+            className="filtre-input"
+          />
           <input type="text" placeholder="Commune" value={selectedCommune} onChange={e => setSelectedCommune(e.target.value)} className="filtre-input" style={{ marginTop: 8 }} />
         </div>
         {/* Type d'habitat */}

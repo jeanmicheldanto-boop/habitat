@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import ImageUpload from '@/components/ImageUpload';
+import DepartmentAutocomplete from '@/components/DepartmentAutocomplete';
 
 interface EtablissementData {
   id: string;
@@ -569,12 +570,11 @@ export default function ModifierEtablissementPage() {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Département
                         </label>
-                        <input
-                          type="text"
+                        <DepartmentAutocomplete
                           value={modificationData.departement}
-                          onChange={(e) => setModificationData({...modificationData, departement: e.target.value})}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          onChange={(value) => setModificationData({...modificationData, departement: value})}
                           placeholder={etablissement.departement || 'Non renseigné'}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                     </div>

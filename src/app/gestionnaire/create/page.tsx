@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AddressAutocomplete from '@/components/AddressAutocomplete';
 import ImageUpload from '@/components/ImageUpload';
+import DepartmentAutocomplete from '@/components/DepartmentAutocomplete';
 
 interface FormData {
   nom: string;
@@ -13,6 +14,7 @@ interface FormData {
   adresse: string;
   ville: string;
   code_postal: string;
+  departement: string;
   latitude?: number;
   longitude?: number;
   telephone?: string;
@@ -36,6 +38,7 @@ export default function CreateEtablissement() {
     adresse: '',
     ville: '',
     code_postal: '',
+    departement: '',
     habitat_type: 'logement_independant',
     sous_categories: [],
     equipements: [],
@@ -322,6 +325,19 @@ export default function CreateEtablissement() {
                 required={true}
                 placeholder="Commencez à taper votre adresse..."
               />
+
+              {/* Département */}
+              <div className="mt-6">
+                <label htmlFor="departement" className="block text-sm font-medium text-gray-700 mb-2">
+                  Département
+                </label>
+                <DepartmentAutocomplete
+                  value={formData.departement}
+                  onChange={(value) => handleAddressChange('departement', value)}
+                  placeholder="Sélectionnez un département..."
+                  required={true}
+                />
+              </div>
             </div>
 
             {/* Contact */}
