@@ -3,6 +3,15 @@ import React, { useState } from 'react';
 import { HABITAT_TAXONOMY, getAllSousCategories, getSousCategorieColor, getCategoryByKey } from '@/lib/habitatTaxonomy';
 import DepartmentAutocomplete from './DepartmentAutocomplete';
 
+interface Caracteristiques {
+  meuble?: boolean;
+  pmr?: boolean;
+  domotique?: boolean;
+  plain_pied?: boolean;
+  surface_min?: string;
+  surface_max?: string;
+}
+
 interface MobileFiltersProps {
   // États des filtres
   selectedHabitatCategories: string[];
@@ -23,8 +32,8 @@ interface MobileFiltersProps {
   setSelectedRestauration: (restauration: {[k:string]: boolean}) => void;
   selectedLogementTypes: string[];
   setSelectedLogementTypes: (logementTypes: string[]) => void;
-  selectedCaracteristiques: any;
-  setSelectedCaracteristiques: (caracteristiques: any) => void;
+  selectedCaracteristiques: Caracteristiques;
+  setSelectedCaracteristiques: (caracteristiques: Caracteristiques) => void;
   allServices: string[];
   allLogementTypes: string[];
   resultsCount: number;

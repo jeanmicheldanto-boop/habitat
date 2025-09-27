@@ -23,7 +23,15 @@ export default function AddressAutocomplete({
   required = false,
   placeholder = "Commencez à taper votre adresse..."
 }: AddressAutocompleteProps) {
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  interface AddressSuggestion {
+    geometry: { coordinates: [number, number] };
+    properties: {
+      name: string;
+      postcode?: string;
+      city?: string;
+    };
+  }
+  const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -50,7 +58,7 @@ export default function AddressAutocomplete({
     }
   };
 
-  const selectAddress = (address: any) => {
+  const selectAddress = (address: AddressSuggestion) => {
     const [longitude, latitude] = address.geometry.coordinates;
     const properties = address.properties;
 

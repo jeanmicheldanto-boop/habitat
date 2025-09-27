@@ -1,6 +1,7 @@
-'use client';
 
+'use client';
 import { useState } from 'react';
+import Image from 'next/image';
 
 interface ImageUploadProps {
   onImageSelected: (imageUrl: string, imageFile: File) => void;
@@ -154,7 +155,7 @@ export default function ImageUpload({
                 <span className="text-gray-600"> ou glissez-déposez</span>
               </label>
               <p className="text-xs text-gray-500 mt-2">
-                JPG, PNG, WebP jusqu'à {maxSizeMB}MB
+                JPG, PNG, WebP jusqu&apos;à {maxSizeMB}MB
               </p>
             </div>
           </div>
@@ -162,10 +163,12 @@ export default function ImageUpload({
       ) : (
         <div className="space-y-4">
           <div className="relative">
-            <img 
+            <Image 
               src={image.url} 
               alt="Aperçu"
-              className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-200"
+              width={400}
+              height={192}
+              style={{objectFit:'cover',borderRadius:'0.5rem',border:'1px solid #e5e7eb'}}
             />
             <button
               type="button"

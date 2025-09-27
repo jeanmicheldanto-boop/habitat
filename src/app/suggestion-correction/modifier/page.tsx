@@ -6,6 +6,26 @@ import { supabase } from '@/lib/supabaseClient';
 import ImageUpload from '@/components/ImageUpload';
 import DepartmentAutocomplete from '@/components/DepartmentAutocomplete';
 
+interface LogementType {
+  id?: string;
+  libelle: string;
+  surface_min: number | '';
+  surface_max: number | '';
+  meuble: boolean;
+  pmr: boolean;
+  domotique: boolean;
+  plain_pied: boolean;
+  nb_unites: number | '';
+}
+interface TarificationType {
+  id?: string;
+  periode: string;
+  fourchette_prix: string;
+  prix_min: number | '';
+  prix_max: number | '';
+  loyer_base: number | '';
+  charges: number | '';
+}
 interface EtablissementData {
   id: string;
   nom: string;
@@ -18,12 +38,12 @@ interface EtablissementData {
   code_postal?: string;
   commune?: string;
   departement?: string;
-  geom?: any;
-  logements_types?: any[];
+  geom?: { coordinates: [number, number] };
+  logements_types?: LogementType[];
   restaurations?: any[];
-  services?: any[];
-  tarifications?: any[];
-  sous_categories?: any[];
+  services?: string[];
+  tarifications?: TarificationType[];
+  sous_categories?: string[];
 }
 
 interface ServiceOption {
@@ -55,7 +75,28 @@ export default function ModifierEtablissementPage() {
   });
 
   // Données de modification
-  const [modificationData, setModificationData] = useState({
+  const [modificationData, setModificationData] = useState<{
+    telephone: string;
+    email: string;
+    site_web: string;
+    adresse_l1: string;
+    adresse_l2: string;
+    code_postal: string;
+    commune: string;
+    departement: string;
+    habitat_type: string;
+    sous_categories: string[];
+    nouvelle_photo_data: { url: string; file: File } | null;
+    logements_types: LogementType[];
+    restauration: {
+      kitchenette: boolean;
+      resto_collectif_midi: boolean;
+      resto_collectif: boolean;
+      portage_repas: boolean;
+    };
+    services: string[];
+    tarifications: TarificationType[];
+  }>({
     // Informations de contact
     telephone: '',
     email: '',

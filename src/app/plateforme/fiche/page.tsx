@@ -3,6 +3,7 @@ import React from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getHabitatImage } from "../../../lib/habitatImages";
+import Image from "next/image";
 
 export default async function FichePage({ searchParams }: { searchParams: { id?: string } }) {
   const etabId = searchParams.id;
@@ -22,11 +23,12 @@ export default async function FichePage({ searchParams }: { searchParams: { id?:
       <h1 style={{ fontSize: "2rem", color: "#a85b2b", marginBottom: 8 }}>{data.nom}</h1>
       <div style={{ color: "#888", fontSize: "1.1rem", marginBottom: 18 }}>{data.commune} ({data.departement}, {data.region}) {data.code_postal}</div>
       <div style={{ display: "flex", gap: 32, flexWrap: "wrap", marginBottom: 24 }}>
-        <img 
-          src={data.image_path ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${data.image_path}` : getHabitatImage(data.sous_categories)} 
-          alt={data.nom} 
-          style={{ width: 260, height: 180, objectFit: "cover", borderRadius: 12, boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)" }} 
-          onError={e => { e.currentTarget.src = getHabitatImage(data.sous_categories); }}
+        <Image
+          src={data.image_path ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${data.image_path}` : getHabitatImage(data.sous_categories)}
+          alt={data.nom}
+          width={260}
+          height={180}
+          style={{ objectFit: "cover", borderRadius: 12, boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)" }}
         />
         <div style={{ flex: 1 }}>
           <div style={{ marginBottom: 12, color: "#444", fontSize: "1.1rem" }}>{data.presentation}</div>
@@ -49,7 +51,16 @@ export default async function FichePage({ searchParams }: { searchParams: { id?:
       <h2 style={{ fontSize: "1.3rem", color: "#a85b2b", marginTop: 24 }}>Logements</h2>
       {Array.isArray(data.logements_types) && data.logements_types.length > 0 ? (
         <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
-          {data.logements_types.map((lt: any, idx: number) => (
+          {data.logements_types.map((lt: {
+            libelle: string;
+            surface_min?: number;
+            surface_max?: number;
+            meuble?: boolean;
+            pmr?: boolean;
+            domotique?: boolean;
+            plain_pied?: boolean;
+            nb_unites?: number;
+          }, idx: number) => (
             <li key={idx} style={{ marginBottom: 8, background: "#f6f6f6", borderRadius: 8, padding: "0.5em 1em", display: "flex", gap: 16, alignItems: "center" }}>
               <span style={{ fontWeight: 500 }}>{lt.libelle}</span>
               <span>Surface: {lt.surface_min || "-"} - {lt.surface_max || "-"} m²</span>

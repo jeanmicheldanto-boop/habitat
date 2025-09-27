@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/lib/database.types";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 // Types
 export type Proposition = Database["public"]["Tables"]["propositions"]["Row"];
@@ -103,15 +104,15 @@ export default function PropositionsModerationPage() {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
                     {p.action === 'create' ? 
-                      `Création d'établissement${(p.payload as any)?.nom ? ` - ${(p.payload as any).nom}` : ''}` : 
+                      `Création d'établissement${(p.payload as PropositionPayload)?.nom ? ` - ${(p.payload as PropositionPayload).nom}` : ''}` : 
                       p.action === 'update' ? 
-                      `Modification d'établissement${(p.payload as any)?.nom ? ` - ${(p.payload as any).nom}` : ''}` :
+                      `Modification d'établissement${(p.payload as PropositionPayload)?.nom ? ` - ${(p.payload as PropositionPayload).nom}` : ''}` :
                       p.type_cible
                     }
                   </h3>
                   <p className="text-sm text-gray-500">
                     Créée le {new Date(p.created_at).toLocaleDateString('fr-FR')} à {new Date(p.created_at).toLocaleTimeString('fr-FR')}
-                    {(p as any).profiles && ` par ${(p as any).profiles.prenom} ${(p as any).profiles.nom}`}
+                    {(p.profiles as ProfileType) && ` par ${(p.profiles as ProfileType).prenom} ${(p.profiles as ProfileType).nom}`}
                   </p>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -140,16 +141,16 @@ export default function PropositionsModerationPage() {
                      p.action === 'update' ? '✏️ Modification' : p.action}
                   </p>
                 </div>
-                {(p.payload as any)?.habitat_type && (
+                {(p.payload as PropositionPayload)?.habitat_type && (
                   <div>
                     <span className="font-semibold text-gray-700">Type:</span>
-                    <p className="text-gray-600">{(p.payload as any).habitat_type}</p>
+                    <p className="text-gray-600">{(p.payload as PropositionPayload).habitat_type}</p>
                   </div>
                 )}
-                {(p.payload as any)?.ville && (
+                {(p.payload as PropositionPayload)?.ville && (
                   <div>
                     <span className="font-semibold text-gray-700">Ville:</span>
-                    <p className="text-gray-600">{(p.payload as any).ville}</p>
+                    <p className="text-gray-600">{(p.payload as PropositionPayload).ville}</p>
                   </div>
                 )}
               </div>
@@ -160,19 +161,19 @@ export default function PropositionsModerationPage() {
                   <h4 className="font-semibold text-gray-700 mb-2">Détails de la proposition:</h4>
                   
                   {/* Informations du créateur */}
-                  {(p as any).profiles && (
+                  {(p.profiles as ProfileType) && (
                     <div className="bg-blue-50 rounded-md p-3 mb-3">
                       <h5 className="text-sm font-medium text-blue-900 mb-2">👤 Créateur</h5>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                         <div>
-                          <span className="font-medium">Nom:</span> {(p as any).profiles.prenom} {(p as any).profiles.nom}
+                          <span className="font-medium">Nom:</span> {(p.profiles as ProfileType).prenom} {(p.profiles as ProfileType).nom}
                         </div>
                         <div>
-                          <span className="font-medium">Email:</span> {(p as any).profiles.email}
+                          <span className="font-medium">Email:</span> {(p.profiles as ProfileType).email}
                         </div>
-                        {(p as any).profiles.organisation && (
+                        {(p.profiles as ProfileType).organisation && (
                           <div>
-                            <span className="font-medium">Organisation:</span> {(p as any).profiles.organisation}
+                            <span className="font-medium">Organisation:</span> {(p.profiles as ProfileType).organisation}
                           </div>
                         )}
                       </div>
@@ -180,19 +181,19 @@ export default function PropositionsModerationPage() {
                   )}
 
                   {/* Informations du proposeur (si différent) */}
-                  {(p.payload as any).proposeur && (
+                  {(p.payload as PropositionPayload).proposeur && (
                     <div className="bg-gray-50 rounded-md p-3 mb-3">
                       <h5 className="text-sm font-medium text-gray-900 mb-2">📝 Proposeur (contact pour modifications)</h5>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                         <div>
-                          <span className="font-medium">Nom:</span> {(p.payload as any).proposeur.nom}
+                          <span className="font-medium">Nom:</span> {(p.payload as PropositionPayload).proposeur.nom}
                         </div>
                         <div>
-                          <span className="font-medium">Email:</span> {(p.payload as any).proposeur.email}
+                          <span className="font-medium">Email:</span> {(p.payload as PropositionPayload).proposeur.email}
                         </div>
-                        {(p.payload as any).proposeur.telephone && (
+                        {(p.payload as PropositionPayload).proposeur.telephone && (
                           <div>
-                            <span className="font-medium">Téléphone:</span> {(p.payload as any).proposeur.telephone}
+                            <span className="font-medium">Téléphone:</span> {(p.payload as PropositionPayload).proposeur.telephone}
                           </div>
                         )}
                       </div>
@@ -204,10 +205,12 @@ export default function PropositionsModerationPage() {
                     <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-3">
                       <h5 className="text-sm font-medium text-blue-900 mb-2">📷 Photo proposée</h5>
                       <div className="flex items-start space-x-4">
-                        <img 
+                        <Image
                           src={(p.payload as any).modifications.nouvelle_photo_base64}
                           alt="Photo proposée"
-                          className="w-32 h-24 object-cover rounded border border-gray-200"
+                          width={128}
+                          height={96}
+                          style={{objectFit:'cover',borderRadius:'0.5rem',border:'1px solid #e5e7eb'}}
                         />
                         <div className="text-sm text-blue-800">
                           <p><strong>Nom du fichier:</strong> {(p.payload as any).modifications.nouvelle_photo_filename || 'Non spécifié'}</p>

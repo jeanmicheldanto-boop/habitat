@@ -1,15 +1,43 @@
 "use client";
 
 
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import Image from "next/image";
 
 
 
 // Affiche les infos logements, restauration, services, tarifs et photo pour un établissement
+
+interface LogementType {
+  type: string;
+  capacite: number;
+}
+interface RestaurationType {
+  type: string;
+  description?: string;
+}
+interface ServiceType {
+  type: string;
+  description?: string;
+}
+interface TarifType {
+  type: string;
+  montant: number;
+  unite?: string;
+}
+interface EtabInfosType {
+  logements: LogementType[];
+  restauration: RestaurationType[];
+  services: ServiceType[];
+  tarifs: TarifType[];
+  image_path: string | null;
+}
+
 function EtabInfos({ etabId }: { etabId: string }) {
-  const [infos, setInfos] = useState<any>({});
+  const [infos, setInfos] = useState<EtabInfosType>({ logements: [], restauration: [], services: [], tarifs: [], image_path: null });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,7 +79,7 @@ function EtabInfos({ etabId }: { etabId: string }) {
         <div><span className="font-semibold">Tarifs:</span> {infos.tarifs.map((t: any) => `${t.type}: ${t.montant}€/${t.unite || "nuit"}`).join(", ")}</div>
       )}
       {infos.image_path && (
-        <div><span className="font-semibold">Photo:</span> <img src={supabase.storage.from("etablissements").getPublicUrl(infos.image_path).data.publicUrl} alt="photo" className="inline-block h-8 align-middle ml-1 rounded border" /></div>
+        <div><span className="font-semibold">Photo:</span> <Image src={supabase.storage.from("etablissements").getPublicUrl(infos.image_path).data.publicUrl} alt="photo" width={32} height={32} className="inline-block h-8 align-middle ml-1 rounded border" /></div>
       )}
 
     </div>
@@ -59,14 +87,15 @@ function EtabInfos({ etabId }: { etabId: string }) {
 }
 
 
-type EtabListItem = {
+
+interface EtabListItem {
   id: string;
   nom: string;
   commune: string | null;
   departement: string | null;
   statut_editorial?: string;
   habitat_type?: string;
-};
+}
 
 export default function EtablissementsAdminPage() {
   const [etabs, setEtabs] = useState<EtabListItem[]>([]);

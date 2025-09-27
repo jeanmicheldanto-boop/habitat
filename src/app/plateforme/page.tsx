@@ -39,6 +39,37 @@ const HABITAT_TYPE_LABELS: Record<string, string> = {
   "logement_individuel_en_residence": "Logement individuel en résidence"
 };
 
+interface LogementType {
+  libelle: string;
+  surface_min?: number;
+  surface_max?: number;
+  meuble?: boolean;
+  pmr?: boolean;
+  domotique?: boolean;
+  plain_pied?: boolean;
+  nb_unites?: number;
+}
+interface Etablissement {
+  etab_id: string;
+  nom: string;
+  commune?: string;
+  departement?: string;
+  region?: string;
+  code_postal?: string;
+  image_path?: string;
+  sous_categories?: string[];
+  fourchette_prix?: string;
+  prix_min?: number;
+  prix_max?: number;
+  presentation?: string;
+  public_cible?: string[];
+  services?: string[];
+  logements_types?: LogementType[];
+  habitat_type?: string;
+  geom?: { coordinates: [number, number] };
+  eligibilite_statut?: string;
+}
+
 export default function Page() {
   // --- HOOKS ET LOGIQUE ---
   const [mounted, setMounted] = useState(false);
@@ -59,7 +90,7 @@ export default function Page() {
   }, []);
   
   const [tab, setTab] = useState<'liste'|'carte'>('liste');
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<Etablissement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");

@@ -5,8 +5,24 @@ import { getHabitatImage } from '@/lib/habitatImages';
 import BadgeIcon from './BadgeIcon';
 import AvpBadge from './AvpBadge';
 
+interface EtablissementResult {
+  etab_id: string;
+  nom: string;
+  commune?: string;
+  departement?: string;
+  region?: string;
+  image_path?: string;
+  sous_categories?: string[] | null;
+  fourchette_prix?: string;
+  presentation?: string;
+  public_cible?: string[];
+  services?: string[];
+  habitat_type?: string;
+  eligibilite_statut?: string;
+  [key: string]: any; // Pour permettre l'accès dynamique aux propriétés restaurationOptions
+}
 interface MobileResultsListProps {
-  results: any[];
+  results: EtablissementResult[];
   publicCibleOptions: Array<{key: string, label: string}>;
   restaurationOptions: Array<{key: string, label: string}>;
 }
@@ -28,7 +44,7 @@ export default function MobileResultsList({
           Aucun résultat trouvé
         </h3>
         <p style={{ fontSize: '0.95rem', lineHeight: 1.4 }}>
-          Essayez d'ajuster vos filtres ou élargir votre zone de recherche
+          Essayez d&#39;ajuster vos filtres ou élargir votre zone de recherche
         </p>
       </div>
     );
@@ -41,7 +57,7 @@ export default function MobileResultsList({
       flexDirection: 'column',
       gap: 16 
     }}>
-      {results.map((etab: any) => (
+  {results.map((etab: EtablissementResult) => (
         <div
           key={etab.etab_id}
           style={{
@@ -65,7 +81,7 @@ export default function MobileResultsList({
             {(() => {
               const imgSrc = etab.image_path 
                 ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${etab.image_path}`
-                : getHabitatImage(etab.sous_categories);
+                : getHabitatImage(etab.sous_categories ?? null);
               return (
                 <img
                   src={imgSrc}
@@ -75,7 +91,7 @@ export default function MobileResultsList({
                     height: '100%', 
                     objectFit: 'cover'
                   }}
-                  onError={e => { e.currentTarget.src = getHabitatImage(etab.sous_categories); }}
+                  onError={e => { e.currentTarget.src = getHabitatImage(etab.sous_categories ?? null); }}
                 />
               );
             })()}
@@ -184,7 +200,7 @@ export default function MobileResultsList({
                 marginBottom: 12
               }}>
                 {publicCibleOptions.map(opt => 
-                  etab.public_cible.includes(opt.key) && (
+                  etab.public_cible?.includes(opt.key) && (
                     <BadgeIcon 
                       key={opt.key} 
                       type="public-cible" 
@@ -230,14 +246,14 @@ export default function MobileResultsList({
             )}
 
             {/* Restauration */}
-            {restaurationOptions.some(opt => etab[opt.key]) && (
+            {restaurationOptions.some(opt => Boolean(etab[opt.key])) && (
               <div style={{
                 display: 'flex',
                 flexWrap: 'wrap',
                 gap: 6,
                 marginBottom: 12
               }}>
-                {restaurationOptions.map(opt => etab[opt.key] && (
+                {restaurationOptions.map(opt => Boolean(etab[opt.key]) && (
                   <BadgeIcon 
                     key={opt.key} 
                     type="restauration" 
