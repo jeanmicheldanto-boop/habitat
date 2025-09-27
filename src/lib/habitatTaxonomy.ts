@@ -19,6 +19,10 @@ export const HABITAT_TAXONOMY: HabitatCategory[] = [
     icon: "🏠",
     sousCategories: [
       {
+        key: "beguinage",
+        label: "Béguinage"
+      },
+      {
         key: "habitat_regroupe",
         label: "Habitat regroupé"
       },
@@ -65,10 +69,6 @@ export const HABITAT_TAXONOMY: HabitatCategory[] = [
     label: "Logement individuel en résidence",
     icon: "🏢",
     sousCategories: [
-      {
-        key: "beguinage",
-        label: "Béguinage"
-      },
       {
         key: "marpa",
         label: "MARPA"
@@ -158,10 +158,10 @@ export const CATEGORY_COLORS: Record<string, string> = {
   "logement_individuel_en_residence": "#a85b2b",
   
   // Sous-catégories spécifiques (optionnel, hérite de la catégorie parent sinon)
+  "beguinage": "#2b7fa8", // Maintenant couleur habitat_individuel
   "residence_autonomie": "#a85b2b",
   "residence_services_seniors": "#2b7fa8",
   "marpa": "#a85b2b",
-  "beguinage": "#e0a800",
   "habitat_inclusif": "#2ba8a8",
   "accueil_familial": "#8b4513",
   "habitat_intergenerationnel": "#9932cc",
