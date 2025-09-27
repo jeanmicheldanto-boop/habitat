@@ -4,7 +4,7 @@ import AidesSubnav from "./AidesSubnav";
 import AidesClient from "./AidesClient";
 
 export const metadata: Metadata = {
-  title: "Aides à l'autonomie et au logement senior | Habitat Intermédiaire",
+  title: "Aides à l'autonomie et au logement senior | Habitat Intermediaire",
   description:
     "Guide complet des aides à l'autonomie pour seniors : APA, GIR, conseils pratiques, simulateurs, repères sur les coûts et démarches pour bien vieillir chez soi ou en habitat intermédiaire.",
   keywords: [
@@ -23,9 +23,9 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/aides" },
   openGraph: {
-    title: "Aides à l'autonomie et au logement senior | Habitat Intermédiaire",
+    title: "Aides à l'autonomie et au logement senior | Habitat Intermediaire",
     description:
-      "Tous les repères pour comprendre et obtenir les aides à l’autonomie, simuler ses droits, et choisir la meilleure solution de logement.",
+      "Tous les repères pour comprendre et obtenir les aides à l'autonomie, simuler ses droits, et choisir la meilleure solution de logement.",
     url: "https://habitat-intermediaire.fr/aides",
     type: "website",
     images: [

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Client from "./client";
 
 export const metadata: Metadata = {
-  title: "Solutions d'habitat intermédiaire pour seniors | Habitat Intermédiaire",
+  title: "Solutions d'habitat intermédiaire pour seniors | Habitat Intermediaire",
   description:
     "Découvrez toutes les solutions d'habitat intermédiaire pour seniors : béguinage, village seniors, habitat inclusif, colocation, résidences autonomie, conseils pratiques et simulateurs pour bien choisir selon vos besoins et votre autonomie.",
   keywords: [
@@ -22,9 +22,9 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/solutions" },
   openGraph: {
-    title: "Solutions d'habitat intermédiaire pour seniors | Habitat Intermédiaire",
+    title: "Solutions d'habitat intermédiaire pour seniors | Habitat Intermediaire",
     description:
-      "Toutes les solutions pour bien vieillir chez soi ou en collectif : conseils, illustrations, simulateurs, alternatives à l’EHPAD.",
+      "Toutes les solutions pour bien vieillir chez soi ou en collectif : conseils, illustrations, simulateurs, alternatives à l'EHPAD.",
     url: "https://habitat-intermediaire.fr/solutions",
     type: "website",
     images: [
