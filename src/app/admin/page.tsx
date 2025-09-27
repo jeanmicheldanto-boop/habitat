@@ -1,96 +1,305 @@
+"use client";
+
 import Link from "next/link";
+import { supabase } from "@/lib/supabaseClient";
 
-export default function AdminHomePage() {
+export default function AdminPage() {
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
+  };
+
   return (
-    <main className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Espace d'administration</h1>
-            <p className="text-gray-600 mb-8">
-              Gérez les établissements, modérez les propositions et administrez la plateforme.
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Gestion des établissements */}
-              <Link href="/admin/etablissements" className="group block">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 hover:bg-blue-100 hover:border-blue-300 transition-colors">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <svg className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                      </svg>
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-700">
-                        Gérer les établissements
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Créer, modifier et supprimer des établissements
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </Link>
+    <div style={{ 
+      padding: "2rem", 
+      maxWidth: "1200px", 
+      margin: "0 auto",
+      fontFamily: "system-ui, sans-serif"
+    }}>
+      <div style={{ 
+        display: "flex", 
+        justifyContent: "space-between", 
+        alignItems: "center", 
+        marginBottom: "2rem" 
+      }}>
+        <h1 style={{ 
+          fontSize: "2rem", 
+          margin: "0",
+          color: "#a85b2b",
+          borderBottom: "2px solid #a85b2b",
+          paddingBottom: "0.5rem"
+        }}>
+          Administration - Habitat Intermédiaire
+        </h1>
+        <button 
+          onClick={handleLogout}
+          style={{
+            padding: "0.5rem 1rem",
+            backgroundColor: "#dc2626",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem"
+          }}
+          onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = "#b91c1c"}
+          onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = "#dc2626"}
+        >
+          🚪 Se déconnecter
+        </button>
+      </div>
+      
+      <div style={{ 
+        display: "grid", 
+        gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", 
+        gap: "1.5rem",
+        marginBottom: "2rem"
+      }}>
+        {/* Gestion des établissements */}
+        <div style={{
+          background: "#fff",
+          border: "1px solid #e5e7eb",
+          borderRadius: "8px",
+          padding: "1.5rem",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+        }}>
+          <h2 style={{ 
+            fontSize: "1.25rem", 
+            marginBottom: "1rem", 
+            color: "#374151",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem"
+          }}>
+            🏢 Établissements
+          </h2>
+          <p style={{ 
+            color: "#6b7280", 
+            marginBottom: "1rem",
+            fontSize: "0.9rem",
+            lineHeight: "1.4"
+          }}>
+            Gérer les établissements, ajouter de nouveaux habitats, modifier les informations existantes.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            <Link 
+              href="/admin/etablissements" 
+              style={{
+                display: "inline-block",
+                background: "#a85b2b",
+                color: "white",
+                padding: "0.75rem 1rem",
+                borderRadius: "6px",
+                textDecoration: "none",
+                fontSize: "0.9rem",
+                fontWeight: "500",
+                textAlign: "center",
+                transition: "background-color 0.2s"
+              }}
+            >
+              Liste des établissements
+            </Link>
+            <Link 
+              href="/admin/etablissements/create" 
+              style={{
+                display: "inline-block",
+                background: "#059669",
+                color: "white",
+                padding: "0.75rem 1rem",
+                borderRadius: "6px",
+                textDecoration: "none",
+                fontSize: "0.9rem",
+                fontWeight: "500",
+                textAlign: "center",
+                transition: "background-color 0.2s"
+              }}
+            >
+              Ajouter un établissement
+            </Link>
+          </div>
+        </div>
 
-              {/* Modération */}
-              <Link href="/admin/moderation" className="group block">
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 hover:bg-orange-100 hover:border-orange-300 transition-colors">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <svg className="h-8 w-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-orange-700">
-                        Modération
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Valider les propositions et réclamations
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </Link>
+        {/* Modération */}
+        <div style={{
+          background: "#fff",
+          border: "1px solid #e5e7eb",
+          borderRadius: "8px",
+          padding: "1.5rem",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+        }}>
+          <h2 style={{ 
+            fontSize: "1.25rem", 
+            marginBottom: "1rem", 
+            color: "#374151",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem"
+          }}>
+            ✅ Modération
+          </h2>
+          <p style={{ 
+            color: "#6b7280", 
+            marginBottom: "1rem",
+            fontSize: "0.9rem",
+            lineHeight: "1.4"
+          }}>
+            Modérer les contenus, valider les propositions, gérer les signalements.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            <Link 
+              href="/admin/moderation" 
+              style={{
+                display: "inline-block",
+                background: "#7c3aed",
+                color: "white",
+                padding: "0.75rem 1rem",
+                borderRadius: "6px",
+                textDecoration: "none",
+                fontSize: "0.9rem",
+                fontWeight: "500",
+                textAlign: "center",
+                transition: "background-color 0.2s"
+              }}
+            >
+              Interface de modération
+            </Link>
+          </div>
+        </div>
 
-              {/* Anciennes propositions */}
-              <Link href="/admin/propositions" className="group block">
-                <div className="bg-green-50 border border-green-200 rounded-lg p-6 hover:bg-green-100 hover:border-green-300 transition-colors">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                      </svg>
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-green-700">
-                        Anciennes propositions
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Historique et suivi des propositions
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            </div>
-
-            <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-              <h4 className="font-medium text-gray-900 mb-2">Accès rapide</h4>
-              <div className="flex flex-wrap gap-2">
-                <Link href="/plateforme" className="text-sm text-blue-600 hover:text-blue-500">
-                  → Voir la plateforme publique
-                </Link>
-                <span className="text-gray-300">•</span>
-                <Link href="/gestionnaire" className="text-sm text-blue-600 hover:text-blue-500">
-                  → Espace gestionnaire
-                </Link>
-              </div>
-            </div>
+        {/* Propositions */}
+        <div style={{
+          background: "#fff",
+          border: "1px solid #e5e7eb",
+          borderRadius: "8px",
+          padding: "1.5rem",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+        }}>
+          <h2 style={{ 
+            fontSize: "1.25rem", 
+            marginBottom: "1rem", 
+            color: "#374151",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem"
+          }}>
+            💡 Propositions
+          </h2>
+          <p style={{ 
+            color: "#6b7280", 
+            marginBottom: "1rem",
+            fontSize: "0.9rem",
+            lineHeight: "1.4"
+          }}>
+            Gérer les propositions d'amélioration et les suggestions des utilisateurs.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            <Link 
+              href="/admin/propositions" 
+              style={{
+                display: "inline-block",
+                background: "#f59e0b",
+                color: "white",
+                padding: "0.75rem 1rem",
+                borderRadius: "6px",
+                textDecoration: "none",
+                fontSize: "0.9rem",
+                fontWeight: "500",
+                textAlign: "center",
+                transition: "background-color 0.2s"
+              }}
+            >
+              Gérer les propositions
+            </Link>
           </div>
         </div>
       </div>
-    </main>
+
+      {/* Statistiques rapides */}
+      <div style={{
+        background: "#f9fafb",
+        border: "1px solid #e5e7eb",
+        borderRadius: "8px",
+        padding: "1.5rem",
+        marginTop: "2rem"
+      }}>
+        <h3 style={{ 
+          fontSize: "1.1rem", 
+          marginBottom: "1rem", 
+          color: "#374151"
+        }}>
+          📊 Accès rapide
+        </h3>
+        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+          <Link 
+            href="/admin/check-propositions" 
+            style={{
+              display: "inline-block",
+              background: "#3b82f6",
+              color: "white",
+              padding: "0.5rem 1rem",
+              borderRadius: "6px",
+              textDecoration: "none",
+              fontSize: "0.85rem",
+              fontWeight: "500"
+            }}
+          >
+            🔍 Vérifier la table propositions
+          </Link>
+          <Link 
+            href="/admin/test-propositions" 
+            style={{
+              display: "inline-block",
+              background: "#dc2626",
+              color: "white",
+              padding: "0.5rem 1rem",
+              borderRadius: "6px",
+              textDecoration: "none",
+              fontSize: "0.85rem",
+              fontWeight: "500"
+            }}
+          >
+            🧪 Créer des propositions de test
+          </Link>
+          <Link 
+            href="/plateforme" 
+            target="_blank"
+            style={{
+              display: "inline-block",
+              background: "#6b7280",
+              color: "white",
+              padding: "0.5rem 1rem",
+              borderRadius: "6px",
+              textDecoration: "none",
+              fontSize: "0.85rem",
+              fontWeight: "500"
+            }}
+          >
+            🌐 Voir la plateforme publique
+          </Link>
+          <Link 
+            href="/" 
+            style={{
+              display: "inline-block",
+              background: "#6b7280",
+              color: "white",
+              padding: "0.5rem 1rem",
+              borderRadius: "6px",
+              textDecoration: "none",
+              fontSize: "0.85rem",
+              fontWeight: "500"
+            }}
+          >
+            🏠 Retour à l'accueil
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }

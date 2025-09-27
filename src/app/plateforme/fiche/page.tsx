@@ -2,6 +2,7 @@ import { supabase } from "../../../lib/supabaseClient";
 import React from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { getHabitatImage } from "../../../lib/habitatImages";
 
 export default async function FichePage({ searchParams }: { searchParams: { id?: string } }) {
   const etabId = searchParams.id;
@@ -21,7 +22,12 @@ export default async function FichePage({ searchParams }: { searchParams: { id?:
       <h1 style={{ fontSize: "2rem", color: "#a85b2b", marginBottom: 8 }}>{data.nom}</h1>
       <div style={{ color: "#888", fontSize: "1.1rem", marginBottom: 18 }}>{data.commune} ({data.departement}, {data.region}) {data.code_postal}</div>
       <div style={{ display: "flex", gap: 32, flexWrap: "wrap", marginBottom: 24 }}>
-        <img src={data.image_path ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${data.image_path}` : "/placeholder.jpg"} alt={data.nom} style={{ width: 260, height: 180, objectFit: "cover", borderRadius: 12, boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)" }} />
+        <img 
+          src={data.image_path ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${data.image_path}` : getHabitatImage(data.sous_categories)} 
+          alt={data.nom} 
+          style={{ width: 260, height: 180, objectFit: "cover", borderRadius: 12, boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)" }} 
+          onError={e => { e.currentTarget.src = getHabitatImage(data.sous_categories); }}
+        />
         <div style={{ flex: 1 }}>
           <div style={{ marginBottom: 12, color: "#444", fontSize: "1.1rem" }}>{data.presentation}</div>
           <div style={{ marginBottom: 8 }}><b>Type d'habitat :</b> {Array.isArray(data.sous_categories) ? data.sous_categories.join(", ") : "-"}</div>

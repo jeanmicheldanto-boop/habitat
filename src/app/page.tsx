@@ -25,7 +25,7 @@ export default function HomePage() {
       </div>
 
       <div className="hero__content">
-  <h1 className="hero__title" style={{ marginTop: "4rem" }}>Plateforme experte du logement inclusif pour séniors</h1>
+  <h1 className="hero__title" style={{ marginTop: "6rem" }}>Plateforme experte du logement inclusif pour séniors</h1>
 
         {/* Barre de recherche centrale */}
         <form
@@ -81,7 +81,7 @@ export default function HomePage() {
 
         {/* Boutons oblong pour aides, qui sommes-nous et solutions */}
         <div style={{ 
-          marginTop: "2rem", 
+          marginTop: "3.5rem", 
           textAlign: "center", 
           display: "flex", 
           justifyContent: "center", 
@@ -99,7 +99,7 @@ export default function HomePage() {
       <div style={{ 
         position: "relative",
         background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
-        padding: "4rem 1rem",
+        padding: "3rem 1rem",
         marginTop: "2rem",
         borderRadius: "24px",
         margin: "2rem 1rem 0"

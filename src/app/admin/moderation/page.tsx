@@ -58,21 +58,29 @@ export default function ModerationDashboard() {
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      
+      console.log('🔍 Debug Auth - User:', user);
+      
       if (!user) {
+        console.log('❌ Pas d\'utilisateur connecté, redirection vers /admin');
         router.push('/admin');
         return;
       }
 
       // Vérifier le rôle admin
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single();
 
+      console.log('🔍 Debug Profile:', profile, 'Error:', profileError);
+
       if (profile?.role !== 'admin') {
-        router.push('/admin');
-        return;
+        console.log('❌ Utilisateur n\'est pas admin, rôle actuel:', profile?.role);
+        // Rediriger les gestionnaires vers les propositions
+        router.push('/admin/propositions');
+        return; // Sortir complètement de la fonction
       }
 
       setUser(user);
@@ -83,9 +91,28 @@ export default function ModerationDashboard() {
   }, [router]);
 
   const loadData = async () => {
+    // Ne pas charger les données si on n'a pas d'utilisateur authentifié
+    if (!user) {
+      console.log('⚠️ Pas d\'utilisateur authentifié, arrêt du chargement');
+      return;
+    }
+    
     try {
-      // Charger les propositions avec les profils des créateurs
-      const { data: proposData } = await supabase
+      console.log('🔄 Chargement des données de modération...');
+      
+      // Charger d'abord les propositions SANS join pour déboguer
+      const { data: proposDataSimple, error: proposErrorSimple } = await supabase
+        .from('propositions')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      console.log('📋 Propositions (requête simple):', proposDataSimple?.length || 0, 'Erreur:', proposErrorSimple);
+      if (proposDataSimple) {
+        console.log('📝 Détail propositions (simple):', proposDataSimple);
+      }
+
+      // Ensuite essayer avec le join
+      const { data: proposData, error: proposError } = await supabase
         .from('propositions')
         .select(`
           *,
@@ -93,10 +120,18 @@ export default function ModerationDashboard() {
         `)
         .order('created_at', { ascending: false });
 
-      if (proposData) setPropositions(proposData);
+      console.log('📋 Propositions (avec join):', proposData?.length || 0, 'Erreur:', proposError);
+      if (proposData) {
+        console.log('📝 Détail propositions (avec join):', proposData);
+        setPropositions(proposData);
+      } else if (proposDataSimple) {
+        // Si le join échoue, utiliser les données simples
+        console.log('⚠️ Utilisation des données simples car le join a échoué');
+        setPropositions(proposDataSimple);
+      }
 
       // Charger les réclamations avec les établissements et profils
-      const { data: reclamData } = await supabase
+      const { data: reclamData, error: reclamError } = await supabase
         .from('reclamations_propriete')
         .select(`
           *,
@@ -105,9 +140,13 @@ export default function ModerationDashboard() {
         `)
         .order('created_at', { ascending: false });
 
-      if (reclamData) setReclamations(reclamData);
+      console.log('🏢 Réclamations trouvées:', reclamData?.length || 0, 'Erreur:', reclamError);
+      if (reclamData) {
+        console.log('📋 Détail réclamations:', reclamData);
+        setReclamations(reclamData);
+      }
     } catch (error) {
-      console.error('Erreur lors du chargement:', error);
+      console.error('❌ Erreur lors du chargement:', error);
     } finally {
       setLoading(false);
     }
@@ -266,6 +305,19 @@ export default function ModerationDashboard() {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Si l'utilisateur n'est pas admin, afficher un message de redirection
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Accès restreint</h1>
+          <p className="text-gray-600 mb-4">Cette page est réservée aux administrateurs.</p>
+          <p className="text-gray-600">Redirection en cours...</p>
+        </div>
       </div>
     );
   }

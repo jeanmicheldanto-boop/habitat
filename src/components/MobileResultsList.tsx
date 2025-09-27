@@ -1,6 +1,9 @@
 "use client";
 import React from 'react';
 import { getAllSousCategories, getSousCategorieColor } from '@/lib/habitatTaxonomy';
+import { getHabitatImage } from '@/lib/habitatImages';
+import BadgeIcon from './BadgeIcon';
+import AvpBadge from './AvpBadge';
 
 interface MobileResultsListProps {
   results: any[];
@@ -62,7 +65,7 @@ export default function MobileResultsList({
             {(() => {
               const imgSrc = etab.image_path 
                 ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${etab.image_path}`
-                : "/placeholder.jpg";
+                : getHabitatImage(etab.sous_categories);
               return (
                 <img
                   src={imgSrc}
@@ -72,7 +75,7 @@ export default function MobileResultsList({
                     height: '100%', 
                     objectFit: 'cover'
                   }}
-                  onError={e => { e.currentTarget.src = "/placeholder.jpg"; }}
+                  onError={e => { e.currentTarget.src = getHabitatImage(etab.sous_categories); }}
                 />
               );
             })()}
@@ -182,16 +185,13 @@ export default function MobileResultsList({
               }}>
                 {publicCibleOptions.map(opt => 
                   etab.public_cible.includes(opt.key) && (
-                    <span key={opt.key} style={{
-                      background: '#e8f4f8',
-                      color: '#2c5aa0',
-                      padding: '4px 8px',
-                      borderRadius: 12,
-                      fontSize: '0.8rem',
-                      fontWeight: 500
-                    }}>
-                      {opt.label}
-                    </span>
+                    <BadgeIcon 
+                      key={opt.key} 
+                      type="public-cible" 
+                      name={opt.key} 
+                      label={opt.label}
+                      size="sm"
+                    />
                   )
                 )}
               </div>
@@ -206,16 +206,13 @@ export default function MobileResultsList({
                 marginBottom: 12
               }}>
                 {etab.services.slice(0, 3).map((service: string, idx: number) => (
-                  <span key={idx} style={{
-                    background: '#e8f5e8',
-                    color: '#2d7d2d',
-                    padding: '4px 8px',
-                    borderRadius: 12,
-                    fontSize: '0.8rem',
-                    fontWeight: 500
-                  }}>
-                    {service}
-                  </span>
+                  <BadgeIcon 
+                    key={idx} 
+                    type="services" 
+                    name={service} 
+                    label={service === "espace_partage" ? "Espace Partagé" : service}
+                    size="sm"
+                  />
                 ))}
                 {etab.services.length > 3 && (
                   <span style={{
@@ -241,43 +238,49 @@ export default function MobileResultsList({
                 marginBottom: 12
               }}>
                 {restaurationOptions.map(opt => etab[opt.key] && (
-                  <span key={opt.key} style={{
-                    background: '#fff3e0',
-                    color: '#e65100',
-                    padding: '4px 8px',
-                    borderRadius: 12,
-                    fontSize: '0.8rem',
-                    fontWeight: 500
-                  }}>
-                    {opt.label}
-                  </span>
+                  <BadgeIcon 
+                    key={opt.key} 
+                    type="restauration" 
+                    name={opt.key} 
+                    label={opt.label}
+                    size="sm"
+                  />
                 ))}
               </div>
             )}
 
-            {/* Bouton voir la fiche */}
-            <a
-              href={`/plateforme/fiche?id=${encodeURIComponent(etab.etab_id)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'block',
-                width: '100%',
-                background: 'linear-gradient(135deg, #a85b2b 0%, #d35400 100%)',
-                color: 'white',
-                textAlign: 'center',
-                padding: '12px 16px',
-                borderRadius: 8,
-                fontSize: '0.95rem',
-                fontWeight: 600,
-                textDecoration: 'none',
-                boxShadow: '0 2px 8px rgba(168, 91, 43, 0.2)',
-                transition: 'all 0.2s ease'
-              }}
-              onTouchStart={() => {}} // Pour le feedback tactile
-            >
-              Voir la fiche détaillée
-            </a>
+            {/* Bouton voir la fiche et badge AVP */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <a
+                href={`/plateforme/fiche?id=${encodeURIComponent(etab.etab_id)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'block',
+                  flex: 1,
+                  background: 'linear-gradient(135deg, #a85b2b 0%, #d35400 100%)',
+                  color: 'white',
+                  textAlign: 'center',
+                  padding: '12px 16px',
+                  borderRadius: 8,
+                  fontSize: '0.95rem',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  boxShadow: '0 2px 8px rgba(168, 91, 43, 0.2)',
+                  transition: 'all 0.2s ease'
+                }}
+                onTouchStart={() => {}} // Pour le feedback tactile
+              >
+                Voir la fiche détaillée
+              </a>
+              
+              {/* Badge éligibilité AVP */}
+              {etab.eligibilite_statut && etab.eligibilite_statut !== null && etab.eligibilite_statut !== '' && (
+                <AvpBadge 
+                  status={etab.eligibilite_statut as 'avp_eligible' | 'non_eligible' | 'a_verifier'} 
+                />
+              )}
+            </div>
           </div>
         </div>
       ))}

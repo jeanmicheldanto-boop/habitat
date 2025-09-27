@@ -8,6 +8,9 @@ import MobileFilters from "@/components/MobileFilters";
 import MobileResultsList from "@/components/MobileResultsList";
 import { supabase } from "../../lib/supabaseClient";
 import { HABITAT_TAXONOMY, getSousCategorieColor, getAllSousCategories, getCategoryByKey } from "@/lib/habitatTaxonomy";
+import { getHabitatImage } from "@/lib/habitatImages";
+import BadgeIcon, { Badge } from "@/components/BadgeIcon";
+import AvpBadge from "@/components/AvpBadge";
 import './plateforme.css';
 // Palette de couleurs pour les sous-catégories (maintenant gérée par la taxonomie)
 const TAG_COLORS: Record<string, string> = {
@@ -97,6 +100,8 @@ export default function Page() {
   ];
   const [selectedPublicCible, setSelectedPublicCible] = useState<string[]>([]);
   const [selectedDepartement, setSelectedDepartement] = useState<string>("");
+  // Filtre AVP
+  const [selectedAvpEligibility, setSelectedAvpEligibility] = useState<string>(""); // '', 'avp_eligible', 'non_eligible', 'a_verifier'
   // Sticky responsive: top = 80px (desktop), 120px (mobile)
   const [stickyTop, setStickyTop] = useState(80);
   useEffect(() => {
@@ -256,6 +261,9 @@ export default function Page() {
           if (!etab.departement.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(selectedDepartement.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, ''))) return false;
         }
       }
+      
+      // Filtre éligibilité AVP
+      if (selectedAvpEligibility && etab.eligibilite_statut !== selectedAvpEligibility) return false;
       if (selectedCommune && etab.commune && !etab.commune.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(selectedCommune.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, ''))) return false;
       
       // Recherche texte - recherche globale dans tous les champs pertinents
@@ -573,6 +581,22 @@ export default function Page() {
           />
           <input type="text" placeholder="Commune" value={selectedCommune} onChange={e => setSelectedCommune(e.target.value)} className="filtre-input" style={{ marginTop: 8 }} />
         </div>
+
+        {/* Filtre éligibilité AVP */}
+        <div>
+          <div className="filtre-label">Éligibilité AVP</div>
+          <select 
+            value={selectedAvpEligibility} 
+            onChange={e => setSelectedAvpEligibility(e.target.value)} 
+            className="filtre-input"
+            style={{ cursor: 'pointer' }}
+          >
+            <option value="">Tous les établissements</option>
+            <option value="avp_eligible">✓ Éligibles AVP</option>
+            <option value="non_eligible">✗ Non éligibles</option>
+            <option value="a_verifier">? À vérifier</option>
+          </select>
+        </div>
         {/* Types d'habitat - Nouvelle structure hiérarchique */}
         <div>
           <div className="filtre-label">Types d'habitat</div>
@@ -888,13 +912,15 @@ export default function Page() {
                         {/* ...existing code for card... */}
                         <div style={{ minWidth: 140, maxWidth: 160, width: 140, height: 140, display: "flex", alignItems: "center", justifyContent: "center", background: "#f4f4f4", borderTopLeftRadius: 18, borderBottomLeftRadius: 18, overflow: "hidden", margin: 10 }}>
                           {(() => {
-                            const imgSrc = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${etab.image_path}`;
+                            const imgSrc = etab.image_path 
+                              ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${etab.image_path}`
+                              : getHabitatImage(etab.sous_categories);
                             return (
                               <img
                                 src={imgSrc}
                                 alt={etab.nom}
                                 style={{ maxWidth: 120, maxHeight: 100, width: "auto", height: "auto", objectFit: "contain", borderRadius: 10, boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)" }}
-                                onError={e => { e.currentTarget.src = "/placeholder.jpg"; }}
+                                onError={e => { e.currentTarget.src = getHabitatImage(etab.sous_categories); }}
                               />
                             );
                           })()}
@@ -960,9 +986,22 @@ export default function Page() {
                               }}
                               onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = '#444'; (e.currentTarget as HTMLElement).style.textDecoration = 'underline'; }}
                               onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = '#23272f'; (e.currentTarget as HTMLElement).style.textDecoration = 'none'; }}
-                            >
+                            >  
                               Voir la fiche
                             </a>
+                          </div>
+                          {/* Badge éligibilité AVP */}
+                          <div style={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            marginTop: "6px",
+                            marginBottom: "8px"
+                          }}>
+                            {etab.eligibilite_statut && etab.eligibilite_statut !== null && etab.eligibilite_statut !== '' && (
+                              <AvpBadge 
+                                status={etab.eligibilite_statut as 'avp_eligible' | 'non_eligible' | 'a_verifier'} 
+                              />
+                            )}
                           </div>
                           <div style={{ color: "#444", marginBottom: "0.3rem", fontSize: "0.92rem", overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
                             {etab.presentation}
@@ -970,23 +1009,39 @@ export default function Page() {
                           <div style={{ color: "#888", fontSize: "0.88rem" }}>
                             {etab.commune} ({etab.departement}, {etab.region}) {etab.code_postal}
                           </div>
-                          <div style={{ background: "#f6f6f6", borderRadius: 10, padding: "0.4em 0.8em", margin: "0.5em 0 0.2em 0", display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
+                          <div style={{ background: "#f6f6f6", borderRadius: 10, padding: "0.4em 0.8em", margin: "0.5em 0 0.2em 0", display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                             {PUBLIC_CIBLE_OPTIONS.map(opt => etab.public_cible && etab.public_cible.includes(opt.key) && (
-                              <span key={opt.key} style={{ display: "flex", alignItems: "center", gap: 4, color: "#a85b2b", fontWeight: 500, fontSize: "0.90em" }}>
-                                {opt.label}
-                              </span>
+                              <BadgeIcon 
+                                key={opt.key} 
+                                type="public-cible" 
+                                name={opt.key} 
+                                label={opt.label}
+                                size="sm"
+                              />
                             ))}
                           </div>
                           {Array.isArray(etab.services) && etab.services.length > 0 && (
-                            <div style={{ background: "#f6f6f6", borderRadius: 10, padding: "0.4em 0.8em", margin: "0.2em 0", display: "flex", gap: 10, flexWrap: "wrap" }}>
+                            <div style={{ background: "#f6f6f6", borderRadius: 10, padding: "0.4em 0.8em", margin: "0.2em 0", display: "flex", gap: 8, flexWrap: "wrap" }}>
                               {etab.services.map((s:string, idx:number) => (
-                                <span key={idx} style={{ color: "#2ba85b", fontWeight: 500, fontSize: "0.90em" }}>{s === "espace_partage" ? "Espace Partagé" : s}</span>
+                                <BadgeIcon 
+                                  key={idx} 
+                                  type="services" 
+                                  name={s} 
+                                  label={s === "espace_partage" ? "Espace Partagé" : s}
+                                  size="sm"
+                                />
                               ))}
                             </div>
                           )}
-                          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", margin: "0.2rem 0" }}>
+                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "0.2rem 0" }}>
                             {RESTAURATION_OPTIONS.map(opt => etab[opt.key] && (
-                              <span key={opt.key} style={{ background: "#e0e2e6", color: "#444", borderRadius: 8, padding: "0.18em 0.7em", fontSize: "0.84rem", fontWeight: 500 }}>{opt.label}</span>
+                              <BadgeIcon 
+                                key={opt.key} 
+                                type="restauration" 
+                                name={opt.key} 
+                                label={opt.label}
+                                size="sm"
+                              />
                             ))}
                           </div>
                         </div>

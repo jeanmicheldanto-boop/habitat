@@ -2,7 +2,6 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import HeaderSubnavGate from '@/components/HeaderSubnavGate';
-import SecondaryMenu from '@/components/SecondaryMenu';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -139,7 +138,6 @@ export default function RootLayout({
       >
         <HeaderSubnavGate />
         {children}
-        <SecondaryMenu />
       </body>
     </html>
   );

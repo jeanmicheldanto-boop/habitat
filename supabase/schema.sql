@@ -132,34 +132,175 @@ CREATE TYPE public.statut_editorial AS ENUM (
 CREATE FUNCTION public.can_publish(p_etab uuid) RETURNS boolean
     LANGUAGE sql STABLE
     AS $_$
-WITH e AS (
-  SELECT *
-  FROM public.etablissements
-  WHERE id = p_etab
-)
-SELECT
-  -- 1) nom
-  COALESCE(NULLIF(trim(nom),''), NULL) IS NOT NULL
-  -- 2) adresse (accepte adresse_l1 OU adresse_l2), commune, code postal (non vide), géoloc non nulle
-  AND COALESCE(NULLIF(trim(adresse_l1),''), NULLIF(trim(adresse_l2),''), NULL) IS NOT NULL
-  AND COALESCE(NULLIF(trim(commune),''), NULL) IS NOT NULL
-  AND COALESCE(NULLIF(trim(code_postal),''), NULL) IS NOT NULL
-  AND geom IS NOT NULL
-  -- 3) gestionnaire
-  AND COALESCE(NULLIF(trim(gestionnaire),''), NULL) IS NOT NULL
-  -- 4) typage d’habitat : **nouveau champ** OU (legacy) au moins une sous-catégorie liée
-  AND (
-        habitat_type IS NOT NULL
-     OR EXISTS (
-          SELECT 1
-          FROM public.etablissement_sous_categorie esc
-          WHERE esc.etablissement_id = p_etab
+                WITH e AS (
+                  SELECT *
+                  FROM public.etablissements
+                  WHERE id = p_etab
+                )
+                SELECT
+                  -- 1) nom
+                  COALESCE(NULLIF(trim(nom),''), NULL) IS NOT NULL
+                  -- 2) adresse (accepte adresse_l1 OU adresse_l2), commune, code postal (non vide), géoloc non nulle
+                  AND COALESCE(NULLIF(trim(adresse_l1),''), NULLIF(trim(adresse_l2),''), NULL) IS NOT NULL
+                  AND COALESCE(NULLIF(trim(commune),''), NULL) IS NOT NULL
+                  AND COALESCE(NULLIF(trim(code_postal),''), NULL) IS NOT NULL
+                  AND geom IS NOT NULL
+                  -- 3) gestionnaire
+                  AND COALESCE(NULLIF(trim(gestionnaire),''), NULL) IS NOT NULL
+                  -- 4) typage d'habitat : **nouveau champ** OU (legacy) au moins une sous-catégorie liée
+                  AND (
+                        habitat_type IS NOT NULL
+                     OR EXISTS (
+                          SELECT 1
+                          FROM public.etablissement_sous_categorie esc
+                          WHERE esc.etablissement_id = p_etab
+                        )
+                  )
+                  -- 5) email au format simple OU NULL/vide (plus permissif pour import CSV)
+                  AND (
+                        email IS NULL 
+                        OR COALESCE(NULLIF(trim(email),''), NULL) IS NULL
+                        OR email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+                  )
+                FROM e;
+                $_$;
+
+
+--
+-- Name: can_publish_original(uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.can_publish_original(p_etab uuid) RETURNS boolean
+    LANGUAGE sql STABLE
+    AS $_$
+                WITH e AS (
+                  SELECT *
+                  FROM public.etablissements
+                  WHERE id = p_etab
+                )
+                SELECT
+                  -- 1) nom
+                  COALESCE(NULLIF(trim(nom),''), NULL) IS NOT NULL
+                  -- 2) adresse (accepte adresse_l1 OU adresse_l2), commune, code postal (non vide), géoloc non nulle
+                  AND COALESCE(NULLIF(trim(adresse_l1),''), NULLIF(trim(adresse_l2),''), NULL) IS NOT NULL
+                  AND COALESCE(NULLIF(trim(commune),''), NULL) IS NOT NULL
+                  AND COALESCE(NULLIF(trim(code_postal),''), NULL) IS NOT NULL
+                  AND geom IS NOT NULL
+                  -- 3) gestionnaire
+                  AND COALESCE(NULLIF(trim(gestionnaire),''), NULL) IS NOT NULL
+                  -- 4) typage d'habitat : **nouveau champ** OU (legacy) au moins une sous-catégorie liée
+                  AND (
+                        habitat_type IS NOT NULL
+                     OR EXISTS (
+                          SELECT 1
+                          FROM public.etablissement_sous_categorie esc
+                          WHERE esc.etablissement_id = p_etab
+                        )
+                  )
+                  -- 5) email au format simple (ANCIENNE VERSION - stricte)
+                  AND email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+                FROM e;
+                $_$;
+
+
+--
+-- Name: create_notification_on_status_change(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.create_notification_on_status_change() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  notification_title VARCHAR(255);
+  notification_message TEXT;
+  notification_type VARCHAR(20);
+BEGIN
+  -- Pour les propositions
+  IF TG_TABLE_NAME = 'propositions' THEN
+    IF OLD.statut != NEW.statut AND NEW.statut IN ('approuve', 'rejete') THEN
+      CASE NEW.statut
+        WHEN 'approuve' THEN
+          notification_type := 'proposition_approved';
+          notification_title := 'Proposition approuvée';
+          notification_message := 'Votre demande de création d''établissement a été approuvée !';
+        WHEN 'rejete' THEN
+          notification_type := 'proposition_rejected';
+          notification_title := 'Proposition rejetée';
+          notification_message := 'Votre demande de création d''établissement a été rejetée.';
+      END CASE;
+
+      INSERT INTO notifications (user_id, type, title, message, data)
+      VALUES (
+        NEW.created_by,
+        notification_type,
+        notification_title,
+        notification_message,
+        jsonb_build_object(
+          'proposition_id', NEW.id,
+          'review_note', NEW.review_note
         )
-  )
-  -- 5) email au format simple (comme avant)
-  AND email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
-FROM e;
-$_$;
+      );
+    END IF;
+  END IF;
+
+  -- Pour les réclamations
+  IF TG_TABLE_NAME = 'reclamations_propriete' THEN
+    IF OLD.statut != NEW.statut AND NEW.statut IN ('approuve', 'rejete') THEN
+      CASE NEW.statut
+        WHEN 'approuve' THEN
+          notification_type := 'reclamation_approved';
+          notification_title := 'Réclamation approuvée';
+          notification_message := 'Votre réclamation de propriété a été approuvée !';
+        WHEN 'rejete' THEN
+          notification_type := 'reclamation_rejected';
+          notification_title := 'Réclamation rejetée';
+          notification_message := 'Votre réclamation de propriété a été rejetée.';
+      END CASE;
+
+      INSERT INTO notifications (user_id, type, title, message, data)
+      VALUES (
+        NEW.created_by,
+        notification_type,
+        notification_title,
+        notification_message,
+        jsonb_build_object(
+          'reclamation_id', NEW.id,
+          'etablissement_id', NEW.etablissement_id,
+          'review_note', NEW.review_note
+        )
+      );
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: handle_new_user(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.handle_new_user() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, nom, prenom, telephone, organisation, role, created_at, updated_at)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'nom', ''),
+    COALESCE(NEW.raw_user_meta_data->>'prenom', ''),
+    COALESCE(NEW.raw_user_meta_data->>'telephone', ''),
+    COALESCE(NEW.raw_user_meta_data->>'organisation', ''),
+    COALESCE(NEW.raw_user_meta_data->>'role', 'user'),
+    NOW(),
+    NOW()
+  );
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -433,6 +574,41 @@ CREATE TABLE public.medias (
 
 
 --
+-- Name: notifications; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.notifications (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    type character varying(20) NOT NULL,
+    title character varying(255) NOT NULL,
+    message text NOT NULL,
+    data jsonb DEFAULT '{}'::jsonb,
+    is_read boolean DEFAULT false,
+    created_at timestamp with time zone DEFAULT now(),
+    CONSTRAINT notifications_type_check CHECK (((type)::text = ANY ((ARRAY['proposition_approved'::character varying, 'proposition_rejected'::character varying, 'reclamation_approved'::character varying, 'reclamation_rejected'::character varying])::text[])))
+);
+
+
+--
+-- Name: profiles; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.profiles (
+    id uuid NOT NULL,
+    email text,
+    nom text,
+    prenom text,
+    telephone text,
+    organisation text,
+    role text DEFAULT 'user'::text,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now(),
+    CONSTRAINT profiles_role_check CHECK ((role = ANY (ARRAY['user'::text, 'admin'::text, 'gestionnaire'::text])))
+);
+
+
+--
 -- Name: proposition_items; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -654,6 +830,7 @@ CREATE VIEW public.v_liste_publication AS
     pays,
     geom,
     geocode_precision,
+    eligibilite_statut,
     telephone,
     email,
     site_web,
@@ -741,6 +918,7 @@ CREATE VIEW public.v_liste_publication_geoloc AS
     public.st_y(geom) AS latitude,
     public.st_x(geom) AS longitude,
     geocode_precision,
+    eligibilite_statut,
     telephone,
     email,
     site_web,
@@ -915,6 +1093,22 @@ ALTER TABLE ONLY public.medias
 
 
 --
+-- Name: notifications notifications_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.notifications
+    ADD CONSTRAINT notifications_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: profiles profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.profiles
+    ADD CONSTRAINT profiles_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: proposition_items proposition_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1016,6 +1210,27 @@ CREATE INDEX idx_etablissements_nom ON public.etablissements USING gin (nom publ
 
 
 --
+-- Name: idx_notifications_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_notifications_created_at ON public.notifications USING btree (created_at DESC);
+
+
+--
+-- Name: idx_notifications_is_read; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_notifications_is_read ON public.notifications USING btree (is_read);
+
+
+--
+-- Name: idx_notifications_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_notifications_user_id ON public.notifications USING btree (user_id);
+
+
+--
 -- Name: idx_prop_created_by; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1048,6 +1263,20 @@ CREATE INDEX idx_prop_statut ON public.propositions USING btree (statut);
 --
 
 CREATE INDEX idx_tarifs_periode ON public.tarifications USING btree (etablissement_id, periode);
+
+
+--
+-- Name: propositions proposition_status_change_notification; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER proposition_status_change_notification AFTER UPDATE ON public.propositions FOR EACH ROW EXECUTE FUNCTION public.create_notification_on_status_change();
+
+
+--
+-- Name: reclamations_propriete reclamation_status_change_notification; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER reclamation_status_change_notification AFTER UPDATE ON public.reclamations_propriete FOR EACH ROW EXECUTE FUNCTION public.create_notification_on_status_change();
 
 
 --
@@ -1137,6 +1366,22 @@ ALTER TABLE ONLY public.medias
 
 
 --
+-- Name: notifications notifications_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.notifications
+    ADD CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: profiles profiles_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.profiles
+    ADD CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+
+--
 -- Name: proposition_items proposition_items_proposition_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1197,6 +1442,48 @@ ALTER TABLE ONLY public.tarifications
 --
 
 CREATE POLICY "Allow insert for all" ON public.etablissements FOR INSERT WITH CHECK (true);
+
+
+--
+-- Name: notifications Les utilisateurs peuvent mettre à jour leurs propres notificat; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Les utilisateurs peuvent mettre à jour leurs propres notificat" ON public.notifications FOR UPDATE USING ((auth.uid() = user_id));
+
+
+--
+-- Name: notifications Les utilisateurs peuvent voir leurs propres notifications; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Les utilisateurs peuvent voir leurs propres notifications" ON public.notifications FOR SELECT USING ((auth.uid() = user_id));
+
+
+--
+-- Name: etablissements Public can read published establishments; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Public can read published establishments" ON public.etablissements FOR SELECT USING ((statut_editorial = 'publie'::public.statut_editorial));
+
+
+--
+-- Name: profiles Service role can insert profiles; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Service role can insert profiles" ON public.profiles FOR INSERT WITH CHECK (true);
+
+
+--
+-- Name: profiles Users can update own profile; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING ((auth.uid() = id));
+
+
+--
+-- Name: profiles Users can view own profile; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT USING ((auth.uid() = id));
 
 
 --
@@ -1261,6 +1548,12 @@ ALTER TABLE public.logements_types ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.medias ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: notifications; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: etablissement_proprietaires owners select self or admin; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -1273,6 +1566,12 @@ CREATE POLICY "owners select self or admin" ON public.etablissement_proprietaire
 
 CREATE POLICY "owners write admin only" ON public.etablissement_proprietaires TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
 
+
+--
+-- Name: profiles; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 --
 -- Name: propositions prop delete admin only; Type: POLICY; Schema: public; Owner: -

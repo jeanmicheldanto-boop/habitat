@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="24" viewBox="0 0 50 24" role="img" aria-label="Badge AVP à vérifier">
+  <title>AVP — à vérifier</title>
+  <desc>Badge AVP à vérifier, gris professionnel, maison élargie et centrée dans le médaillon, point d’interrogation en bas à droite.</desc>
+  <defs>
+    <linearGradient id="bgGradCheck" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9CA3AF"/>
+      <stop offset="1" stop-color="#6B7280"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Label -->
+  <rect x="0.75" y="0.75" width="48.5" height="22.5" rx="6"
+        fill="url(#bgGradCheck)" stroke="#6B7280" stroke-width="1.5"/>
+
+  <!-- Médaillon -->
+  <circle cx="12" cy="12" r="8.25" fill="#6B7280" stroke="rgba(0,0,0,0.06)" stroke-width="1.5"/>
+
+  <!-- Maison élargie et centrée -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Toit (plus large) -->
+    <path d="M8 12.1 L12 8.9 L16 12.1"/>
+    <!-- Corps (plus large, centré sur x=12) -->
+    <rect x="9.4" y="12.1" width="5.2" height="5.2" rx="0.9"/>
+  </g>
+
+  <!-- Point d'interrogation SANS rond, en bas à droite du médaillon -->
+  <text x="21.2" y="19.2" fill="#FFFFFF"
+        font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"
+        font-size="7.2" font-weight="800" text-anchor="middle">?</text>
+
+  <!-- Texte AVP -->
+  <text x="27" y="15.5" fill="#FFFFFF"
+        font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"
+        font-size="10" font-weight="700" letter-spacing=".4">AVP</text>
+</svg>

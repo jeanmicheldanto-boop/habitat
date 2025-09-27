@@ -2,10 +2,11 @@ import { MapContainer, TileLayer, Marker, Popup, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import React from 'react';
+import { getHabitatImage } from '@/lib/habitatImages';
 
 // Utilitaire pour générer l'URL publique Supabase Storage
-function getPublicUrl(path?: string | null): string {
-  if (!path) return "/placeholder.jpg";
+function getPublicUrl(path?: string | null, sous_categories?: string[] | null): string {
+  if (!path) return getHabitatImage(sous_categories || null);
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${path}`;
 }
 
@@ -33,6 +34,7 @@ interface EtabMapProps {
     prix_max?: number;
     presentation?: string;
     public_cible?: string[];
+    sous_categories?: string[];
   }>;
 }
 
@@ -91,9 +93,12 @@ export default function EtabMap({ etablissements }: EtabMapProps) {
             {/* @ts-ignore */}
             <Popup options={{ minWidth: 260, maxWidth: 320 }}>
               <div style={{display:'flex',gap:12,alignItems:'flex-start'}}>
-                  {etab.image_path && (
-                    <img src={getPublicUrl(etab.image_path)} alt={etab.nom} style={{width:40,height:40,objectFit:'cover',borderRadius:8,flexShrink:0,boxShadow:'0 1px 4px 0 rgba(0,0,0,0.08)'}} />
-                  )}
+                  <img 
+                    src={getPublicUrl(etab.image_path, etab.sous_categories)} 
+                    alt={etab.nom} 
+                    style={{width:40,height:40,objectFit:'cover',borderRadius:8,flexShrink:0,boxShadow:'0 1px 4px 0 rgba(0,0,0,0.08)'}} 
+                    onError={e => { e.currentTarget.src = getHabitatImage(etab.sous_categories || null); }}
+                  />
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontWeight:'bold',fontSize:16,marginBottom:2}}>{etab.nom}</div>
                   {etab.fourchette_prix && (

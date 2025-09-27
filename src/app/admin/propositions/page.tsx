@@ -13,22 +13,69 @@ export default function PropositionsModerationPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
+  };
+
   useEffect(() => {
     async function fetchPropositions() {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("propositions")
-        .select("*")
-        .eq("statut", "en_attente")
-        .order("created_at", { ascending: false });
-      if (error) {
+      
+      try {
+        // D'abord récupérer les propositions
+        const { data: propositionsData, error: proposError } = await supabase
+          .from("propositions")
+          .select("*")
+          .eq("statut", "en_attente")
+          .order("created_at", { ascending: false });
+          
+        if (proposError) {
+          console.error('Erreur propositions:', proposError);
+          setError("Erreur lors du chargement des propositions.");
+          setLoading(false);
+          return;
+        }
+
+        // Ensuite récupérer les profils des créateurs
+        const propositionsWithProfiles = [];
+        
+        for (const prop of propositionsData || []) {
+          let profileData = null;
+          
+          if (prop.created_by) {
+            const { data: profile, error: profileError } = await supabase
+              .from("profiles")
+              .select("*")
+              .eq("id", prop.created_by)
+              .single();
+              
+            if (!profileError && profile) {
+              profileData = profile;
+            }
+          }
+          
+          propositionsWithProfiles.push({
+            ...prop,
+            profiles: profileData
+          });
+        }
+
+        console.log('✅ Propositions chargées avec succès:', propositionsWithProfiles.length);
+        setPropositions(propositionsWithProfiles);
+        
+      } catch (err) {
+        console.error('❌ Erreur lors du chargement:', err);
         setError("Erreur lors du chargement des propositions.");
+      } finally {
         setLoading(false);
-        return;
       }
-      setPropositions(data || []);
-      setLoading(false);
     }
+    
     fetchPropositions();
   }, []);
 
@@ -37,7 +84,15 @@ export default function PropositionsModerationPage() {
 
   return (
     <main className="max-w-3xl mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">Propositions à modérer</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Propositions à modérer</h1>
+        <button 
+          onClick={handleLogout}
+          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+        >
+          🚪 Se déconnecter
+        </button>
+      </div>
       {propositions.length === 0 ? (
         <div className="text-gray-600">Aucune proposition en attente.</div>
       ) : (
@@ -47,10 +102,16 @@ export default function PropositionsModerationPage() {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {p.type_cible === 'etablissement' ? 'Modification d\'établissement' : p.type_cible}
+                    {p.action === 'create' ? 
+                      `Création d'établissement${(p.payload as any)?.nom ? ` - ${(p.payload as any).nom}` : ''}` : 
+                      p.action === 'update' ? 
+                      `Modification d'établissement${(p.payload as any)?.nom ? ` - ${(p.payload as any).nom}` : ''}` :
+                      p.type_cible
+                    }
                   </h3>
                   <p className="text-sm text-gray-500">
                     Créée le {new Date(p.created_at).toLocaleDateString('fr-FR')} à {new Date(p.created_at).toLocaleTimeString('fr-FR')}
+                    {(p as any).profiles && ` par ${(p as any).profiles.prenom} ${(p as any).profiles.nom}`}
                   </p>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -71,15 +132,26 @@ export default function PropositionsModerationPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <span className="font-semibold text-gray-700">Établissement ID:</span>
-                  <p className="text-gray-600 font-mono text-sm">{p.etablissement_id}</p>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
                   <span className="font-semibold text-gray-700">Action:</span>
-                  <p className="text-gray-600">{p.action}</p>
+                  <p className="text-gray-600">
+                    {p.action === 'create' ? '🆕 Création' : 
+                     p.action === 'update' ? '✏️ Modification' : p.action}
+                  </p>
                 </div>
+                {(p.payload as any)?.habitat_type && (
+                  <div>
+                    <span className="font-semibold text-gray-700">Type:</span>
+                    <p className="text-gray-600">{(p.payload as any).habitat_type}</p>
+                  </div>
+                )}
+                {(p.payload as any)?.ville && (
+                  <div>
+                    <span className="font-semibold text-gray-700">Ville:</span>
+                    <p className="text-gray-600">{(p.payload as any).ville}</p>
+                  </div>
+                )}
               </div>
 
               {/* Afficher le payload s'il contient des informations */}
@@ -87,10 +159,30 @@ export default function PropositionsModerationPage() {
                 <div className="mb-4">
                   <h4 className="font-semibold text-gray-700 mb-2">Détails de la proposition:</h4>
                   
-                  {/* Informations du proposeur */}
+                  {/* Informations du créateur */}
+                  {(p as any).profiles && (
+                    <div className="bg-blue-50 rounded-md p-3 mb-3">
+                      <h5 className="text-sm font-medium text-blue-900 mb-2">👤 Créateur</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+                        <div>
+                          <span className="font-medium">Nom:</span> {(p as any).profiles.prenom} {(p as any).profiles.nom}
+                        </div>
+                        <div>
+                          <span className="font-medium">Email:</span> {(p as any).profiles.email}
+                        </div>
+                        {(p as any).profiles.organisation && (
+                          <div>
+                            <span className="font-medium">Organisation:</span> {(p as any).profiles.organisation}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Informations du proposeur (si différent) */}
                   {(p.payload as any).proposeur && (
                     <div className="bg-gray-50 rounded-md p-3 mb-3">
-                      <h5 className="text-sm font-medium text-gray-900 mb-2">Proposeur</h5>
+                      <h5 className="text-sm font-medium text-gray-900 mb-2">📝 Proposeur (contact pour modifications)</h5>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                         <div>
                           <span className="font-medium">Nom:</span> {(p.payload as any).proposeur.nom}

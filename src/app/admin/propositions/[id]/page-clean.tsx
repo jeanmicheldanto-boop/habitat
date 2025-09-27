@@ -70,6 +70,7 @@ export default function PropositionModerationPage({ params }: { params: { id: st
       setItems(itemsData || []);
       setLoading(false);
     }
+
     fetchData();
   }, [params.id]);
 
@@ -164,10 +165,10 @@ export default function PropositionModerationPage({ params }: { params: { id: st
 
   if (loading) {
     return (
-      <main className="max-w-2xl mx-auto py-8">
-        <div className="p-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement de la proposition...</p>
+      <main className="max-w-4xl mx-auto py-8 px-4">
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Chargement de la proposition...</p>
         </div>
       </main>
     );
@@ -175,12 +176,10 @@ export default function PropositionModerationPage({ params }: { params: { id: st
   
   if (error) {
     return (
-      <main className="max-w-2xl mx-auto py-8">
-        <div className="p-8">
-          <div className="bg-red-50 border border-red-200 rounded p-4">
-            <h2 className="text-red-800 font-semibold mb-2">Erreur</h2>
-            <p className="text-red-600">{error}</p>
-          </div>
+      <main className="max-w-4xl mx-auto py-8 px-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <h2 className="text-red-800 font-semibold mb-2">Erreur</h2>
+          <p className="text-red-600">{error}</p>
           <Link href="/admin/propositions" className="text-blue-600 hover:underline mt-4 inline-block">
             ← Retour à la liste
           </Link>
@@ -191,12 +190,10 @@ export default function PropositionModerationPage({ params }: { params: { id: st
   
   if (!proposition) {
     return (
-      <main className="max-w-2xl mx-auto py-8">
-        <div className="p-8">
-          <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
-            <h2 className="text-yellow-800 font-semibold mb-2">Proposition non trouvée</h2>
-            <p className="text-yellow-600">Aucune proposition trouvée avec cet ID.</p>
-          </div>
+      <main className="max-w-4xl mx-auto py-8 px-4">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+          <h2 className="text-yellow-800 font-semibold mb-2">Proposition non trouvée</h2>
+          <p className="text-yellow-600">Aucune proposition trouvée avec cet ID.</p>
           <Link href="/admin/propositions" className="text-blue-600 hover:underline mt-4 inline-block">
             ← Retour à la liste
           </Link>
@@ -204,14 +201,6 @@ export default function PropositionModerationPage({ params }: { params: { id: st
       </main>
     );
   }
-
-  // Debug - afficher les données dans la console
-  console.log('🔍 Proposition data:', proposition);
-  console.log('🔍 Payload:', proposition.payload);
-  console.log('🔍 Profile:', (proposition as any).profiles);
-  console.log('🔍 Items count:', items.length);
-  console.log('🔍 Loading state:', loading);
-  console.log('🔍 Error state:', error);
 
   return (
     <main className="max-w-4xl mx-auto py-8 px-4">
@@ -248,7 +237,7 @@ export default function PropositionModerationPage({ params }: { params: { id: st
               Créé le {new Date(proposition.created_at).toLocaleDateString('fr-FR')}
             </span>
           </div>
-          </div>
+        </div>
 
         <div className="p-6 space-y-6">
           {/* Informations du créateur - EN PREMIER */}
@@ -282,60 +271,144 @@ export default function PropositionModerationPage({ params }: { params: { id: st
                 )}
               </div>
             </div>
-          )}      {/* Boutons d'action */}
-      {proposition.statut === 'en_attente' && (
-        <div className="bg-white border rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Actions</h2>
-          <div className="flex flex-wrap gap-4">
-            <button
-              onClick={() => handleModerate("approuvee")}
-              className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              disabled={actionLoading}
-            >
-              {actionLoading ? 'Traitement...' : '✅ Approuver'}
-            </button>
-            <button
-              onClick={() => handleModerate("rejetee")}
-              className="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              disabled={actionLoading}
-            >
-              {actionLoading ? 'Traitement...' : '❌ Rejeter'}
-            </button>
-          </div>
-          {actionLoading && (
-            <div className="mt-4 text-sm text-gray-600">
-              ⏳ Traitement en cours, veuillez patienter...
+          )}
+
+          {/* Détails de l'établissement */}
+          {proposition.payload && (
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                  <span className="text-2xl">🏠</span>
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-blue-900">
+                    {(proposition.payload as any)?.nom || 'Établissement proposé'}
+                  </h2>
+                  <p className="text-blue-700">Détails de l'établissement</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {(proposition.payload as any)?.habitat_type && (
+                  <div className="bg-white rounded-lg p-4">
+                    <span className="font-medium text-gray-700 block text-sm mb-1">Type d'habitat</span>
+                    <p className="text-lg font-semibold text-gray-900">{(proposition.payload as any).habitat_type}</p>
+                  </div>
+                )}
+                {(proposition.payload as any)?.ville && (
+                  <div className="bg-white rounded-lg p-4">
+                    <span className="font-medium text-gray-700 block text-sm mb-1">Ville</span>
+                    <p className="text-lg font-semibold text-gray-900">{(proposition.payload as any).ville}</p>
+                  </div>
+                )}
+                {(proposition.payload as any)?.adresse && (
+                  <div className="bg-white rounded-lg p-4 md:col-span-2 lg:col-span-1">
+                    <span className="font-medium text-gray-700 block text-sm mb-1">Adresse</span>
+                    <p className="text-lg text-gray-900">{(proposition.payload as any).adresse}</p>
+                  </div>
+                )}
+                {(proposition.payload as any)?.capacite && (
+                  <div className="bg-white rounded-lg p-4">
+                    <span className="font-medium text-gray-700 block text-sm mb-1">Capacité</span>
+                    <p className="text-lg font-semibold text-gray-900">{(proposition.payload as any).capacite} places</p>
+                  </div>
+                )}
+                {(proposition.payload as any)?.telephone && (
+                  <div className="bg-white rounded-lg p-4">
+                    <span className="font-medium text-gray-700 block text-sm mb-1">Téléphone</span>
+                    <p className="text-lg text-gray-900">{(proposition.payload as any).telephone}</p>
+                  </div>
+                )}
+                {(proposition.payload as any)?.email && (
+                  <div className="bg-white rounded-lg p-4">
+                    <span className="font-medium text-gray-700 block text-sm mb-1">Email</span>
+                    <p className="text-lg text-gray-900">{(proposition.payload as any).email}</p>
+                  </div>
+                )}
+              </div>
+              {(proposition.payload as any)?.description && (
+                <div className="mt-4 bg-white rounded-lg p-4">
+                  <span className="font-medium text-gray-700 block text-sm mb-2">Description</span>
+                  <p className="text-gray-900 leading-relaxed">{(proposition.payload as any).description}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Items de modification détaillés (si ils existent) */}
+          {items.length > 0 && (
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-6 border border-amber-200">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mr-4">
+                  <span className="text-2xl">📝</span>
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-amber-900">Modifications détaillées ({items.length})</h2>
+                  <p className="text-amber-700">Changements proposés champ par champ</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {items.map((item) => (
+                  <div key={item.id} className="bg-white rounded-lg p-4 border">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <span className="font-medium text-gray-700 block text-sm mb-1">Champ</span>
+                        <p className="text-gray-900 font-semibold">{item.column_name}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700 block text-sm mb-1">Ancienne valeur</span>
+                        <p className="text-gray-600 bg-gray-50 px-2 py-1 rounded">{String(item.old_value) || 'Vide'}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700 block text-sm mb-1">Nouvelle valeur</span>
+                        <p className="text-gray-900 bg-blue-50 px-2 py-1 rounded">{String(item.new_value)}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Boutons d'action */}
+          {proposition.statut === 'en_attente' && (
+            <div className="bg-gradient-to-r from-gray-50 to-slate-50 rounded-lg p-6 border border-gray-200">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mr-4">
+                  <span className="text-2xl">⚖️</span>
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Actions de modération</h2>
+                  <p className="text-gray-700">Approuver ou rejeter cette proposition</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={() => handleModerate("approuvee")}
+                  className="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
+                  disabled={actionLoading}
+                >
+                  <span className="text-xl">✅</span>
+                  {actionLoading ? 'Traitement...' : 'Approuver'}
+                </button>
+                <button
+                  onClick={() => handleModerate("rejetee")}
+                  className="bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
+                  disabled={actionLoading}
+                >
+                  <span className="text-xl">❌</span>
+                  {actionLoading ? 'Traitement...' : 'Rejeter'}
+                </button>
+              </div>
+              {actionLoading && (
+                <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200 flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  <span className="text-sm text-blue-800">Traitement en cours, veuillez patienter...</span>
+                </div>
+              )}
             </div>
           )}
         </div>
-      )}
-
-      {/* Items de proposition (si ils existent) */}
-      {items.length > 0 && (
-        <div className="bg-white border rounded-lg p-6 mt-6">
-          <h2 className="text-xl font-semibold mb-4">Détails des modifications ({items.length})</h2>
-          <div className="space-y-4">
-            {items.map((item) => (
-              <div key={item.id} className="bg-gray-50 rounded p-4 border">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
-                  <div>
-                    <span className="font-semibold text-gray-700">Champ :</span>
-                    <p className="text-gray-900">{item.column_name}</p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-gray-700">Ancienne valeur :</span>
-                    <p className="text-gray-900">{String(item.old_value)}</p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-gray-700">Nouvelle valeur :</span>
-                    <p className="text-gray-900">{String(item.new_value)}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      </div>
     </main>
   );
 }
