@@ -336,6 +336,8 @@ export default function PropositionModerationPage({ params }: { params: { id: st
           </div>
         </div>
       )}
+        </div> {/* fermeture du div .bg-white rounded-lg shadow-lg overflow-hidden */}
+      </div> {/* fermeture du div .mb-6 */}
     </main>
   );
 }
