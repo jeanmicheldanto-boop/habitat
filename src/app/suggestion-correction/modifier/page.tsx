@@ -177,7 +177,7 @@ export default function ModifierEtablissementPage() {
       
     } catch (error) {
       console.error('Erreur lors du chargement:', error);
-      setError('Impossible de charger les données de l\'établissement');
+      setError('Impossible de charger les données de l&#39;établissement');
     } finally {
       setLoading(false);
     }
@@ -268,7 +268,7 @@ export default function ModifierEtablissementPage() {
     setError('');
 
     try {
-      // Convertir l'image en base64 si elle existe
+      // Convertir l&#39;image en base64 si elle existe
       let imageBase64 = null;
       if (modificationData.nouvelle_photo_data?.file) {
         imageBase64 = await convertImageToBase64(modificationData.nouvelle_photo_data.file);
@@ -294,7 +294,7 @@ export default function ModifierEtablissementPage() {
             // Toutes les modifications structurées
             modifications: {
               ...modificationData,
-              // Inclure l'image en base64 si elle existe
+              // Inclure l&#39;image en base64 si elle existe
               nouvelle_photo_base64: imageBase64,
               nouvelle_photo_filename: modificationData.nouvelle_photo_data?.file.name || null
             }
@@ -309,7 +309,7 @@ export default function ModifierEtablissementPage() {
 
       setIsSubmitted(true);
   } catch (err) {
-      console.error('Erreur lors de l\'envoi:', err);
+      console.error('Erreur lors de l&#39;envoi:', err);
   setError('Une erreur est survenue lors de l&#39;envoi de votre proposition. Veuillez réessayer.');
     } finally {
       setIsSubmitting(false);
@@ -616,7 +616,7 @@ export default function ModifierEtablissementPage() {
                               <li>Taille maximum : 5 MB</li>
                               <li>Privilégiez les photos de qualité et représentatives de l&#39;établissement</li>
                               <li>La photo proposée sera examinée avant validation</li>
-                              <li>L'image sera stockée temporairement avec votre proposition</li>
+                              <li>L&#39;image sera stockée temporairement avec votre proposition</li>
                             </ul>
                           </div>
                         </div>
