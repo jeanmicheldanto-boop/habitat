@@ -35,8 +35,8 @@ export default function EditEtablissementPage() {
   // id est maintenant récupéré via useParams()
   // Tous les hooks d'abord !
   const [etab, setEtab] = useState<Etablissement | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<Partial<Etablissement>>({});
   const [tab, setTab] = useState<"etablissement"|"logements"|"restauration"|"services"|"tarifs"|"photo"|"presentation">("etablissement");
   const [presentationForm, setPresentationForm] = useState({
@@ -47,20 +47,16 @@ export default function EditEtablissementPage() {
 
   useEffect(() => {
     async function fetchEtab() {
-      setLoading(true);
       const { data, error } = await supabase
         .from("etablissements")
         .select("*")
         .eq("id", id)
         .single();
       if (error) {
-        setError("Établissement introuvable");
-        setLoading(false);
         return;
       }
       setEtab(data);
       setForm(data);
-      setLoading(false);
     }
     fetchEtab();
   }, [id]);
@@ -82,7 +78,6 @@ export default function EditEtablissementPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
     if (!etab) return;
 
     // On ne crée une proposition que si des champs ont changé
@@ -90,7 +85,6 @@ export default function EditEtablissementPage() {
       (key) => (form as Record<string, unknown>)[key] !== (etab as Record<string, unknown>)[key]
     );
     if (changedFields.length === 0) {
-      setError("Aucune modification détectée.");
       return;
     }
 
@@ -109,7 +103,6 @@ export default function EditEtablissementPage() {
       .select()
       .single();
     if (propError || !proposition) {
-      setError("Erreur lors de la création de la proposition.");
       return;
     }
 
@@ -126,7 +119,6 @@ export default function EditEtablissementPage() {
       .from("proposition_items")
       .insert(items);
     if (itemsError) {
-      setError("Erreur lors de la création des items de proposition.");
       return;
     }
 
@@ -254,7 +246,7 @@ export default function EditEtablissementPage() {
         <Link href="/admin/etablissements" className="bg-gray-200 px-4 py-2 rounded font-semibold hover:bg-gray-300">← Retour établissements</Link>
         <Link href="/admin" className="bg-gray-200 px-4 py-2 rounded font-semibold hover:bg-gray-300">← Retour admin</Link>
       </div>
-      <h1 className="text-2xl font-bold mb-6">Édition d&apos;un établissement</h1>
+  <h1 className="text-2xl font-bold mb-6">Édition d&#39;un établissement</h1>
       <div className="mb-6">
         <nav className="flex flex-wrap justify-center gap-x-0.5 gap-y-0 border-b border-gray-300 w-full mx-auto">
           {tabs.map((t: { key: string; label: string }) => (

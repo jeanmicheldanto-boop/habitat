@@ -253,7 +253,7 @@ export default function PropositionModerationPage({ params }: { params: { id: st
 
         <div className="p-6 space-y-6">
           {/* Informations du créateur - EN PREMIER */}
-          {(proposition as any).profiles && (
+          {(proposition as Proposition).profiles && (
             <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-6 border border-green-200">
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
@@ -340,7 +340,7 @@ export default function PropositionModerationPage({ params }: { params: { id: st
               {(proposition.payload as EtablissementPayload)?.description && (
                 <div className="mt-4 bg-white rounded-lg p-4">
                   <span className="font-medium text-gray-700 block text-sm mb-2">Description</span>
-                  <p className="text-gray-900 leading-relaxed">{(proposition.payload as EtablissementPayload).description}</p>
+                  <p className="text-gray-900 leading-relaxed">{(proposition.payload as EtablissementPayload).description?.replace("'", "&#39;")}</p>
                 </div>
               )}
             </div>

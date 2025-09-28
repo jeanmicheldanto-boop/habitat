@@ -220,7 +220,7 @@ export default function ClaimEtablissement() {
                       type="text"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="Nom de l&apos;établissement, ville, adresse..."
+                      placeholder="Nom de l&#39;établissement, ville, adresse..."
                       className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                       required
                     />

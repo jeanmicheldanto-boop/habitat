@@ -214,9 +214,9 @@ export default function Page() {
       
       // Sous-catégories d'habitat
       if (selectedSousCategories.length > 0) {
-        if (!etabObj.sous_categories || !Array.isArray(etabObj.sous_categories)) return false;
-        const hasMatch = selectedSousCategories.some(sc => etabObj.sous_categories.includes(sc));
-        if (!hasMatch) return false;
+  if (!etabObj.sous_categories || !Array.isArray(etabObj.sous_categories)) return false;
+  const hasMatch = selectedSousCategories.some(sc => (etabObj.sous_categories ?? []).includes(sc));
+  if (!hasMatch) return false;
       }
       
       // Prix
@@ -229,15 +229,15 @@ export default function Page() {
       
       // Services dynamiques (au moins un des services sélectionnés doit être présent)
       if (selectedServices.length > 0) {
-        if (!etabObj.services || !Array.isArray(etabObj.services)) return false;
-        const hasServiceMatch = selectedServices.some(s => etabObj.services.includes(s));
-        if (!hasServiceMatch) return false;
+  if (!etabObj.services || !Array.isArray(etabObj.services)) return false;
+  const hasServiceMatch = selectedServices.some(s => (etabObj.services ?? []).includes(s));
+  if (!hasServiceMatch) return false;
       }
       
       // Restauration (toutes les cases cochées doivent être vraies)
       if (Object.values(selectedRestauration).some(Boolean)) {
         for (const key of Object.keys(selectedRestauration)) {
-          if (selectedRestauration[key] && !(etabObj as any)[key]) return false;
+          if (selectedRestauration[key] && !(etabObj as unknown as Record<string, unknown>)[key]) return false;
         }
       }
       
@@ -280,7 +280,7 @@ export default function Page() {
       // Public cible (au moins une case cochée doit être présente)
       if (selectedPublicCible.length > 0) {
         if (!Array.isArray(etabObj.public_cible)) return false;
-        if (!selectedPublicCible.some(pc => etabObj.public_cible.includes(pc))) return false;
+  if (!selectedPublicCible.some(pc => (etabObj.public_cible ?? []).includes(pc))) return false;
       }
       
       // Localisation - Support des codes et noms de départements
@@ -339,7 +339,7 @@ export default function Page() {
           }
           
           // Recherche dans le gestionnaire
-          if (etabObj.gestionnaire && etabObj.gestionnaire.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
+          // if (etabObj.gestionnaire && etabObj.gestionnaire.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
           
           // Recherche dans les types de logement
           if (Array.isArray(etabObj.logements_types)) {
@@ -918,16 +918,16 @@ export default function Page() {
                 tab === 'carte' ? (
                   <div style={{ width: "100%", maxWidth: 900, margin: '8px auto 0' }}>
                     {mounted && (
-                      <EtabMap etablissements={filteredData.map((etab:any) => ({
+                      <EtabMap etablissements={filteredData.map((etab: Etablissement) => ({
                         ...etab,
-                        longitude: etab.geom?.coordinates?.[0],
-                        latitude: etab.geom?.coordinates?.[1],
+                        longitude: (etab.geom as any)?.coordinates?.[0],
+                        latitude: (etab.geom as any)?.coordinates?.[1],
                       }))} />
                     )}
                   </div>
                 ) : (
                   <div style={{ display: "grid", gap: "1rem", margin: 0, padding: 0, width: "100%", maxWidth: 900, marginLeft: 'auto', marginRight: 'auto', fontSize: '0.82rem' }}>
-                    {filteredData.map((etab:any) => (
+                    {filteredData.map((etab: Etablissement) => (
                       <div
                         key={etab.etab_id}
                         style={{
@@ -950,7 +950,7 @@ export default function Page() {
                           {(() => {
                             const imgSrc = etab.image_path 
                               ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${etab.image_path}`
-                              : getHabitatImage(etab.sous_categories);
+                              : getHabitatImage(etab.sous_categories ?? null);
                             return (
                               <Image
                                 src={imgSrc}
@@ -987,7 +987,8 @@ export default function Page() {
                                     {(() => {
                                       // Chercher le label de la sous-catégorie dans la taxonomie
                                       const sousCat = getAllSousCategories().find(sc => sc.key === sousCategorie);
-                                      return sousCat?.label || sousCategorie?.charAt(0).toUpperCase() + sousCategorie?.slice(1) || "Autre";
+                                      const label = sousCat?.label || sousCategorie?.charAt(0).toUpperCase() + sousCategorie?.slice(1) || "Autre";
+                                      return label.replace("'", "&#39;");
                                     })()}
                                   </span>
                                 );
@@ -1071,7 +1072,7 @@ export default function Page() {
                             </div>
                           )}
                           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "0.2rem 0" }}>
-                            {RESTAURATION_OPTIONS.map(opt => etab[opt.key] && (
+                            {RESTAURATION_OPTIONS.filter(opt => (etab as unknown as Record<string, unknown>)[opt.key]).map(opt => (
                               <BadgeIcon 
                                 key={opt.key} 
                                 type="restauration" 

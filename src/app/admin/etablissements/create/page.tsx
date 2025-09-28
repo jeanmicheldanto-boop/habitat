@@ -189,12 +189,13 @@ export default function AdminCreateEtablissement() {
         </div>
         <div>
           <label className="block font-semibold mb-1">Type d'habitat *</label>
+          <label className="block font-semibold mb-1">Type d&#39;habitat *</label>
           <select name="habitat_type" value={form.habitat_type} onChange={handleChange} className="w-full border rounded px-3 py-2" required>
             <option value="residence">Résidence</option>
             <option value="habitat_partage">Habitat partagé</option>
             <option value="logement_independant">Logement indépendant</option>
           </select>
-          <div className="text-xs text-gray-500 mt-1">Ce champ détermine la catégorie principale de l'établissement.</div>
+          <div className="text-xs text-gray-500 mt-1">Ce champ détermine la catégorie principale de l&#39;établissement.</div>
         </div>
         <div>
           <label className="block font-semibold mb-1">Téléphone</label>

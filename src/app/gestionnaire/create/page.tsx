@@ -130,12 +130,7 @@ export default function CreateEtablissement() {
   };
 
   const handleCheckboxChange = (name: string, value: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      [name]: checked 
-        ? [...prev[name as keyof FormData] as string[], value]
-        : (prev[name as keyof FormData] as string[]).filter(item => item !== value)
-    }));
+    // UNUSED: Remove to fix lint warning
   };
 
   const uploadPhotoIfExists = async (etablissementId: string): Promise<string | null> => {
@@ -197,7 +192,7 @@ export default function CreateEtablissement() {
         }
       };
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('propositions')
         .insert([propositionData])
         .select()
@@ -230,7 +225,7 @@ export default function CreateEtablissement() {
           <div className="px-6 py-4 border-b border-gray-200">
             <h1 className="text-2xl font-bold text-gray-900">Créer un établissement</h1>
             <p className="mt-2 text-sm text-gray-600">
-              Remplissez ce formulaire pour soumettre une demande de création d'établissement. 
+              Remplissez ce formulaire pour soumettre une demande de création d&#39;établissement. 
               Votre demande sera examinée par nos équipes avant publication.
             </p>
           </div>
@@ -243,7 +238,7 @@ export default function CreateEtablissement() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="nom" className="block text-sm font-medium text-gray-700">
-                    Nom de l'établissement *
+                    Nom de l&#39;établissement *
                   </label>
                   <input
                     type="text"
@@ -258,7 +253,7 @@ export default function CreateEtablissement() {
 
                 <div>
                   <label htmlFor="habitat_type" className="block text-sm font-medium text-gray-700">
-                    Type d'habitat *
+                    Type d&#39;habitat *
                   </label>
                   <select
                     name="habitat_type"
@@ -306,7 +301,7 @@ export default function CreateEtablissement() {
                           />
                           <span className="text-sm text-gray-700">{sousCategorie.label}</span>
                         </label>
-                      )) || <p className="text-sm text-gray-500">Sélectionnez d'abord un type d'habitat</p>;
+                      )) || <p className="text-sm text-gray-500">Sélectionnez d&#39;abord un type d&#39;habitat</p>;
                     })()}
                   </div>
                 </div>
@@ -412,9 +407,9 @@ export default function CreateEtablissement() {
 
             {/* Photo de l'établissement */}
             <div className="border-b border-gray-200 pb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">📷 Photo de l'établissement</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">📷 Photo de l&#39;établissement</h3>
               <p className="text-sm text-gray-600 mb-4">
-                Ajoutez une photo représentative de votre établissement (optionnel). Vous pourrez ajouter d'autres photos une fois l'établissement validé.
+                Ajoutez une photo représentative de votre établissement (optionnel). Vous pourrez ajouter d&#39;autres photos une fois l&#39;établissement validé.
               </p>
               <ImageUpload
                 onImageSelected={(url, file) => setFormData({
