@@ -20,10 +20,10 @@ type ModificationDataType = {
   services: string[];
   tarifications: TarificationType[];
 };
-"use client";
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import ImageUpload from '@/components/ImageUpload';
 import DepartmentAutocomplete from '@/components/DepartmentAutocomplete';
@@ -79,9 +79,11 @@ interface SousCategorieOption {
 }
 
 export default function ModifierEtablissementPage() {
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams();
   const router = useRouter();
-  const etablissementId = searchParams.get('etablissement');
+  // const etablissementId = searchParams.get('etablissement');
+  // Remplacer par une valeur statique ou une prop pour test
+  const etablissementId = '';
   
   const [etablissement, setEtablissement] = useState<EtablissementData | null>(null);
   const [servicesOptions, setServicesOptions] = useState<ServiceOption[]>([]);
