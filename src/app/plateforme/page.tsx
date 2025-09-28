@@ -606,7 +606,6 @@ export default function Page() {
         </div>
 
         {/* Localisation */}
-        <div>
           <div className="filtre-label">Localisation</div>
           <DepartmentAutocomplete 
             value={selectedDepartement}
@@ -721,7 +720,6 @@ export default function Page() {
               })}
             </div>
           </div>
-        </div>
         
         {/* Public cible */}
         <div>
@@ -824,7 +822,9 @@ export default function Page() {
             ))}
           </div>
         </div>
-      </aside>
+  </div>
+  </aside>
+    {/* End sidebar */}
       {/* Colonne centrale : sticky top bar (search+tabs) + contenu principal */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {/* Sticky block: search bar + tabs */}
@@ -847,7 +847,7 @@ export default function Page() {
               <div style={{ background: '#fff', borderRadius: 32, boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', width: 420, padding: '0.2em 0.3em' }}>
                 <input
                   type="text"
-                  placeholder="Nom, ville, département, type d'habitat, service..."
+                  placeholder="Nom, ville, département, type d&#39;habitat, service..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   className="search-oblong"
@@ -912,7 +912,6 @@ export default function Page() {
               onMouseOut={e => (e.currentTarget.style.color = tab === 'carte' ? '#a85b2b' : '#888')}
             >Carte</span>
           </div>
-        </div>
   <section style={{ flex: 1, minWidth: 0, marginTop: 12, fontSize: '0.82rem' }}>
               {!loading && !error && (
                 tab === 'carte' ? (
@@ -1093,6 +1092,6 @@ export default function Page() {
             </section>
           </div>
         </div>
-    </main>
+  </main>
   );
 }
