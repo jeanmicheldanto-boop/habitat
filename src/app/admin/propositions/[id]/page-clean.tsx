@@ -95,8 +95,8 @@ export default function PropositionModerationPage({ params }: { params: { id: st
     if (statut === "approuvee" && proposition.type_cible === "etablissement") {
       try {
         if (proposition.action === 'create') {
-          // Création d&#39;un nouvel établissement
-          console.log(&#39;🏗️ Création d\&#39;un nouvel établissement avec payload:', proposition.payload);
+          // Création d'un nouvel établissement
+          console.log('🏗️ Création d\'un nouvel établissement avec payload:', proposition.payload);
           
           // Préparer les données pour l&#39;insertion
           const etablissementData = { ...(proposition.payload as Record<string, unknown>) };

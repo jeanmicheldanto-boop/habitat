@@ -143,14 +143,11 @@ export default function Page(): JSX.Element {
     async function fetchData() {
       const { data: rows, error: err } = await supabase.from("v_liste_publication_geoloc").select("*").limit(500);
       if (err) {
-        // eslint-disable-next-line no-console
         console.error("Erreur lors du chargement des données:", err);
         setError(err.message);
       } else {
-        // eslint-disable-next-line no-console
         console.log("Données chargées:", rows?.length || 0, "établissements");
         if (rows && rows.length > 0) {
-          // eslint-disable-next-line no-console
           console.log("Premier établissement:", rows[0]);
         }
       }
@@ -210,7 +207,7 @@ export default function Page(): JSX.Element {
       // Restauration (toutes les cases cochées doivent être vraies)
       if (Object.values(selectedRestauration).some(Boolean)) {
         for (const key of Object.keys(selectedRestauration)) {
-          if (selectedRestauration[key] && !(key in etab && (etab as any)[key])) return false;
+          if (selectedRestauration[key] && !(key in etab && Boolean((etab as Record<string, unknown>)[key]))) return false;
         }
       }
 
@@ -1074,7 +1071,7 @@ export default function Page(): JSX.Element {
                       )}
 
                       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "0.2rem 0" }}>
-                        {RESTAURATION_OPTIONS.filter(opt => opt.key in etab && (etab as any)[opt.key]).map(opt => (
+                        {RESTAURATION_OPTIONS.filter(opt => opt.key in etab && Boolean((etab as Record<string, unknown>)[opt.key])).map(opt => (
                           <BadgeIcon key={opt.key} type="restauration" name={opt.key} label={opt.label} size="sm" />
                         ))}
                       </div>

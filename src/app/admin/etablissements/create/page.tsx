@@ -6,7 +6,7 @@ import AddressAutocomplete from "@/components/AddressAutocomplete";
 import DepartmentAutocomplete from "@/components/DepartmentAutocomplete";
 import Link from "next/link";
 
-// Type d'établissement
+// Type d&#39;établissement
 
 const regions = [
   { code: "ARA", nom: "Auvergne-Rhône-Alpes" },
@@ -107,7 +107,7 @@ export default function AdminCreateEtablissement() {
     if (error) {
       setError("Erreur lors de la création : " + error.message);
     } else if (data && data.id) {
-      // Redirige vers la page d'édition de l'établissement créé
+      // Redirige vers la page d&#39;édition de l&#39;établissement créé
       router.push(`/admin/etablissements/${data.id}/edit`);
     }
   }
@@ -148,7 +148,7 @@ export default function AdminCreateEtablissement() {
             codePostal={form.code_postal}
             ville={form.commune}
             required={true}
-            placeholder="Commencez à taper l'adresse..."
+            placeholder="Commencez à taper l&#39;adresse..."
           />
         </div>
 
@@ -188,7 +188,7 @@ export default function AdminCreateEtablissement() {
           <div className="text-xs text-gray-500 mt-1">Le code ISO2 (FR, BE, etc.) est attendu.</div>
         </div>
         <div>
-          // ...existing code...
+          {/* ...existing code... */}
           <label className="block font-semibold mb-1">Type d&#39;habitat *</label>
           <select name="habitat_type" value={form.habitat_type} onChange={handleChange} className="w-full border rounded px-3 py-2" required>
             <option value="residence">Résidence</option>
