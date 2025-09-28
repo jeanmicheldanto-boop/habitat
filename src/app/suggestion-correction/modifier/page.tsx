@@ -1,4 +1,5 @@
 
+export const dynamic = 'force-dynamic';
 'use client';
 type ModificationDataType = {
   telephone: string;
