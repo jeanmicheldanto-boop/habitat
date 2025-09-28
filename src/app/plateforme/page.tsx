@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import type { JSX } from "react";
-import dynamic from "next/dynamic";
+import nextDynamic from "next/dynamic";
 import HeaderSubnavGate from "@/components/HeaderSubnavGate";
 import DepartmentAutocomplete from "@/components/DepartmentAutocomplete";
 import MobileFilters from "@/components/MobileFilters";
@@ -296,7 +296,7 @@ export default function Page(): JSX.Element {
   }
 
   // Import dynamique de la carte pour CSR uniquement
-  const EtabMap = dynamic(() => import("../../components/EtabMap"), { ssr: false });
+  const EtabMap = nextDynamic(() => import("../../components/EtabMap"), { ssr: false });
 
   const filteredData = getFilteredData();
 

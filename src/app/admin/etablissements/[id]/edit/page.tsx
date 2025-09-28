@@ -1,9 +1,10 @@
+export const dynamic = 'force-dynamic';
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import type { JSX } from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
+import nextDynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/lib/database.types";
@@ -20,10 +21,10 @@ type TabKey =
   | "tarifs"
   | "photo";
 
-const LogementsModal = dynamic(() => import("../logements/page"), { ssr: false });
-const RestaurationModal = dynamic(() => import("../restauration/page"), { ssr: false });
-const ServicesModal = dynamic(() => import("../services/page"), { ssr: false });
-const TarifsModal = dynamic(() => import("../tarifs/page"), { ssr: false });
+const LogementsModal = nextDynamic(() => import("../logements/page"), { ssr: false });
+const RestaurationModal = nextDynamic(() => import("../restauration/page"), { ssr: false });
+const ServicesModal = nextDynamic(() => import("../services/page"), { ssr: false });
+const TarifsModal = nextDynamic(() => import("../tarifs/page"), { ssr: false });
 
 export default function EditEtablissementPage(): JSX.Element {
   const params = useParams<{ id: string }>();
