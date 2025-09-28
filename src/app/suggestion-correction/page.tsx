@@ -1,15 +1,14 @@
 "use client";
-export const dynamic = 'force-dynamic';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 
-export default function SuggestionCorrectionPage() {
+function SuggestionCorrectionContent() {
   const searchParams = useSearchParams();
   const etablissementId = searchParams.get('etablissement');
-  
+
   const [formData, setFormData] = useState({
     nom: '',
     email: '',
@@ -19,7 +18,7 @@ export default function SuggestionCorrectionPage() {
     valeurActuelle: '',
     valeurCorrigee: ''
   });
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState('');
@@ -41,7 +40,6 @@ export default function SuggestionCorrectionPage() {
     setError('');
 
     try {
-      // Envoyer la suggestion à une table de suggestions/corrections
       const { error: submitError } = await supabase
         .from('suggestions_corrections')
         .insert([{
@@ -62,9 +60,9 @@ export default function SuggestionCorrectionPage() {
       }
 
       setIsSubmitted(true);
-  } catch (err) {
+    } catch (err) {
       console.error('Erreur lors de l\'envoi:', err);
-  setError('Une erreur est survenue lors de l&#39;envoi de votre suggestion. Veuillez réessayer.');
+      setError('Une erreur est survenue lors de l\'envoi de votre suggestion. Veuillez réessayer.');
     } finally {
       setIsSubmitting(false);
     }
@@ -84,7 +82,7 @@ export default function SuggestionCorrectionPage() {
               Merci pour votre suggestion !
             </h1>
             <p className="text-gray-600 mb-6">
-              Votre suggestion de correction a été envoyée avec succès. Notre équipe va l&#39;examiner et prendre les mesures nécessaires pour améliorer les informations de l&#39;établissement.
+              Votre suggestion de correction a été envoyée avec succès. Notre équipe va l&apos;examiner et prendre les mesures nécessaires pour améliorer les informations de l&apos;établissement.
             </p>
             <Link 
               href="/plateforme"
@@ -248,5 +246,20 @@ export default function SuggestionCorrectionPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SuggestionCorrectionPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    }>
+      <SuggestionCorrectionContent />
+    </Suspense>
   );
 }
