@@ -207,7 +207,7 @@ export default function Page(): JSX.Element {
       // Restauration (toutes les cases cochées doivent être vraies)
       if (Object.values(selectedRestauration).some(Boolean)) {
         for (const key of Object.keys(selectedRestauration)) {
-          if (selectedRestauration[key] && !(key in etab && Boolean((etab as Record<string, unknown>)[key]))) return false;
+          if (selectedRestauration[key] && !(key in etab && Boolean((etab as unknown as Record<string, unknown>)[key]))) return false;
         }
       }
 
@@ -576,7 +576,7 @@ export default function Page(): JSX.Element {
 
           {/* Types d'habitat - Nouvelle structure hiérarchique */}
           <div>
-            <div className="filtre-label">Types d'habitat</div>
+            <div className="filtre-label">Types d&apos;habitat</div>
 
             {/* Catégories principales */}
             <div style={{ marginTop: 8, marginBottom: 16 }}>
@@ -1071,7 +1071,7 @@ export default function Page(): JSX.Element {
                       )}
 
                       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "0.2rem 0" }}>
-                        {RESTAURATION_OPTIONS.filter(opt => opt.key in etab && Boolean((etab as Record<string, unknown>)[opt.key])).map(opt => (
+                        {RESTAURATION_OPTIONS.filter(opt => opt.key in etab && Boolean((etab as unknown as Record<string, unknown>)[opt.key])).map(opt => (
                           <BadgeIcon key={opt.key} type="restauration" name={opt.key} label={opt.label} size="sm" />
                         ))}
                       </div>
