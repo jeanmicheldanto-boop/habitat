@@ -32,7 +32,7 @@ export default function PropositionModerationPage({ params }: { params: { id: st
     async function fetchData() {
       setLoading(true);
       
-      // D'abord récupérer la proposition
+      // D&#39;abord récupérer la proposition
       const { data: prop, error: propError } = await supabase
         .from("propositions")
         .select("*")
@@ -95,10 +95,10 @@ export default function PropositionModerationPage({ params }: { params: { id: st
     if (statut === "approuvee" && proposition.type_cible === "etablissement") {
       try {
         if (proposition.action === 'create') {
-          // Création d'un nouvel établissement
-          console.log('🏗️ Création d\'un nouvel établissement avec payload:', proposition.payload);
+          // Création d&#39;un nouvel établissement
+          console.log(&#39;🏗️ Création d\&#39;un nouvel établissement avec payload:', proposition.payload);
           
-          // Préparer les données pour l'insertion
+          // Préparer les données pour l&#39;insertion
           const etablissementData = { ...(proposition.payload as Record<string, unknown>) };
           
           // Supprimer les champs qui ne doivent pas être dans etablissements
@@ -133,7 +133,7 @@ export default function PropositionModerationPage({ params }: { params: { id: st
             .eq("id", proposition.id);
             
         } else if (proposition.action === 'update' && proposition.etablissement_id) {
-          // Modification d'un établissement existant
+          // Modification d&#39;un établissement existant
           console.log('✏️ Modification établissement existant:', proposition.etablissement_id);
           
           const { error: updateEtabError } = await supabase
@@ -149,8 +149,8 @@ export default function PropositionModerationPage({ params }: { params: { id: st
           console.log('✅ Établissement modifié avec succès');
         }
       } catch (error) {
-        console.error('❌ Erreur lors de l\'application:', error);
-        setError(`Erreur lors de l'application des modifications: ${(error as Error).message}`);
+        console.error('❌ Erreur lors de l\&#39;application:', error);
+        setError(`Erreur lors de l&#39;application des modifications: ${(error as Error).message}`);
         setActionLoading(false);
         return;
       }
@@ -285,7 +285,7 @@ export default function PropositionModerationPage({ params }: { params: { id: st
             </div>
           )}
 
-          {/* Détails de l'établissement */}
+          {/* Détails de l&#39;établissement */}
           {proposition.payload && (
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
               <div className="flex items-center mb-4">
@@ -296,13 +296,13 @@ export default function PropositionModerationPage({ params }: { params: { id: st
                   <h2 className="text-xl font-bold text-blue-900">
                     {(proposition.payload as Record<string, unknown>)?.nom as string || 'Établissement proposé'}
                   </h2>
-                  <p className="text-blue-700">Détails de l'établissement</p>
+                  <p className="text-blue-700">Détails de l&#39;établissement</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {(proposition.payload as EtablissementPayload)?.habitat_type && (
                   <div className="bg-white rounded-lg p-4">
-                    <span className="font-medium text-gray-700 block text-sm mb-1">Type d'habitat</span>
+                    <span className="font-medium text-gray-700 block text-sm mb-1">Type d&#39;habitat</span>
                     <p className="text-lg font-semibold text-gray-900">{(proposition.payload as EtablissementPayload).habitat_type}</p>
                   </div>
                 )}
@@ -340,7 +340,7 @@ export default function PropositionModerationPage({ params }: { params: { id: st
               {(proposition.payload as EtablissementPayload)?.description && (
                 <div className="mt-4 bg-white rounded-lg p-4">
                   <span className="font-medium text-gray-700 block text-sm mb-2">Description</span>
-                  <p className="text-gray-900 leading-relaxed">{(proposition.payload as EtablissementPayload).description?.replace("'", "&#39;")}</p>
+                  <p className="text-gray-900 leading-relaxed">{(proposition.payload as EtablissementPayload).description?.replace(/'/g, "&#39;")}</p>
                 </div>
               )}
             </div>
@@ -381,7 +381,7 @@ export default function PropositionModerationPage({ params }: { params: { id: st
             </div>
           )}
 
-          {/* Boutons d'action */}
+          {/* Boutons d&#39;action */}
           {proposition.statut === 'en_attente' && (
             <div className="bg-gradient-to-r from-gray-50 to-slate-50 rounded-lg p-6 border border-gray-200">
               <div className="flex items-center mb-4">

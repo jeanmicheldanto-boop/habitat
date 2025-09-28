@@ -188,7 +188,7 @@ export default function AdminCreateEtablissement() {
           <div className="text-xs text-gray-500 mt-1">Le code ISO2 (FR, BE, etc.) est attendu.</div>
         </div>
         <div>
-          <label className="block font-semibold mb-1">Type d'habitat *</label>
+          // ...existing code...
           <label className="block font-semibold mb-1">Type d&#39;habitat *</label>
           <select name="habitat_type" value={form.habitat_type} onChange={handleChange} className="w-full border rounded px-3 py-2" required>
             <option value="residence">Résidence</option>

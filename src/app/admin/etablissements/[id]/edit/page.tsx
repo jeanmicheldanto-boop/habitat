@@ -19,10 +19,9 @@ import React from "react";
 
 import { useParams } from "next/navigation";
 
-export default function EditEtablissementPage() {
   const params = useParams();
   const id = params?.id as string;
-  // Onglets d'accès aux sous-CRUD (déclaré en haut pour l'ordre des hooks)
+  // Onglets d&#39;accès aux sous-CRUD (déclaré en haut pour l&#39;ordre des hooks)
   const tabs: { key: string; label: string }[] = [
     { key: "etablissement", label: "Établissement" },
     { key: "presentation", label: "Présentation & Public" },
@@ -33,7 +32,7 @@ export default function EditEtablissementPage() {
     { key: "photo", label: "Photo" },
   ];
   // id est maintenant récupéré via useParams()
-  // Tous les hooks d'abord !
+  // Tous les hooks d&#39;abord !
   const [etab, setEtab] = useState<Etablissement | null>(null);
   // const [loading, setLoading] = useState(true);
   // const [error, setError] = useState<string | null>(null);
@@ -349,7 +348,7 @@ export default function EditEtablissementPage() {
             />
           </div>
           <div>
-            <label className="block font-semibold mb-1">Type d'habitat</label>
+            <label className="block font-semibold mb-1">Type d&#39;habitat</label>
             <select
               name="habitat_type"
               value={form.habitat_type || ""}

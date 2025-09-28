@@ -102,7 +102,7 @@ export default function ClaimEtablissement() {
         .limit(10);
 
       if (error) throw error;
-  // setEtablissements(data || []); // variable 'data' supprimée
+  // setEtablissements(data || []); // variable data supprimée
     } catch (err: unknown) {
       if (typeof err === 'object' && err !== null && 'message' in err) {
         setError('Erreur lors de la recherche : ' + (err as { message: string }).message);
@@ -209,9 +209,9 @@ export default function ClaimEtablissement() {
               </div>
             )}
 
-            {/* Étape 1: Recherche d'établissement */}
+            {/* Étape 1: Recherche d&#39;établissement */}
             <div className="border-b border-gray-200 pb-8">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">1. Rechercher l'établissement</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">1. Rechercher l&#39;établissement</h3>
               
               <form onSubmit={handleSearch} className="space-y-4">
                 <div className="flex gap-4">
@@ -342,10 +342,10 @@ export default function ClaimEtablissement() {
                           <div className="mt-2 text-sm text-yellow-700">
                             <ul className="list-disc list-inside space-y-1">
                               <li>Contrat de bail ou acte de propri&eacute;t&eacute;</li>
-                              <li>Kbis de l&apos;entreprise gestionnaire</li>
-                              <li>Autorisation d&apos;exploitation</li>
+                              <li>Kbis de l&#39;entreprise gestionnaire</li>
+                              <li>Autorisation d&#39;exploitation</li>
                               <li>Factures ou documents officiels</li>
-                              <li>Correspondances avec l&apos;&eacute;tablissement</li>
+                              <li>Correspondances avec l&#39;&eacute;tablissement</li>
                             </ul>
                           </div>
                         </div>

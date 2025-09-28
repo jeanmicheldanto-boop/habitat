@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import type { JSX } from "react";
 import dynamic from "next/dynamic";
 import HeaderSubnavGate from "@/components/HeaderSubnavGate";
 import DepartmentAutocomplete from "@/components/DepartmentAutocomplete";
@@ -78,7 +79,6 @@ export default function Page(): JSX.Element {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [sousCategories, setSousCategories] = useState<string[]>([]);
 
   // Nouveaux filtres pour habitat_type - Utilisation de la taxonomie
   const [selectedHabitatCategories, setSelectedHabitatCategories] = useState<string[]>([]);
@@ -160,13 +160,9 @@ export default function Page(): JSX.Element {
     async function fetchSousCategories() {
       const { data: rows } = await supabase
         .from("v_liste_publication_geoloc")
-        .select("sous_categories, services, logements_types, habitat_type")
+        .select("services, logements_types, habitat_type")
         .limit(500);
       if (rows) {
-        const allSousCat = rows.flatMap((row: { sous_categories?: string[] }) => row.sous_categories || []);
-        const uniqueSousCat = Array.from(new Set(allSousCat)).sort();
-        setSousCategories(uniqueSousCat);
-
         const allServ = rows.flatMap((row: { services?: string[] }) => row.services || []);
         const uniqueServices = Array.from(new Set(allServ)).sort();
         setAllServices(uniqueServices);
@@ -214,7 +210,7 @@ export default function Page(): JSX.Element {
       // Restauration (toutes les cases cochées doivent être vraies)
       if (Object.values(selectedRestauration).some(Boolean)) {
         for (const key of Object.keys(selectedRestauration)) {
-          if (selectedRestauration[key] && !(etab as Record<string, unknown>)[key]) return false;
+          if (selectedRestauration[key] && !(key in etab && (etab as any)[key])) return false;
         }
       }
 
@@ -288,7 +284,7 @@ export default function Page(): JSX.Element {
           }
           if (Array.isArray(etab.sous_categories) && etab.sous_categories.some((sc) => normalize(sc).includes(term))) return true;
           if (Array.isArray(etab.services) && etab.services.some((s) => normalize(s).includes(term))) return true;
-          if (etab.gestionnaire && normalize(etab.gestionnaire).includes(term)) return true;
+          // if (etab.gestionnaire && normalize(etab.gestionnaire).includes(term)) return true; // gestionnaire n'existe pas dans Etablissement
           if (Array.isArray(etab.logements_types) && etab.logements_types.some((lt) => lt.libelle && normalize(lt.libelle).includes(term))) return true;
           return false;
         });
@@ -876,7 +872,7 @@ export default function Page(): JSX.Element {
                   margin: "0.5rem auto 0",
                 }}
               >
-                <strong>Recherche :</strong> &quot;{search}&quot; dans noms, villes, départements, types d&#39;habitat, services...
+                <strong>Recherche :</strong> &quot;{search}&quot; dans noms, villes, départements, types d&apos;habitat, services...
               </div>
             )}
 
@@ -972,7 +968,7 @@ export default function Page(): JSX.Element {
                       {(() => {
                         const imgSrc = etab.image_path
                           ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${etab.image_path}`
-                          : getHabitatImage(etab.sous_categories);
+                          : getHabitatImage(etab.sous_categories ?? null);
                         return <Image src={imgSrc} alt={etab.nom} width={120} height={100} style={{ objectFit: "contain", borderRadius: 10, boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)" }} />;
                       })()}
                     </div>
@@ -1078,9 +1074,9 @@ export default function Page(): JSX.Element {
                       )}
 
                       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "0.2rem 0" }}>
-                        {RESTAURATION_OPTIONS.map(
-                          (opt) => (etab as Record<string, unknown>)[opt.key] && <BadgeIcon key={opt.key} type="restauration" name={opt.key} label={opt.label} size="sm" />
-                        )}
+                        {RESTAURATION_OPTIONS.filter(opt => opt.key in etab && (etab as any)[opt.key]).map(opt => (
+                          <BadgeIcon key={opt.key} type="restauration" name={opt.key} label={opt.label} size="sm" />
+                        ))}
                       </div>
                     </div>
                   </div>
