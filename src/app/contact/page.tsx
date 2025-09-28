@@ -119,7 +119,7 @@ export default function ContactPage() {
                   </a>
                 </p>
                 <p className="text-gray-600 text-sm">
-                  Pour toute question, suggestion d'amélioration, partenariat ou demande d'information
+                  Pour toute question, suggestion d&#39;amélioration, partenariat ou demande d&#39;information
                 </p>
               </div>
 
@@ -132,7 +132,7 @@ export default function ContactPage() {
                   </a>
                 </p>
                 <p className="text-gray-600 text-sm">
-                  Pour les demandes d'ajout d'établissement, imports en masse (CSV), partenariats professionnels
+                  Pour les demandes d&#39;ajout d&#39;établissement, imports en masse (CSV), partenariats professionnels
                 </p>
               </div>
             </div>
@@ -143,7 +143,7 @@ export default function ContactPage() {
             <div className="bg-orange-50 rounded-lg p-6 max-w-3xl mx-auto border border-orange-100">
               <h3 className="text-lg font-semibold text-orange-900 mb-3">Notre originalité</h3>
               <p className="text-orange-800 leading-relaxed">
-                La gratuité, la focalisation sur les solutions alternatives à l'institution, et la volonté 
+                La gratuité, la focalisation sur les solutions alternatives à l&#39;institution, et la volonté 
                 de donner à chacun les moyens de choisir un habitat qui corresponde à ses besoins et à ses envies, 
                 sans pression commerciale ni jargon administratif.
               </p>
