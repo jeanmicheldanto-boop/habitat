@@ -23,7 +23,7 @@ type ModificationDataType = {
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import ImageUpload from '@/components/ImageUpload';
 import DepartmentAutocomplete from '@/components/DepartmentAutocomplete';
