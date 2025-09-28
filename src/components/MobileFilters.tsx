@@ -205,7 +205,11 @@ export default function MobileFilters({
       {/* Modal plein écran des filtres */}
       {isOpen && (
         <div style={{
-          inset: 0,
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
           background: '#fff',
           zIndex: 2000,
           display: 'flex',

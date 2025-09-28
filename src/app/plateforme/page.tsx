@@ -10,6 +10,7 @@ import type { EtablissementResult } from "@/components/MobileResultsList";
 import { supabase } from "../../lib/supabaseClient";
 import { HABITAT_TAXONOMY, getSousCategorieColor, getAllSousCategories, getCategoryByKey } from "@/lib/habitatTaxonomy";
 import { getHabitatImage } from "@/lib/habitatImages";
+import { getSupabaseImageUrl } from "@/lib/imageUtils";
 import BadgeIcon from "@/components/BadgeIcon";
 import AvpBadge from "@/components/AvpBadge";
 import "./plateforme.css";
@@ -964,7 +965,7 @@ export default function Page(): JSX.Element {
                     >
                       {(() => {
                         const imgSrc = etab.image_path
-                          ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${etab.image_path}`
+                          ? getSupabaseImageUrl(etab.image_path)
                           : getHabitatImage(etab.sous_categories ?? null);
                         return <Image src={imgSrc} alt={etab.nom} width={120} height={100} style={{ objectFit: "contain", borderRadius: 10, boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)" }} />;
                       })()}

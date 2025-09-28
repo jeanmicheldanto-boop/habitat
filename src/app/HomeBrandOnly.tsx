@@ -1,11 +1,12 @@
 
 "use client";
-export const dynamic = 'force-dynamic';
 
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Caveat } from "next/font/google";
+
+export const dynamic = 'force-dynamic';
 
 const caveat = Caveat({ subsets: ["latin"], weight: ["700"] });
 
