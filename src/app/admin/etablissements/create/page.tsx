@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
 import DepartmentAutocomplete from "@/components/DepartmentAutocomplete";
-import type { Database } from "@/lib/database.types";
 import Link from "next/link";
 
 // Type d'établissement
@@ -22,7 +21,7 @@ const regions = [
   { code: "NAQ", nom: "Nouvelle-Aquitaine" },
   { code: "OCC", nom: "Occitanie" },
   { code: "PDL", nom: "Pays de la Loire" },
-  { code: "PAC", nom: "Provence-Alpes-Côte d'Azur" },
+  { code: "PAC", nom: "Provence-Alpes-Côte d&apos;Azur" },
   { code: "GUA", nom: "Guadeloupe" },
   { code: "GUY", nom: "Guyane" },
   { code: "LRE", nom: "La Réunion" },
@@ -68,7 +67,7 @@ const publics = [
 
 const tabs: { key: string; label: string }[] = [
   { key: "etablissement", label: "Établissement" },
-  { key: "presentation", label: "Présentation & Public" },
+  { key: "presentation", label: "Présentation &amp; Public" },
   { key: "logements", label: "Logements" },
   { key: "restauration", label: "Restauration" },
   { key: "services", label: "Services" },
@@ -195,7 +194,7 @@ export default function AdminCreateEtablissement() {
             <option value="habitat_partage">Habitat partagé</option>
             <option value="logement_independant">Logement indépendant</option>
           </select>
-          <div className="text-xs text-gray-500 mt-1">Ce champ détermine la catégorie principale de l'établissement.</div>
+          <div className="text-xs text-gray-500 mt-1">Ce champ détermine la catégorie principale de l&apos;établissement.</div>
         </div>
         <div>
           <label className="block font-semibold mb-1">Téléphone</label>

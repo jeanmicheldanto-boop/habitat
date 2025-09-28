@@ -202,13 +202,13 @@ export default function CheckPropositions() {
             Aucune proposition trouvée
           </h3>
           <p style={{ color: '#9ca3af', marginBottom: '1rem' }}>
-            La table propositions est vide. C'est normal si vous n'avez créé des établissements 
-            que via l'interface admin (qui crée directement des établissements).
+            La table propositions est vide. C&#39;est normal si vous n&#39;avez créé des établissements 
+            que via l&#39;interface admin (qui crée directement des établissements).
           </p>
           <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
             <strong>Pour tester la modération :</strong><br/>
             Allez sur <code style={{ background: '#e5e7eb', padding: '2px 4px', borderRadius: '3px' }}>/admin</code> 
-            {' '}et cliquez sur "🧪 Créer des propositions de test"
+            {' '}et cliquez sur &quot;🧪 Créer des propositions de test&quot;
           </div>
         </div>
       ) : (

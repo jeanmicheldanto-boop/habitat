@@ -85,7 +85,7 @@ export default function RestaurationPage({ params }: { params: { id: string } })
       table_name: "restaurations",
       column_name: field,
       old_value: restauration ? restauration[field as keyof Restauration] : null,
-      new_value: (payload as any)[field],
+      new_value: (payload as Partial<Restauration>)[field as keyof Restauration],
       statut: "pending",
     }));
     const { error: itemsError } = await supabase

@@ -72,25 +72,28 @@ export default function EtabMap({ etablissements }: EtabMapProps) {
   const markers = etablissements.filter(e => typeof e.latitude === 'number' && typeof e.longitude === 'number');
   return (
     <div style={{ width: '100%', height: 420, borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 8px 0 rgba(0,0,0,0.08)', marginBottom: 24 }}>
-  {/* @ts-ignore: center prop is valid for MapContainer but TS types may be outdated */}
-  <MapContainer center={DEFAULT_CENTER as [number, number]} zoom={6} style={{ height: '100%', width: '100%' }} scrollWheelZoom={true} attributionControl={true}>
+      <MapContainer
+        // @ts-expect-error center prop is valid for MapContainer but TS types may be outdated
+        center={DEFAULT_CENTER as [number, number]}
+        zoom={6}
+        style={{ height: '100%', width: '100%' }}
+        scrollWheelZoom={true}
+        attributionControl={true}
+      >
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-          // @ts-ignore
+          // @ts-expect-error attribution prop is valid but not typed
           attribution="© OpenStreetMap © CartoDB"
         />
         {markers.map(etab => (
           <Marker
             key={etab.etab_id}
             position={[etab.latitude!, etab.longitude!] as [number, number]}
-            // @ts-ignore
             icon={getMarkerIcon(etab.habitat_type)}
           >
-            {/* Tooltip direction et offset ne sont pas typés dans react-leaflet, on ignore l'erreur */}
-            {/* @ts-ignore */}
+            {/* @ts-expect-error direction and offset props are valid but not typed */}
             <Tooltip direction="top" offset={[0, -32]}>{etab.nom}</Tooltip>
-            {/* minWidth/maxWidth via options car non typés */}
-            {/* @ts-ignore */}
+            {/* @ts-expect-error options prop is valid but not typed */}
             <Popup options={{ minWidth: 260, maxWidth: 320 }}>
               <div style={{display:'flex',gap:12,alignItems:'flex-start'}}>
                   <img 

@@ -35,12 +35,12 @@ export default function FileUpload({
   };
 
   const uploadFile = async (file: File) => {
-    const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Utilisateur non connecté');
 
     const fileName = generateFileName(file.name, user.id);
     
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('justificatifs')
       .upload(fileName, file, {
         cacheControl: '3600',
@@ -207,7 +207,7 @@ export default function FileUpload({
               <span className="text-gray-600"> ou glissez-déposez</span>
             </label>
             <p className="text-xs text-gray-500 mt-2">
-              PDF, DOC, DOCX, PNG, JPG jusqu'à 5MB ({maxFiles} fichiers max)
+              PDF, DOC, DOCX, PNG, JPG jusqu&apos;à 5MB ({maxFiles} fichiers max)
             </p>
           </div>
         </div>

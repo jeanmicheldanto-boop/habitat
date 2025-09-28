@@ -10,7 +10,7 @@ interface Proposition {
   type_cible: string;
   action: string;
   statut: 'en_attente' | 'approuve' | 'rejete';
-  payload: any;
+  payload: Record<string, unknown>;
   review_note?: string;
   created_at: string;
   reviewed_at?: string;
@@ -45,12 +45,14 @@ interface ReclamationPropriete {
 }
 
 export default function ModerationDashboard() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [propositions, setPropositions] = useState<Proposition[]>([]);
   const [reclamations, setReclamations] = useState<ReclamationPropriete[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'propositions' | 'reclamations'>('propositions');
-  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedItem, setSelectedItem] = useState<
+    (Proposition & { type: 'proposition' }) | (ReclamationPropriete & { type: 'reclamation' }) | null
+  >(null);
   const [reviewNote, setReviewNote] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const router = useRouter();
@@ -159,7 +161,7 @@ export default function ModerationDashboard() {
         statut: action,
         review_note: reviewNote || null,
         reviewed_at: new Date().toISOString(),
-        reviewed_by: user.id
+  reviewed_by: user?.id ?? ''
       };
 
       if (type === 'proposition') {
@@ -190,9 +192,9 @@ export default function ModerationDashboard() {
       await loadData();
       setSelectedItem(null);
       setReviewNote('');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erreur:', error);
-      alert('Erreur lors de la mise à jour: ' + error.message);
+      alert('Erreur lors de la mise à jour: ' + (error instanceof Error ? error.message : String(error)));
     } finally {
       setActionLoading(false);
     }
@@ -200,7 +202,25 @@ export default function ModerationDashboard() {
 
   const createEtablissementFromProposition = async (proposition: Proposition) => {
     try {
-      const payload = proposition.payload;
+      const payload = proposition.payload as {
+        nom?: string;
+        description?: string;
+        adresse?: string;
+        ville?: string;
+        code_postal?: string;
+        latitude?: number;
+        longitude?: number;
+        telephone?: string;
+        email?: string;
+        site_web?: string;
+        habitat_type?: string;
+        capacite_totale?: number;
+        prix_min?: number;
+        prix_max?: number;
+        sous_categories?: string[];
+        equipements?: string[];
+        services?: string[];
+      };
       
       // Créer l'établissement
       const etablissementData = {
@@ -231,36 +251,33 @@ export default function ModerationDashboard() {
       if (etablissementError) throw etablissementError;
 
       // Créer les liaisons avec les sous-catégories
-      if (payload.sous_categories && payload.sous_categories.length > 0) {
+      if (Array.isArray(payload.sous_categories) && payload.sous_categories.length > 0) {
         const sousCategoriesData = payload.sous_categories.map((scId: string) => ({
           etablissement_id: etablissement.id,
           sous_categorie_id: parseInt(scId)
         }));
-
         await supabase
           .from('etablissement_sous_categories')
           .insert(sousCategoriesData);
       }
 
       // Créer les liaisons avec les équipements
-      if (payload.equipements && payload.equipements.length > 0) {
+      if (Array.isArray(payload.equipements) && payload.equipements.length > 0) {
         const equipementsData = payload.equipements.map((eqId: string) => ({
           etablissement_id: etablissement.id,
           equipement_id: parseInt(eqId)
         }));
-
         await supabase
           .from('etablissement_equipements')
           .insert(equipementsData);
       }
 
       // Créer les liaisons avec les services
-      if (payload.services && payload.services.length > 0) {
+      if (Array.isArray(payload.services) && payload.services.length > 0) {
         const servicesData = payload.services.map((sId: string) => ({
           etablissement_id: etablissement.id,
           service_id: parseInt(sId)
         }));
-
         await supabase
           .from('etablissement_services')
           .insert(servicesData);
@@ -439,7 +456,7 @@ export default function ModerationDashboard() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Propositions d'établissements ({propositions.length})
+              Propositions d&apos;établissements ({propositions.length})
             </button>
             <button
               onClick={() => setActiveTab('reclamations')}
@@ -463,7 +480,7 @@ export default function ModerationDashboard() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <h3 className="mt-2 text-sm font-medium text-gray-900">Aucune proposition</h3>
-                <p className="mt-1 text-sm text-gray-500">Aucune proposition d'établissement en attente.</p>
+                <p className="mt-1 text-sm text-gray-500">Aucune proposition d&apos;établissement en attente.</p>
               </div>
             ) : (
               <div className="grid gap-6">
@@ -474,7 +491,7 @@ export default function ModerationDashboard() {
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <h3 className="text-lg font-semibold text-gray-900">
-                              {proposition.payload?.nom || 'Établissement sans nom'}
+                              {typeof proposition.payload?.nom === 'string' ? proposition.payload.nom : 'Établissement sans nom'}
                             </h3>
                             {getStatutBadge(proposition.statut)}
                           </div>
@@ -482,10 +499,10 @@ export default function ModerationDashboard() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
                               <p className="text-sm text-gray-600">
-                                <strong>Adresse:</strong> {proposition.payload?.adresse}, {proposition.payload?.code_postal} {proposition.payload?.ville}
+                                <strong>Adresse:</strong> {typeof proposition.payload?.adresse === 'string' ? proposition.payload.adresse : ''}, {typeof proposition.payload?.code_postal === 'string' ? proposition.payload.code_postal : ''} {typeof proposition.payload?.ville === 'string' ? proposition.payload.ville : ''}
                               </p>
                               <p className="text-sm text-gray-600">
-                                <strong>Type:</strong> {proposition.payload?.habitat_type?.replace('_', ' ')}
+                                <strong>Type:</strong> {typeof proposition.payload?.habitat_type === 'string' ? proposition.payload.habitat_type.replace('_', ' ') : ''}
                               </p>
                               <p className="text-sm text-gray-600">
                                 <strong>Action:</strong> {proposition.action}

@@ -32,7 +32,7 @@ export default async function FichePage({ searchParams }: { searchParams: { id?:
         />
         <div style={{ flex: 1 }}>
           <div style={{ marginBottom: 12, color: "#444", fontSize: "1.1rem" }}>{data.presentation}</div>
-          <div style={{ marginBottom: 8 }}><b>Type d'habitat :</b> {Array.isArray(data.sous_categories) ? data.sous_categories.join(", ") : "-"}</div>
+          <div style={{ marginBottom: 8 }}><b>Type d&#39;habitat :</b> {Array.isArray(data.sous_categories) ? data.sous_categories.join(", ") : "-"}</div>
           <div style={{ marginBottom: 8 }}><b>Public cible :</b> {Array.isArray(data.public_cible) ? data.public_cible.join(", ") : "-"}</div>
           <div style={{ marginBottom: 8 }}><b>Services :</b> {Array.isArray(data.services) ? data.services.join(", ") : "-"}</div>
           <div style={{ marginBottom: 8 }}><b>Tarif :</b> {data.fourchette_prix === 'euro' ? '€' : data.fourchette_prix === 'deux_euros' ? '€€' : data.fourchette_prix === 'trois_euros' ? '€€€' : '-'} ({data.prix_min || "-"}€ - {data.prix_max || "-"}€)</div>

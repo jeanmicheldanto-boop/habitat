@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function GestionnaireLogin() {
   const [email, setEmail] = useState('');
@@ -70,8 +71,8 @@ export default function GestionnaireLogin() {
       }
 
       router.push('/gestionnaire/dashboard');
-    } catch (err) {
-      setError('Une erreur inattendue s\'est produite');
+    } catch {
+      setError('Une erreur inattendue s&#39;est produite');
     } finally {
       setLoading(false);
     }
@@ -81,17 +82,13 @@ export default function GestionnaireLogin() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <img
-            className="h-12 w-auto"
-            src="/logoDF.png"
-            alt="Logo"
-          />
+          <Image src="/logoDF.png" alt="Logo" width={48} height={48} />
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
           Connexion Gestionnaire
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Accédez à votre espace de gestion d'établissements
+          Accédez à votre espace de gestion d&#39;établissements
         </p>
       </div>
 
@@ -196,7 +193,7 @@ export default function GestionnaireLogin() {
                 href="/"
                 className="text-sm text-blue-600 hover:text-blue-500"
               >
-                ← Retour à l'accueil
+                ← Retour à l&#39;accueil
               </Link>
             </div>
           </form>

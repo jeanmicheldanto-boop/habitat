@@ -67,16 +67,16 @@ function EtabInfos({ etabId }: { etabId: string }) {
   return (
     <div className="mt-1 text-xs text-gray-700 space-y-1">
       {infos.logements && infos.logements.length > 0 && (
-        <div><span className="font-semibold">Logements:</span> {infos.logements.map((l: any) => `${l.type} (${l.capacite})`).join(", ")}</div>
+        <div><span className="font-semibold">Logements:</span> {infos.logements.map((l: LogementType) => `${l.type} (${l.capacite})`).join(", ")}</div>
       )}
       {infos.restauration && infos.restauration.length > 0 && (
-        <div><span className="font-semibold">Restauration:</span> {infos.restauration.map((r: any) => r.type).join(", ")}</div>
+        <div><span className="font-semibold">Restauration:</span> {infos.restauration.map((r: RestaurationType) => r.type).join(", ")}</div>
       )}
       {infos.services && infos.services.length > 0 && (
-        <div><span className="font-semibold">Services:</span> {infos.services.map((s: any) => s.type).join(", ")}</div>
+        <div><span className="font-semibold">Services:</span> {infos.services.map((s: ServiceType) => s.type).join(", ")}</div>
       )}
       {infos.tarifs && infos.tarifs.length > 0 && (
-        <div><span className="font-semibold">Tarifs:</span> {infos.tarifs.map((t: any) => `${t.type}: ${t.montant}€/${t.unite || "nuit"}`).join(", ")}</div>
+        <div><span className="font-semibold">Tarifs:</span> {infos.tarifs.map((t: TarifType) => `${t.type}: ${t.montant}€/`+(t.unite || "nuit")).join(", ")}</div>
       )}
       {infos.image_path && (
         <div><span className="font-semibold">Photo:</span> <Image src={supabase.storage.from("etablissements").getPublicUrl(infos.image_path).data.publicUrl} alt="photo" width={32} height={32} className="inline-block h-8 align-middle ml-1 rounded border" /></div>
@@ -117,7 +117,7 @@ export default function EtablissementsAdminPage() {
       if (search) {
         query = query.ilike("nom", `%${search}%`);
       }
-      const { data, error } = await query;
+  const { data, error }: { data: EtabListItem[] | null; error: { message: string } | null } = await query;
       if (error) {
         setError(`Erreur lors du chargement des établissements : ${error.message}`);
         setLoading(false);
@@ -132,11 +132,11 @@ export default function EtablissementsAdminPage() {
   // Récupère la liste unique des départements pour l'autocomplétion
   useEffect(() => {
     async function fetchDepartements() {
-      const { data } = await supabase
+  const { data }: { data: Array<{ departement: string }> | null } = await supabase
         .from("etablissements")
         .select("departement")
         .neq("departement", null);
-      const unique = Array.from(new Set((data || []).map((e: any) => e.departement).filter(Boolean)));
+      const unique = Array.from(new Set((data || []).map((e) => e.departement).filter(Boolean)));
       setDepartements(unique);
     }
     fetchDepartements();
@@ -144,9 +144,9 @@ export default function EtablissementsAdminPage() {
 
   return (
     <main className="max-w-2xl mx-auto py-12">
-      <h1 className="text-2xl font-bold mb-8">Gestion des établissements</h1>
+  <h1 className="text-2xl font-bold mb-8">Gestion des &eacute;tablissements</h1>
     <div className="flex justify-end mb-4">
-      <Link href="/admin/etablissements/create" className="bg-blue-600 text-white px-4 py-2 rounded font-semibold hover:bg-blue-700">+ Créer un établissement</Link>
+  <Link href="/admin/etablissements/create" className="bg-blue-600 text-white px-4 py-2 rounded font-semibold hover:bg-blue-700">+ Cr&eacute;er un &eacute;tablissement</Link>
     </div>
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <input
@@ -159,7 +159,7 @@ export default function EtablissementsAdminPage() {
         <div className="relative flex-1">
           <input
             type="text"
-            placeholder="Département…"
+            placeholder="D&eacute;partement…"
             value={departement}
             onChange={e => setDepartement(e.target.value)}
             list="departements-list"
@@ -174,13 +174,13 @@ export default function EtablissementsAdminPage() {
         <Link href="/admin" className="bg-gray-200 px-4 py-2 rounded font-semibold hover:bg-gray-300 whitespace-nowrap">Retour admin</Link>
       </div>
       {loading ? (
-        <div>Chargement…</div>
+  <div>Chargement…</div>
       ) : error ? (
         <div className="text-red-600">{error}</div>
       ) : (
         <div className="space-y-4">
           {etabs.length === 0 ? (
-            <div className="text-gray-600">Aucun établissement trouvé.</div>
+      <div className="text-gray-600">Aucun &eacute;tablissement trouv&eacute;.</div>
           ) : (
             etabs.map((etab) => (
               <Link
@@ -188,7 +188,7 @@ export default function EtablissementsAdminPage() {
                 href={`/admin/etablissements/${etab.id}/edit`}
                 className="block bg-gray-100 border rounded px-6 py-3 hover:bg-gray-200"
               >
-                <div className="font-semibold">{etab.nom || `Établissement #${etab.id}`}</div>
+                <div className="font-semibold">{etab.nom || `&Eacute;tablissement #${etab.id}`}</div>
                 <div className="text-sm text-gray-600 flex gap-4">
                   <span>{etab.commune || "Commune inconnue"}</span>
                   <span>{etab.departement || ""}</span>
@@ -203,7 +203,7 @@ export default function EtablissementsAdminPage() {
         </div>
       )}
       <div className="mt-8 text-gray-500 text-sm">
-        Cette page liste les établissements à gérer. Cliquez sur un établissement pour accéder à son formulaire de modification.
+        Cette page liste les &eacute;tablissements &agrave; g&eacute;rer. Cliquez sur un &eacute;tablissement pour acc&eacute;der &agrave; son formulaire de modification.&nbsp;
       </div>
     </main>
   );

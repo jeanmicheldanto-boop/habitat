@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Etablissement {
   id: string;
@@ -22,7 +23,7 @@ interface Etablissement {
 }
 
 export default function MesEtablissements() {
-  const [user, setUser] = useState<any>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [etablissements, setEtablissements] = useState<Etablissement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -72,8 +73,8 @@ export default function MesEtablissements() {
         return;
       }
 
-      setUser(user);
-      loadEtablissements(user.id);
+  setUserId(user.id);
+  loadEtablissements(user.id);
     };
 
     checkAuth();
@@ -139,7 +140,7 @@ export default function MesEtablissements() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
-              <img className="h-8 w-auto mr-4" src="/logoDF.png" alt="Logo" />
+              <Image src="/logoDF.png" alt="Logo" width={32} height={32} className="mr-4" />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Mes établissements</h1>
                 <p className="text-sm text-gray-600">Gérez vos établissements validés</p>
@@ -197,7 +198,7 @@ export default function MesEtablissements() {
             </svg>
             <h3 className="mt-2 text-sm font-medium text-gray-900">Aucun établissement</h3>
             <p className="mt-1 text-sm text-gray-500">
-              Vous n'avez pas encore d'établissements validés.
+              Vous n&#39;avez pas encore d&#39;établissements validés.
             </p>
             <div className="mt-6">
               <Link

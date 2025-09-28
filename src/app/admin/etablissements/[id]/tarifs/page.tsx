@@ -114,7 +114,7 @@ export default function TarifsPage({ params }: { params: { id: string } }) {
       table_name: "tarifications",
       column_name: field,
       old_value: editId ? tarifs.find((t) => t.id === editId)?.[field as keyof Tarif] : null,
-      new_value: (payload as any)[field],
+      new_value: (payload as Partial<Tarif>)[field as keyof Tarif],
       statut: "pending",
     }));
     const { error: itemsError } = await supabase

@@ -6,8 +6,35 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 
 // Types
-export type Proposition = Database["public"]["Tables"]["propositions"]["Row"];
+
+export type Proposition = Database["public"]["Tables"]["propositions"]["Row"] & { profiles?: ProfileType | null };
 export type PropositionItem = Database["public"]["Tables"]["proposition_items"]["Row"];
+
+// Type for payload field in Proposition
+export type PropositionPayload = {
+  nom?: string;
+  habitat_type?: string;
+  ville?: string;
+  proposeur?: {
+    nom?: string;
+    email?: string;
+    telephone?: string;
+  };
+  modifications?: {
+    nouvelle_photo_base64?: string;
+    nouvelle_photo_filename?: string;
+    [key: string]: any;
+  };
+  [key: string]: any;
+};
+
+// Type for profiles field
+export type ProfileType = {
+  prenom?: string;
+  nom?: string;
+  email?: string;
+  organisation?: string;
+};
 
 export default function PropositionsModerationPage() {
   const [propositions, setPropositions] = useState<Proposition[]>([]);
@@ -186,14 +213,14 @@ export default function PropositionsModerationPage() {
                       <h5 className="text-sm font-medium text-gray-900 mb-2">📝 Proposeur (contact pour modifications)</h5>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                         <div>
-                          <span className="font-medium">Nom:</span> {(p.payload as PropositionPayload).proposeur.nom}
+                          <span className="font-medium">Nom:</span> {(p.payload as PropositionPayload).proposeur?.nom || ''}
                         </div>
                         <div>
-                          <span className="font-medium">Email:</span> {(p.payload as PropositionPayload).proposeur.email}
+                          <span className="font-medium">Email:</span> {(p.payload as PropositionPayload).proposeur?.email || ''}
                         </div>
-                        {(p.payload as PropositionPayload).proposeur.telephone && (
+                        {(p.payload as PropositionPayload).proposeur?.telephone && (
                           <div>
-                            <span className="font-medium">Téléphone:</span> {(p.payload as PropositionPayload).proposeur.telephone}
+                            <span className="font-medium">Téléphone:</span> {(p.payload as PropositionPayload).proposeur?.telephone || ''}
                           </div>
                         )}
                       </div>
@@ -201,34 +228,36 @@ export default function PropositionsModerationPage() {
                   )}
 
                   {/* Photo proposée */}
-                  {(p.payload as any).modifications?.nouvelle_photo_base64 && (
+                  {(p.payload as PropositionPayload).modifications?.nouvelle_photo_base64 && (
                     <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-3">
                       <h5 className="text-sm font-medium text-blue-900 mb-2">📷 Photo proposée</h5>
                       <div className="flex items-start space-x-4">
                         <Image
-                          src={(p.payload as any).modifications.nouvelle_photo_base64}
+                          src={(p.payload as PropositionPayload).modifications?.nouvelle_photo_base64 || ''}
                           alt="Photo proposée"
                           width={128}
                           height={96}
                           style={{objectFit:'cover',borderRadius:'0.5rem',border:'1px solid #e5e7eb'}}
                         />
                         <div className="text-sm text-blue-800">
-                          <p><strong>Nom du fichier:</strong> {(p.payload as any).modifications.nouvelle_photo_filename || 'Non spécifié'}</p>
-                          <p className="mt-1">Proposition de nouvelle photo pour l'établissement</p>
+                          <p><strong>Nom du fichier:</strong> {(p.payload as PropositionPayload).modifications?.nouvelle_photo_filename || 'Non spécifié'}</p>
+                          <p className="mt-1">Proposition de nouvelle photo pour l&apos;établissement</p>
                         </div>
                       </div>
                     </div>
                   )}
 
                   {/* Autres modifications */}
-                  {(p.payload as any).modifications && Object.keys((p.payload as any).modifications).filter(k => !k.startsWith('nouvelle_photo')).length > 0 && (
+                  {typeof (p.payload as PropositionPayload).modifications === 'object' &&
+                    (p.payload as PropositionPayload).modifications &&
+                    Object.keys((p.payload as PropositionPayload).modifications ?? {}).filter(k => !k.startsWith('nouvelle_photo')).length > 0 && (
                     <div className="bg-gray-50 rounded-md p-3">
                       <h5 className="text-sm font-medium text-gray-900 mb-2">Autres modifications</h5>
                       <div className="text-xs text-gray-600 max-h-32 overflow-y-auto">
                         <pre className="whitespace-pre-wrap">
                           {JSON.stringify(
                             Object.fromEntries(
-                              Object.entries((p.payload as any).modifications).filter(([k]) => !k.startsWith('nouvelle_photo'))
+                              Object.entries((p.payload as PropositionPayload).modifications ?? {}).filter(([k]) => !k.startsWith('nouvelle_photo'))
                             ), 
                             null, 2
                           )}

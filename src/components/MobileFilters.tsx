@@ -35,7 +35,7 @@ interface MobileFiltersProps {
   selectedCaracteristiques: Caracteristiques;
   setSelectedCaracteristiques: (caracteristiques: Caracteristiques) => void;
   allServices: string[];
-  allLogementTypes: string[];
+  // allLogementTypes: string[]; // supprimé car non utilisé
   resultsCount: number;
 }
 
@@ -76,7 +76,6 @@ export default function MobileFilters({
   selectedCaracteristiques,
   setSelectedCaracteristiques,
   allServices,
-  allLogementTypes,
   resultsCount
 }: MobileFiltersProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -206,13 +205,15 @@ export default function MobileFilters({
       {/* Modal plein écran des filtres */}
       {isOpen && (
         <div style={{
-          position: 'fixed',
           inset: 0,
           background: '#fff',
           zIndex: 2000,
           display: 'flex',
           flexDirection: 'column'
         }}>
+          <div style={{textAlign: 'center', padding: '8px 0', fontSize: '0.95rem', color: '#a85b2b', fontWeight: 500}}>
+            C&#39;est un filtre avancé
+          </div>
           {/* Header du modal */}
           <div style={{
             background: 'linear-gradient(135deg, #a85b2b 0%, #d35400 100%)',
@@ -329,7 +330,7 @@ export default function MobileFilters({
                   cursor: 'pointer'
                 }}
               >
-                🏠 Types d'habitat
+                🏠 Types d&apos;habitat
                 <svg 
                   width="20" 
                   height="20" 

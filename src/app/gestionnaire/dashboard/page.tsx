@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Proposition {
   id: string;
   type_cible: string;
   action: string;
   statut: 'en_attente' | 'approuve' | 'rejete';
-  payload: any;
+    payload: Record<string, unknown>;
   review_note?: string;
   created_at: string;
   reviewed_at?: string;
@@ -34,7 +35,7 @@ export default function GestionnaireDashboard() {
   const [user, setUser] = useState<any>(null);
   const [propositions, setPropositions] = useState<Proposition[]>([]);
   const [reclamations, setReclamations] = useState<ReclamationPropriete[]>([]);
-  const [notifications, setNotifications] = useState<any[]>([]);
+    const [notifications, setNotifications] = useState<Array<{ id: string; is_read: boolean; title?: string; message?: string; data?: { review_note?: string }; created_at?: string }>>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -125,7 +126,17 @@ export default function GestionnaireDashboard() {
         },
         (payload) => {
           const newNotification = payload.new;
-          setNotifications(prev => [newNotification, ...prev]);
+          setNotifications(prev => [
+            {
+              id: newNotification.id,
+              is_read: newNotification.is_read,
+              title: newNotification.title,
+              message: newNotification.message,
+              data: newNotification.data,
+              created_at: newNotification.created_at
+            },
+            ...prev
+          ]);
           setUnreadCount(prev => prev + 1);
         }
       )
@@ -274,7 +285,7 @@ export default function GestionnaireDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
-              <img className="h-8 w-auto mr-4" src="/logoDF.png" alt="Logo" />
+              <Image src="/logoDF.png" alt="Logo" width={32} height={32} style={{ height: '2rem', width: 'auto', marginRight: '1rem' }} />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Tableau de bord gestionnaire</h1>
                 <p className="text-sm text-gray-600">Bienvenue, {user?.email}</p>
@@ -338,12 +349,12 @@ export default function GestionnaireDashboard() {
                                   </p>
                                 )}
                                 <p className="text-xs text-gray-400 mt-2">
-                                  {new Date(notification.created_at).toLocaleDateString('fr-FR', {
+                                  {notification.created_at ? new Date(notification.created_at).toLocaleDateString('fr-FR', {
                                     day: 'numeric',
                                     month: 'short',
                                     hour: '2-digit',
                                     minute: '2-digit'
-                                  })}
+                                  }) : ''}
                                 </p>
                               </div>
                               {!notification.is_read && (
@@ -455,7 +466,7 @@ export default function GestionnaireDashboard() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <h3 className="mt-2 text-sm font-medium text-gray-900">Aucune demande</h3>
-                <p className="mt-1 text-sm text-gray-500">Commencez par créer votre première demande d'établissement.</p>
+                <p className="mt-1 text-sm text-gray-500">Commencez par créer votre première demande d&#39;établissement.</p>
                 <div className="mt-6">
                   <Link
                     href="/gestionnaire/create"
@@ -473,10 +484,10 @@ export default function GestionnaireDashboard() {
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <h3 className="text-lg font-medium text-gray-900">
-                            {proposition.payload?.nom || 'Établissement sans nom'}
+                            {typeof proposition.payload === 'object' && proposition.payload !== null && 'nom' in proposition.payload ? (proposition.payload as any).nom : 'Établissement sans nom'}
                           </h3>
                           <p className="mt-1 text-sm text-gray-600">
-                            {proposition.payload?.ville} • Type: {proposition.payload?.habitat_type?.replace('_', ' ')}
+                            {typeof proposition.payload === 'object' && proposition.payload !== null && 'ville' in proposition.payload ? (proposition.payload as any).ville : ''} • Type: {typeof proposition.payload === 'object' && proposition.payload !== null && 'habitat_type' in proposition.payload && typeof (proposition.payload as any).habitat_type === 'string' ? (proposition.payload as any).habitat_type.replace('_', ' ') : ''}
                           </p>
                           <p className="mt-2 text-sm text-gray-500">
                             Demandé le {formatDate(proposition.created_at)}
@@ -519,7 +530,7 @@ export default function GestionnaireDashboard() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
                 <h3 className="mt-2 text-sm font-medium text-gray-900">Aucune réclamation</h3>
-                <p className="mt-1 text-sm text-gray-500">Vous n'avez pas encore réclamé la propriété d'un établissement.</p>
+                <p className="mt-1 text-sm text-gray-500">Vous n&#39;avez pas encore réclamé la propriété d&#39;un établissement.</p>
               </div>
             ) : (
               <div className="grid gap-6">

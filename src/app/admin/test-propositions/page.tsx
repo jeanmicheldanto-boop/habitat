@@ -69,9 +69,9 @@ export default function CreateTestPropositions() {
 
       setMessage(`✅ ${data.length} propositions de test créées avec succès !`);
       
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erreur:', error);
-      setMessage(`❌ Erreur : ${error.message}`);
+      setMessage(`❌ Erreur : ${(error instanceof Error ? error.message : 'Erreur inconnue')}`);
     } finally {
       setLoading(false);
     }
@@ -95,8 +95,8 @@ export default function CreateTestPropositions() {
         color: '#6b7280',
         lineHeight: '1.5'
       }}>
-        Cela va créer 2 propositions d'établissements en attente de modération 
-        pour tester le système de modération.
+  Cela va créer 2 propositions d&apos;établissements en attente de modération 
+  pour tester le système de modération.
       </p>
 
       <button
@@ -136,7 +136,7 @@ export default function CreateTestPropositions() {
         <ol style={{ marginLeft: '1.5rem', lineHeight: '1.6' }}>
           <li>Allez sur <code>/admin/moderation</code></li>
           <li>Vous devriez voir 2 propositions en attente</li>
-          <li>Cliquez sur "Examiner" pour les approuver/rejeter</li>
+          <li>Cliquez sur &quot;Examiner&quot; pour les approuver/rejeter</li>
           <li>Si approuvées, elles deviendront de vrais établissements</li>
         </ol>
       </div>

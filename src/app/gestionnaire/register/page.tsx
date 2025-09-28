@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function GestionnaireRegister() {
   const [formData, setFormData] = useState({
@@ -30,19 +31,19 @@ export default function GestionnaireRegister() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-    setMessage('');
+  setLoading(true);
+  setError('');
+  setMessage('');
 
     // Validation
     if (formData.password !== formData.confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
+  setError('Les mots de passe ne correspondent pas');
       setLoading(false);
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères');
+  setError('Le mot de passe doit contenir au moins 6 caractères');
       setLoading(false);
       return;
     }
@@ -64,7 +65,7 @@ export default function GestionnaireRegister() {
       });
 
       if (signUpError) {
-        setError(signUpError.message);
+    setError(signUpError.message);
         return;
       }
 
@@ -95,8 +96,8 @@ export default function GestionnaireRegister() {
           router.push('/gestionnaire/login');
         }, 3000);
       }
-    } catch (err: any) {
-      setError(err.message || 'Une erreur inattendue s\'est produite');
+    } catch (err) {
+  setError((err as Error)?.message || 'Une erreur inattendue s&#39;est produite');
     } finally {
       setLoading(false);
     }
@@ -106,7 +107,7 @@ export default function GestionnaireRegister() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <img className="h-12 w-auto" src="/logoDF.png" alt="Logo" />
+          <Image src="/logoDF.png" alt="Logo" width={48} height={48} />
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
           Inscription Gestionnaire
@@ -252,7 +253,7 @@ export default function GestionnaireRegister() {
                 <div className="bg-red-50 border border-red-200 rounded-md p-4">
                   <div className="flex">
                     <div className="ml-3">
-                      <h3 className="text-sm font-medium text-red-800">Erreur d'inscription</h3>
+                      <h3 className="text-sm font-medium text-red-800">Erreur d&#39;inscription</h3>
                       <div className="mt-2 text-sm text-red-700">{error}</div>
                     </div>
                   </div>
@@ -274,7 +275,7 @@ export default function GestionnaireRegister() {
                       Inscription en cours...
                     </div>
                   ) : (
-                    'S\'inscrire'
+                    'S&#39;inscrire'
                   )}
                 </button>
               </div>
@@ -293,7 +294,7 @@ export default function GestionnaireRegister() {
                   href="/"
                   className="text-sm text-blue-600 hover:text-blue-500"
                 >
-                  ← Retour à l'accueil
+                  ← Retour à l&#39;accueil
                 </Link>
               </div>
             </form>

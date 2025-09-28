@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function TestSupabasePage() {
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -91,7 +91,7 @@ export default function TestSupabasePage() {
           {results?.etablissements?.data && results.etablissements.data.length > 0 && (
             <div className="mt-2">
               <p className="font-semibold">Premiers établissements :</p>
-              {results.etablissements.data.slice(0, 3).map((etab: any, idx: number) => (
+              {results.etablissements.data.slice(0, 3).map((etab: { id: string; nom: string; ville?: string }, idx: number) => (
                 <div key={idx} className="text-xs bg-white p-2 mt-1 rounded">
                   ID: {etab.id} | Nom: {etab.nom} | Ville: {etab.ville}
                 </div>

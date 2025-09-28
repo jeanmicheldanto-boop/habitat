@@ -12,6 +12,7 @@ import { getHabitatImage } from "@/lib/habitatImages";
 import BadgeIcon, { Badge } from "@/components/BadgeIcon";
 import AvpBadge from "@/components/AvpBadge";
 import './plateforme.css';
+import Image from 'next/image';
 // Palette de couleurs pour les sous-catégories (maintenant gérée par la taxonomie)
 const TAG_COLORS: Record<string, string> = {
   // Ancienne palette pour compatibilité - sera migrée vers getSousCategorieColor
@@ -179,21 +180,21 @@ export default function Page() {
         .select("sous_categories, services, logements_types, habitat_type")
         .limit(500);
       if (data) {
-        const allSousCat = data.flatMap((row:any) => row.sous_categories || []);
+  const allSousCat = data.flatMap((row: { sous_categories?: string[] }) => row.sous_categories || []);
         const uniqueSousCat = Array.from(new Set(allSousCat)).sort();
         console.log("Sous-catégories disponibles:", uniqueSousCat);
         setSousCategories(uniqueSousCat);
         
-        const allServ = data.flatMap((row:any) => row.services || []);
+  const allServ = data.flatMap((row: { services?: string[] }) => row.services || []);
         const uniqueServices = Array.from(new Set(allServ)).sort();
         console.log("Services disponibles:", uniqueServices);
         setAllServices(uniqueServices);
         
-        const allLogTypes = data.flatMap((row:any) => (row.logements_types || []).map((lt:any) => lt.libelle).filter(Boolean));
+  const allLogTypes = data.flatMap((row: { logements_types?: LogementType[] }) => (row.logements_types || []).map((lt: LogementType) => lt.libelle).filter(Boolean));
         setAllLogementTypes(Array.from(new Set(allLogTypes)).sort());
 
         // Debug: afficher les types d'habitat disponibles
-        const allHabitatTypes = data.map((row:any) => row.habitat_type).filter(Boolean);
+  const allHabitatTypes = data.map((row: { habitat_type?: string }) => row.habitat_type).filter(Boolean);
         const uniqueHabitatTypes = Array.from(new Set(allHabitatTypes));
         console.log("Types d'habitat disponibles (habitat_type):", uniqueHabitatTypes);
       }
@@ -444,7 +445,7 @@ export default function Page() {
               display: 'inline-block',
               width: '100%'
             }}>
-              <strong>Recherche :</strong> "{search}" dans tous les champs
+              <strong>Recherche :</strong> &quot;{search}&quot; dans tous les champs
             </div>
           )}
         </div>
@@ -871,7 +872,7 @@ export default function Page() {
               display: 'inline-block',
               margin: '0.5rem auto 0',
             }}>
-              <strong>Recherche :</strong> "{search}" dans noms, villes, départements, types d'habitat, services...
+              <strong>Recherche :</strong> &quot;{search}&quot; dans noms, villes, départements, types d&#39;habitat, services...
             </div>
           )}
           {/* Onglets Liste / Carte sous la barre de recherche */}
@@ -942,16 +943,18 @@ export default function Page() {
                       >
                         {/* ...existing code for card... */}
                         <div style={{ minWidth: 140, maxWidth: 160, width: 140, height: 140, display: "flex", alignItems: "center", justifyContent: "center", background: "#f4f4f4", borderTopLeftRadius: 18, borderBottomLeftRadius: 18, overflow: "hidden", margin: 10 }}>
+                          {/* --- PATCHED CARD IMAGE --- */}
                           {(() => {
                             const imgSrc = etab.image_path 
                               ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${etab.image_path}`
                               : getHabitatImage(etab.sous_categories);
                             return (
-                              <img
+                              <Image
                                 src={imgSrc}
                                 alt={etab.nom}
-                                style={{ maxWidth: 120, maxHeight: 100, width: "auto", height: "auto", objectFit: "contain", borderRadius: 10, boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)" }}
-                                onError={e => { e.currentTarget.src = getHabitatImage(etab.sous_categories); }}
+                                width={120}
+                                height={100}
+                                style={{ objectFit: "contain", borderRadius: 10, boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)" }}
                               />
                             );
                           })()}

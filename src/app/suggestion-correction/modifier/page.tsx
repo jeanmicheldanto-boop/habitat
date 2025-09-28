@@ -71,7 +71,7 @@ export default function ModifierEtablissementPage() {
     nom: '',
     email: '',
     telephone: '',
-    description: 'Modification complète des données de l\'établissement'
+    description: 'Modification complète des données de l&#39;établissement'
   });
 
   // Données de modification
@@ -156,13 +156,6 @@ export default function ModifierEtablissementPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (etablissementId) {
-      loadEtablissementData();
-      loadOptions();
-    }
-  }, [etablissementId]);
-
   const loadEtablissementData = async () => {
     try {
       const { data: etab, error } = await supabase
@@ -199,7 +192,7 @@ export default function ModifierEtablissementPage() {
         commune: etab.commune || '',
         departement: etab.departement || '',
         habitat_type: etab.habitat_type || '',
-        sous_categories: etab.etablissement_sous_categorie?.map((sc: any) => sc.sous_categorie_id) || [],
+  sous_categories: etab.etablissement_sous_categorie?.map((sc: { sous_categorie_id: string }) => sc.sous_categorie_id) || [],
         nouvelle_photo_data: null, // Pas de pré-remplissage pour les nouvelles photos
         logements_types: etab.logements_types || [],
         restauration: etab.restaurations?.[0] || {
@@ -208,7 +201,7 @@ export default function ModifierEtablissementPage() {
           resto_collectif: false,
           portage_repas: false
         },
-        services: etab.etablissement_service?.map((es: any) => es.service_id) || [],
+  services: etab.etablissement_service?.map((es: { service_id: string }) => es.service_id) || [],
         tarifications: etab.tarifications || []
       });
       
@@ -257,7 +250,7 @@ export default function ModifierEtablissementPage() {
     }));
   };
 
-  const updateLogementType = (index: number, field: string, value: any) => {
+  const updateLogementType = (index: number, field: string, value: string | number | boolean) => {
     setModificationData(prev => ({
       ...prev,
       logements_types: prev.logements_types.map((item, i) => 
@@ -287,7 +280,7 @@ export default function ModifierEtablissementPage() {
     }));
   };
 
-  const updateTarification = (index: number, field: string, value: any) => {
+  const updateTarification = (index: number, field: string, value: string | number) => {
     setModificationData(prev => ({
       ...prev,
       tarifications: prev.tarifications.map((item, i) => 
@@ -357,9 +350,9 @@ export default function ModifierEtablissementPage() {
       }
 
       setIsSubmitted(true);
-    } catch (err: any) {
+  } catch (err) {
       console.error('Erreur lors de l\'envoi:', err);
-      setError('Une erreur est survenue lors de l\'envoi de votre proposition. Veuillez réessayer.');
+  setError('Une erreur est survenue lors de l&#39;envoi de votre proposition. Veuillez réessayer.');
     } finally {
       setIsSubmitting(false);
     }
@@ -375,6 +368,13 @@ export default function ModifierEtablissementPage() {
     { id: 'services', label: 'Services', icon: '🔧' },
     { id: 'tarifs', label: 'Tarifs', icon: '💰' }
   ];
+
+  useEffect(() => {
+    if (etablissementId) {
+      loadEtablissementData();
+      loadOptions();
+    }
+  }, [etablissementId, loadEtablissementData]);
 
   if (loading) {
     return (
@@ -409,7 +409,7 @@ export default function ModifierEtablissementPage() {
           <h2 className="text-xl font-bold text-gray-900 mb-2">Proposition envoyée !</h2>
           <p className="text-gray-600 mb-6">
             Votre proposition de modification a été transmise à notre équipe de modération. 
-            Nous l'examinerons dans les plus brefs délais.
+            Nous l&#39;examinerons dans les plus brefs délais.
           </p>
           <button 
             onClick={() => router.back()}
@@ -427,7 +427,7 @@ export default function ModifierEtablissementPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Modifier l'établissement
+            Modifier l&#39;établissement
           </h1>
           <p className="text-lg text-gray-600">
             {etablissement.nom}

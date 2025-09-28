@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-const SUBNAV_GUARD = 64; // marge de sécurité pour l’offset quand on arrive par ancre
+
 
 export default function AidesClient() {
   return (
@@ -17,7 +17,7 @@ export default function AidesClient() {
         </p>
         <div className="mt-6 p-6 bg-orange-50 rounded-lg border border-orange-200">
           <p className="text-md text-orange-900">
-            Si vous traversez une période de stress — “Comment on s’organise ?”, “Rester chez moi ?”, “Combien ça coûte ?” — vous n’êtes pas seul. Ces moments peuvent aussi ouvrir sur de <strong>belles rencontres</strong> et une vraie <strong>prévention</strong>. Bonne nouvelle : <strong>des aides existent</strong> et vous pouvez être accompagné.
+            Si vous traversez une période de stress — “Comment on s&apos;organise ?”, “Rester chez moi ?”, “Combien ça coûte ?” — vous n&apos;êtes pas seul. Ces moments peuvent aussi ouvrir sur de <strong>belles rencontres</strong> et une vraie <strong>prévention</strong>. Bonne nouvelle : <strong>des aides existent</strong> et vous pouvez être accompagné.
           </p>
         </div>
       </header>

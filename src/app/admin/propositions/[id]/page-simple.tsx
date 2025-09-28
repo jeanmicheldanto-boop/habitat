@@ -5,7 +5,17 @@ import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 
 export default function PropositionDetailSimple({ params }: { params: { id: string } }) {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<{
+    id?: string;
+    type_cible?: string;
+    action?: string;
+    statut?: string;
+    payload?: Record<string, unknown>;
+    review_note?: string;
+    created_at?: string;
+    reviewed_at?: string;
+    created_by?: string;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
 

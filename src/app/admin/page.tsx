@@ -197,7 +197,7 @@ export default function AdminPage() {
             fontSize: "0.9rem",
             lineHeight: "1.4"
           }}>
-            Gérer les propositions d'amélioration et les suggestions des utilisateurs.
+            Gérer les propositions d&apos;amélioration et les suggestions des utilisateurs.
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
             <Link 
@@ -296,7 +296,7 @@ export default function AdminPage() {
               fontWeight: "500"
             }}
           >
-            🏠 Retour à l'accueil
+            🏠 Retour à l&apos;accueil
           </Link>
         </div>
       </div>

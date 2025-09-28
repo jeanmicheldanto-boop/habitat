@@ -61,9 +61,9 @@ export default function SuggestionCorrectionPage() {
       }
 
       setIsSubmitted(true);
-    } catch (err: any) {
+  } catch (err) {
       console.error('Erreur lors de l\'envoi:', err);
-      setError('Une erreur est survenue lors de l\'envoi de votre suggestion. Veuillez réessayer.');
+  setError('Une erreur est survenue lors de l&#39;envoi de votre suggestion. Veuillez réessayer.');
     } finally {
       setIsSubmitting(false);
     }
@@ -83,7 +83,7 @@ export default function SuggestionCorrectionPage() {
               Merci pour votre suggestion !
             </h1>
             <p className="text-gray-600 mb-6">
-              Votre suggestion de correction a été envoyée avec succès. Notre équipe va l'examiner et prendre les mesures nécessaires pour améliorer les informations de l'établissement.
+              Votre suggestion de correction a été envoyée avec succès. Notre équipe va l&#39;examiner et prendre les mesures nécessaires pour améliorer les informations de l&#39;établissement.
             </p>
             <Link 
               href="/plateforme"

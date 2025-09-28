@@ -42,7 +42,7 @@ export default function HomePage() {
               id="search-location"
               name="search"
               type="text"
-              placeholder="Ville, département, type d'habitat, nom..."
+              placeholder="Ville, département, type d&#39;habitat, nom..."
               style={{
                 flex: 1,
                 padding: "0.75rem 1.2rem",
@@ -116,7 +116,7 @@ export default function HomePage() {
             marginBottom: 16,
             textAlign: "center"
           }}>
-            Vous proposez de l'habitat intermédiaire ?
+            Vous proposez de l&#39;habitat intermédiaire ?
           </h2>
           <p style={{ 
             color: "#495057", 
@@ -127,7 +127,7 @@ export default function HomePage() {
             margin: "0 auto 40px"
           }}>
             Rejoignez notre réseau de partenaires et donnez de la visibilité à votre établissement. 
-            Gérez facilement vos annonces et connectez-vous avec les personnes recherchant des solutions d'habitat adapté.
+            Gérez facilement vos annonces et connectez-vous avec les personnes recherchant des solutions d&#39;habitat adapté.
           </p>
           
           <div style={{ 

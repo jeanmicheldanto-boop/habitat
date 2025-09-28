@@ -14,7 +14,7 @@ const emptyForm: Partial<LogementType> = {
   pmr: false,
   domotique: false,
   nb_unites: null,
-  plain_pied: false,
+
 };
 
 export default function LogementsTypesPage({ params }: { params: { id: string } }) {
@@ -104,7 +104,7 @@ export default function LogementsTypesPage({ params }: { params: { id: string } 
       table_name: "logements_types",
       column_name: field,
       old_value: editId ? logements.find((l) => l.id === editId)?.[field as keyof LogementType] : null,
-      new_value: (payload as any)[field],
+      new_value: (payload as Partial<LogementType>)[field as keyof LogementType],
       statut: "pending",
     }));
     const { error: itemsError } = await supabase
@@ -189,10 +189,7 @@ export default function LogementsTypesPage({ params }: { params: { id: string } 
                   <input type="checkbox" name="domotique" checked={!!form.domotique} onChange={handleChange} />
                   <label>Domotique</label>
                 </div>
-                <div className="flex-1 flex items-center gap-2">
-                  <input type="checkbox" name="plain_pied" checked={!!form.plain_pied} onChange={handleChange} />
-                  <label>Plein pied</label>
-                </div>
+
               </div>
               <div>
                 <label className="block font-semibold mb-1">Nombre d’unités</label>
