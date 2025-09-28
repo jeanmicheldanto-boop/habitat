@@ -1,3 +1,5 @@
+
+'use client';
 type ModificationDataType = {
   telephone: string;
   email: string;
@@ -20,7 +22,6 @@ type ModificationDataType = {
   services: string[];
   tarifications: TarificationType[];
 };
-'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
