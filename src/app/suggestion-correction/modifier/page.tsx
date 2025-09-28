@@ -20,7 +20,7 @@ type ModificationDataType = {
   services: string[];
   tarifications: TarificationType[];
 };
-'use client';
+"use client";
 
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
