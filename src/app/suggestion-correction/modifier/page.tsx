@@ -1,6 +1,28 @@
+type ModificationDataType = {
+  telephone: string;
+  email: string;
+  site_web: string;
+  adresse_l1: string;
+  adresse_l2: string;
+  code_postal: string;
+  commune: string;
+  departement: string;
+  habitat_type: string;
+  sous_categories: string[];
+  nouvelle_photo_data: { url: string; file: File } | null;
+  logements_types: LogementType[];
+  restauration: {
+    kitchenette: boolean;
+    resto_collectif_midi: boolean;
+    resto_collectif: boolean;
+    portage_repas: boolean;
+  };
+  services: string[];
+  tarifications: TarificationType[];
+};
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import ImageUpload from '@/components/ImageUpload';
@@ -57,7 +79,6 @@ interface SousCategorieOption {
 }
 
 export default function ModifierEtablissementPage() {
-  import { useCallback } from 'react';
   const searchParams = useSearchParams();
   const router = useRouter();
   const etablissementId = searchParams.get('etablissement');
@@ -76,85 +97,30 @@ export default function ModifierEtablissementPage() {
   });
 
   // Données de modification
-  const [modificationData, setModificationData] = useState<{
-    telephone: string;
-    email: string;
-    site_web: string;
-    adresse_l1: string;
-    adresse_l2: string;
-    code_postal: string;
-    commune: string;
-    departement: string;
-    habitat_type: string;
-    sous_categories: string[];
-    nouvelle_photo_data: { url: string; file: File } | null;
-    logements_types: LogementType[];
-    restauration: {
-      kitchenette: boolean;
-      resto_collectif_midi: boolean;
-      resto_collectif: boolean;
-      portage_repas: boolean;
-    };
-    services: string[];
-    tarifications: TarificationType[];
-  }>({
-    // Informations de contact
+  const [modificationData, setModificationData] = useState<ModificationDataType>({
     telephone: '',
     email: '',
     site_web: '',
-    
-    // Adresse et localisation
     adresse_l1: '',
     adresse_l2: '',
     code_postal: '',
     commune: '',
     departement: '',
-    
-    // Type d'habitat et sous-catégorie
     habitat_type: '',
-    sous_categories: [] as string[],
-    
-    // Photo
-    nouvelle_photo_data: null as { url: string; file: File } | null, // Image proposée
-    
-    // Logements
-    logements_types: [] as Array<{
-      id?: string;
-      libelle: string;
-      surface_min: number | '';
-      surface_max: number | '';
-      meuble: boolean;
-      pmr: boolean;
-      domotique: boolean;
-      plain_pied: boolean;
-      nb_unites: number | '';
-    }>,
-    
-    // Restauration
+    sous_categories: [],
+    nouvelle_photo_data: null,
+    logements_types: [],
     restauration: {
       kitchenette: false,
       resto_collectif_midi: false,
       resto_collectif: false,
       portage_repas: false
     },
-    
-    // Services
-    services: [] as string[],
-    
-    // Tarifs
-    tarifications: [] as Array<{
-      id?: string;
-      periode: string;
-      fourchette_prix: string;
-      prix_min: number | '';
-      prix_max: number | '';
-      loyer_base: number | '';
-      charges: number | '';
-    }>
+    services: [],
+    tarifications: []
   });
-  
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   const loadEtablissementData = useCallback(async () => {
@@ -212,56 +178,44 @@ export default function ModifierEtablissementPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const loadOptions = async () => {
-    try {
-      const [servicesRes, sousCategRes] = await Promise.all([
-        supabase.from('services').select('id, libelle').order('libelle'),
-        supabase.from('sous_categories').select('id, libelle').order('libelle')
-      ]);
-
-      if (servicesRes.data) setServicesOptions(servicesRes.data);
-      if (sousCategRes.data) setSousCategories(sousCategRes.data);
-    } catch (error) {
-      console.error('Erreur lors du chargement des options:', error);
-    }
-  };
+  }, [etablissementId]);
 
   const addLogementType = () => {
-    setModificationData(prev => ({
+    setModificationData((prev: ModificationDataType) => ({
       ...prev,
-      logements_types: [...prev.logements_types, {
-        libelle: '',
-        surface_min: '',
-        surface_max: '',
-        meuble: false,
-        pmr: false,
-        domotique: false,
-        plain_pied: false,
-        nb_unites: ''
-      }]
+      logements_types: [
+        ...prev.logements_types,
+        {
+          libelle: '',
+          surface_min: '',
+          surface_max: '',
+          meuble: false,
+          pmr: false,
+          domotique: false,
+          plain_pied: false,
+          nb_unites: ''
+        }
+      ]
     }));
   };
-
   const removeLogementType = (index: number) => {
-    setModificationData(prev => ({
+  setModificationData((prev: ModificationDataType) => ({
       ...prev,
-      logements_types: prev.logements_types.filter((_, i) => i !== index)
+      logements_types: prev.logements_types.filter((_: LogementType, i: number) => i !== index)
     }));
   };
 
   const updateLogementType = (index: number, field: string, value: string | number | boolean) => {
-    setModificationData(prev => ({
+  setModificationData((prev: ModificationDataType) => ({
       ...prev,
-      logements_types: prev.logements_types.map((item, i) => 
+      logements_types: prev.logements_types.map((item: LogementType, i: number) => 
         i === index ? { ...item, [field]: value } : item
       )
     }));
   };
 
   const addTarification = () => {
-    setModificationData(prev => ({
+  setModificationData((prev: ModificationDataType) => ({
       ...prev,
       tarifications: [...prev.tarifications, {
         periode: '',
@@ -275,16 +229,16 @@ export default function ModifierEtablissementPage() {
   };
 
   const removeTarification = (index: number) => {
-    setModificationData(prev => ({
+  setModificationData((prev: ModificationDataType) => ({
       ...prev,
-      tarifications: prev.tarifications.filter((_, i) => i !== index)
+      tarifications: prev.tarifications.filter((_: TarificationType, i: number) => i !== index)
     }));
   };
 
   const updateTarification = (index: number, field: string, value: string | number) => {
-    setModificationData(prev => ({
+  setModificationData((prev: ModificationDataType) => ({
       ...prev,
-      tarifications: prev.tarifications.map((item, i) => 
+      tarifications: prev.tarifications.map((item: TarificationType, i: number) => 
         i === index ? { ...item, [field]: value } : item
       )
     }));
@@ -373,7 +327,7 @@ export default function ModifierEtablissementPage() {
   useEffect(() => {
     if (etablissementId) {
       loadEtablissementData();
-      loadOptions();
+      // loadOptions(); // Fonction non définie
     }
   }, [etablissementId, loadEtablissementData]);
 
