@@ -34,16 +34,16 @@ export default function ContactPage() {
             <h1 className="text-3xl font-bold mb-6 text-center">Notre mission</h1>
             
             <div className="bg-orange-50 rounded-lg p-8 mb-8 border border-orange-100">
-              <h2 className="text-2xl font-semibold text-orange-900 mb-4">L'objectif d'habitat-intermediaire.fr</h2>
+              <h2 className="text-2xl font-semibold text-orange-900 mb-4">L&apos;objectif d&apos;habitat-intermediaire.fr</h2>
               <p className="text-orange-800 mb-4 text-lg leading-relaxed">
-                <strong>Habitat-intermediaire.fr</strong> est une plateforme experte dédiée à la lisibilité et à l'accessibilité 
-                des solutions de logement inclusif pour séniors, entre le domicile et l'EHPAD : logements adaptés, 
+                <strong>Habitat-intermediaire.fr</strong> est une plateforme experte dédiée à la lisibilité et à l&apos;accessibilité 
+                des solutions de logement inclusif pour séniors, entre le domicile et l&apos;EHPAD : logements adaptés, 
                 résidences autonomie, habitats partagés, béguinages, MARPA.
               </p>
               <p className="text-orange-800 mb-4 text-lg leading-relaxed">
                 <strong>Notre objectif</strong> : offrir une information claire, gratuite et indépendante sur toutes les 
                 solutions non médicalisées qui permettent de penser un cadre de vie adapté au projet de vie, 
-                pour préparer sereinement l'avenir.
+                pour préparer sereinement l&apos;avenir.
               </p>
               <p className="text-orange-700 text-lg leading-relaxed">
                 Nous mettons en avant la diversité des solutions, les aides disponibles, et nous nous engageons 
@@ -59,13 +59,13 @@ export default function ContactPage() {
             <div className="bg-gray-50 rounded-lg p-8 mb-8 border border-gray-200">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">Danto & Frère</h3>
               <p className="text-gray-700 mb-4 text-lg leading-relaxed">
-                Habitat-intermediaire.fr est édité par <strong>Danto & Frère</strong>, une société qui développe 
-                des solutions technologiques dans le champ de l'IA et de l'automatisation au service de l'essentiel : 
-                <strong> l'humain</strong>.
+                Habitat-intermediaire.fr est édité par <strong>Danto &amp; Frère</strong>, une société qui développe 
+                des solutions technologiques dans le champ de l&apos;IA et de l&apos;automatisation au service de l&apos;essentiel : 
+                <strong> l&apos;humain</strong>.
               </p>
               <p className="text-gray-700 mb-4 text-lg leading-relaxed">
-                Notre mission : faciliter l'accès à l'information, accompagner les parcours de vie, et promouvoir 
-                l'innovation sociale au bénéfice des personnes âgées et de leurs proches.
+                Notre mission : faciliter l&apos;accès à l&apos;information, accompagner les parcours de vie, et promouvoir 
+                l&apos;innovation sociale au bénéfice des personnes âgées et de leurs proches.
               </p>
             </div>
 
@@ -76,14 +76,14 @@ export default function ContactPage() {
                 <div>
                   <h4 className="font-semibold text-orange-800 mb-2">🚀 Innovation humaniste</h4>
                   <p className="text-orange-700 text-sm">
-                    Nous mettons la technologie au service de l'humain, pas l'inverse. 
+                    Nous mettons la technologie au service de l&apos;humain, pas l&apos;inverse. 
                     Chaque solution développée place la personne au centre.
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-orange-800 mb-2">🏠 Nouvelles solutions d'habitat</h4>
+                  <h4 className="font-semibold text-orange-800 mb-2">🏠 Nouvelles solutions d&apos;habitat</h4>
                   <p className="text-orange-700 text-sm">
-                    Nous promouvons activement les alternatives innovantes à l'institutionnalisation 
+                    Nous promouvons activement les alternatives innovantes à l&apos;institutionnalisation 
                     traditionnelle, pour un vieillissement choisi et digne.
                   </p>
                 </div>
@@ -97,7 +97,7 @@ export default function ContactPage() {
                 <div>
                   <h4 className="font-semibold text-orange-800 mb-2">🌱 Innovation sociale</h4>
                   <p className="text-orange-700 text-sm">
-                    Nous développons des outils qui favorisent le lien social, l'autonomie 
+                    Nous développons des outils qui favorisent le lien social, l&apos;autonomie 
                     et le bien-être dans les parcours de vie.
                   </p>
                 </div>

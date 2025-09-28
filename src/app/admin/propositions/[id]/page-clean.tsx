@@ -6,7 +6,19 @@ import type { Database } from "@/lib/database.types";
 import Link from "next/link";
 
 // Types
-export type Proposition = Database["public"]["Tables"]["propositions"]["Row"];
+export type Proposition = Database["public"]["Tables"]["propositions"]["Row"] & { profiles?: { prenom?: string; nom?: string; email?: string; organisation?: string } };
+
+interface EtablissementPayload {
+  nom?: string;
+  habitat_type?: string;
+  ville?: string;
+  adresse?: string;
+  capacite?: number;
+  telephone?: string;
+  email?: string;
+  description?: string;
+}
+
 export type PropositionItem = Database["public"]["Tables"]["proposition_items"]["Row"];
 
 export default function PropositionModerationPage({ params }: { params: { id: string } }) {
@@ -50,7 +62,7 @@ export default function PropositionModerationPage({ params }: { params: { id: st
       // Combiner les données
       const propositionWithProfile = {
         ...prop,
-        profiles: profileData
+        profiles: profileData as Record<string, unknown>
       };
       
       setProposition(propositionWithProfile);
@@ -87,7 +99,7 @@ export default function PropositionModerationPage({ params }: { params: { id: st
           console.log('🏗️ Création d\'un nouvel établissement avec payload:', proposition.payload);
           
           // Préparer les données pour l'insertion
-          const etablissementData = { ...(proposition.payload as any) };
+          const etablissementData = { ...(proposition.payload as Record<string, unknown>) };
           
           // Supprimer les champs qui ne doivent pas être dans etablissements
           delete etablissementData.proposeur;
@@ -214,8 +226,8 @@ export default function PropositionModerationPage({ params }: { params: { id: st
         {/* Header avec titre et statut */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white">
           <h1 className="text-2xl font-bold">
-            {proposition.action === 'create' ? '🆕 Création d\'établissement' : 
-             proposition.action === 'update' ? '✏️ Modification d\'établissement' : 
+            {proposition.action === 'create' ? '🆕 Création d&apos;établissement' : 
+             proposition.action === 'update' ? '✏️ Modification d&apos;établissement' : 
              'Proposition'}
           </h1>
           <div className="flex items-center mt-2 space-x-4">
@@ -256,17 +268,17 @@ export default function PropositionModerationPage({ params }: { params: { id: st
                 <div className="bg-white rounded-lg p-4">
                   <span className="font-medium text-gray-700 block text-sm mb-1">Nom complet</span>
                   <p className="text-lg font-semibold text-gray-900">
-                    {(proposition as any).profiles.prenom} {(proposition as any).profiles.nom}
+                    {proposition.profiles?.prenom ?? ''} {proposition.profiles?.nom ?? ''}
                   </p>
                 </div>
                 <div className="bg-white rounded-lg p-4">
                   <span className="font-medium text-gray-700 block text-sm mb-1">Email</span>
-                  <p className="text-lg text-gray-900">{(proposition as any).profiles.email}</p>
+                  <p className="text-lg text-gray-900">{proposition.profiles?.email ?? ''}</p>
                 </div>
-                {(proposition as any).profiles.organisation && (
+                {proposition.profiles?.organisation && (
                   <div className="bg-white rounded-lg p-4">
                     <span className="font-medium text-gray-700 block text-sm mb-1">Organisation</span>
-                    <p className="text-lg text-gray-900">{(proposition as any).profiles.organisation}</p>
+                    <p className="text-lg text-gray-900">{proposition.profiles?.organisation ?? ''}</p>
                   </div>
                 )}
               </div>
@@ -282,53 +294,53 @@ export default function PropositionModerationPage({ params }: { params: { id: st
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-blue-900">
-                    {(proposition.payload as any)?.nom || 'Établissement proposé'}
+                    {(proposition.payload as Record<string, unknown>)?.nom as string || 'Établissement proposé'}
                   </h2>
                   <p className="text-blue-700">Détails de l'établissement</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {(proposition.payload as any)?.habitat_type && (
+                {(proposition.payload as EtablissementPayload)?.habitat_type && (
                   <div className="bg-white rounded-lg p-4">
                     <span className="font-medium text-gray-700 block text-sm mb-1">Type d'habitat</span>
-                    <p className="text-lg font-semibold text-gray-900">{(proposition.payload as any).habitat_type}</p>
+                    <p className="text-lg font-semibold text-gray-900">{(proposition.payload as EtablissementPayload).habitat_type}</p>
                   </div>
                 )}
-                {(proposition.payload as any)?.ville && (
+                {(proposition.payload as EtablissementPayload)?.ville && (
                   <div className="bg-white rounded-lg p-4">
                     <span className="font-medium text-gray-700 block text-sm mb-1">Ville</span>
-                    <p className="text-lg font-semibold text-gray-900">{(proposition.payload as any).ville}</p>
+                    <p className="text-lg font-semibold text-gray-900">{(proposition.payload as EtablissementPayload).ville}</p>
                   </div>
                 )}
-                {(proposition.payload as any)?.adresse && (
+                {(proposition.payload as EtablissementPayload)?.adresse && (
                   <div className="bg-white rounded-lg p-4 md:col-span-2 lg:col-span-1">
                     <span className="font-medium text-gray-700 block text-sm mb-1">Adresse</span>
-                    <p className="text-lg text-gray-900">{(proposition.payload as any).adresse}</p>
+                    <p className="text-lg text-gray-900">{(proposition.payload as EtablissementPayload).adresse}</p>
                   </div>
                 )}
-                {(proposition.payload as any)?.capacite && (
+                {(proposition.payload as EtablissementPayload)?.capacite && (
                   <div className="bg-white rounded-lg p-4">
                     <span className="font-medium text-gray-700 block text-sm mb-1">Capacité</span>
-                    <p className="text-lg font-semibold text-gray-900">{(proposition.payload as any).capacite} places</p>
+                    <p className="text-lg font-semibold text-gray-900">{(proposition.payload as EtablissementPayload).capacite} places</p>
                   </div>
                 )}
-                {(proposition.payload as any)?.telephone && (
+                {(proposition.payload as EtablissementPayload)?.telephone && (
                   <div className="bg-white rounded-lg p-4">
                     <span className="font-medium text-gray-700 block text-sm mb-1">Téléphone</span>
-                    <p className="text-lg text-gray-900">{(proposition.payload as any).telephone}</p>
+                    <p className="text-lg text-gray-900">{(proposition.payload as EtablissementPayload).telephone}</p>
                   </div>
                 )}
-                {(proposition.payload as any)?.email && (
+                {(proposition.payload as EtablissementPayload)?.email && (
                   <div className="bg-white rounded-lg p-4">
                     <span className="font-medium text-gray-700 block text-sm mb-1">Email</span>
-                    <p className="text-lg text-gray-900">{(proposition.payload as any).email}</p>
+                    <p className="text-lg text-gray-900">{(proposition.payload as EtablissementPayload).email}</p>
                   </div>
                 )}
               </div>
-              {(proposition.payload as any)?.description && (
+              {(proposition.payload as EtablissementPayload)?.description && (
                 <div className="mt-4 bg-white rounded-lg p-4">
                   <span className="font-medium text-gray-700 block text-sm mb-2">Description</span>
-                  <p className="text-gray-900 leading-relaxed">{(proposition.payload as any).description}</p>
+                  <p className="text-gray-900 leading-relaxed">{(proposition.payload as EtablissementPayload).description}</p>
                 </div>
               )}
             </div>

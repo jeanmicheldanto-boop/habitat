@@ -194,7 +194,7 @@ export default function AdminCreateEtablissement() {
             <option value="habitat_partage">Habitat partagé</option>
             <option value="logement_independant">Logement indépendant</option>
           </select>
-          <div className="text-xs text-gray-500 mt-1">Ce champ détermine la catégorie principale de l&apos;établissement.</div>
+          <div className="text-xs text-gray-500 mt-1">Ce champ détermine la catégorie principale de l'établissement.</div>
         </div>
         <div>
           <label className="block font-semibold mb-1">Téléphone</label>

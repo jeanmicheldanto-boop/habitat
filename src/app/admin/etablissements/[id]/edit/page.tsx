@@ -69,7 +69,7 @@ export default function EditEtablissementPage() {
     if (etab) {
       setPresentationForm({
         presentation: etab.presentation || "",
-        public_cible: (etab as any).public_cible || "",
+  public_cible: (etab as unknown as { public_cible?: string }).public_cible || "",
       });
     }
   }, [etab]);
@@ -87,7 +87,7 @@ export default function EditEtablissementPage() {
 
     // On ne crée une proposition que si des champs ont changé
     const changedFields = Object.keys(form).filter(
-      (key) => (form as any)[key] !== (etab as any)[key]
+      (key) => (form as Record<string, unknown>)[key] !== (etab as Record<string, unknown>)[key]
     );
     if (changedFields.length === 0) {
       setError("Aucune modification détectée.");
@@ -118,8 +118,8 @@ export default function EditEtablissementPage() {
       proposition_id: proposition.id,
       table_name: "etablissements",
       column_name: field,
-      old_value: (etab as any)[field],
-      new_value: (form as any)[field],
+      old_value: (etab as Record<string, unknown>)[field],
+      new_value: (form as Record<string, unknown>)[field],
       statut: "pending",
     }));
     const { error: itemsError } = await supabase
@@ -150,7 +150,7 @@ export default function EditEtablissementPage() {
     // Ne crée une proposition que si modif
     if (
       presentationForm.presentation === (etab.presentation || "") &&
-      presentationForm.public_cible === ((etab as any).public_cible || "")
+      presentationForm.public_cible === ((etab as unknown as { public_cible?: string }).public_cible || "")
     ) {
       setPresentationError("Aucune modification détectée.");
       return;
@@ -188,12 +188,12 @@ export default function EditEtablissementPage() {
         statut: "pending",
       });
     }
-    if (presentationForm.public_cible !== ((etab as any).public_cible || "")) {
+    if (presentationForm.public_cible !== ((etab as unknown as { public_cible?: string }).public_cible || "")) {
       items.push({
         proposition_id: proposition.id,
         table_name: "etablissements",
         column_name: "public_cible",
-        old_value: (etab as any).public_cible,
+        old_value: (etab as unknown as { public_cible?: string }).public_cible,
         new_value: presentationForm.public_cible,
         statut: "pending",
       });
@@ -254,14 +254,14 @@ export default function EditEtablissementPage() {
         <Link href="/admin/etablissements" className="bg-gray-200 px-4 py-2 rounded font-semibold hover:bg-gray-300">← Retour établissements</Link>
         <Link href="/admin" className="bg-gray-200 px-4 py-2 rounded font-semibold hover:bg-gray-300">← Retour admin</Link>
       </div>
-      <h1 className="text-2xl font-bold mb-6">Édition d’un établissement</h1>
+      <h1 className="text-2xl font-bold mb-6">Édition d&apos;un établissement</h1>
       <div className="mb-6">
         <nav className="flex flex-wrap justify-center gap-x-0.5 gap-y-0 border-b border-gray-300 w-full mx-auto">
           {tabs.map((t: { key: string; label: string }) => (
             <button
               key={t.key}
               className={`px-1.5 py-1.5 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${tab === t.key ? "border-blue-600 text-blue-700" : "border-transparent text-gray-600 hover:text-blue-600"}`}
-              onClick={() => setTab(t.key as any)}
+              onClick={() => setTab(t.key as typeof tab)}
               type="button"
             >
               {t.label}
@@ -361,7 +361,7 @@ export default function EditEtablissementPage() {
             <select
               name="habitat_type"
               value={form.habitat_type || ""}
-              onChange={handleChange}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleChange(e as unknown as React.ChangeEvent<HTMLInputElement>)}
               className="w-full border rounded px-3 py-2"
               required
             >
@@ -370,7 +370,7 @@ export default function EditEtablissementPage() {
               <option value="habitat_partage">Habitat partagé</option>
               <option value="logement_independant">Logement indépendant</option>
             </select>
-            <div className="text-xs text-gray-500 mt-1">Ce champ détermine la catégorie principale de l'établissement.</div>
+            <div className="text-xs text-gray-500 mt-1">Ce champ détermine la catégorie principale de l&apos;établissement.</div>
           </div>
           <div>
             <label className="block font-semibold mb-1">Téléphone</label>
@@ -451,16 +451,17 @@ export default function EditEtablissementPage() {
           <div className="p-6 bg-white border rounded shadow max-w-md mx-auto">
             <h2 className="text-xl font-bold mb-4">Photo principale</h2>
             {/* Affiche la photo actuelle si présente */}
-            {(etab as any).image_path && (
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {(etab as unknown as { image_path?: string }).image_path && typeof (etab as unknown as { image_path?: string }).image_path === "string" && (
               <img
-                src={supabase.storage.from("etablissements").getPublicUrl((etab as any).image_path).data.publicUrl}
+                src={supabase.storage.from("etablissements").getPublicUrl((etab as unknown as { image_path?: string }).image_path as string).data.publicUrl}
                 alt="Photo actuelle"
                 className="max-w-full max-h-48 rounded border mb-4"
               />
             )}
             <UploadPhotoEtablissement
               etablissementId={String(etab.id)}
-              currentPath={(etab as any).image_path}
+              currentPath={(etab as unknown as { image_path?: string }).image_path}
               onUploaded={async (path: string) => {
                 // Met à jour le path dans la fiche établissement via proposition
                 const { data: proposition, error: propError } = await supabase

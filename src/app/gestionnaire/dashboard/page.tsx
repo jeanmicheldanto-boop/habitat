@@ -32,7 +32,7 @@ interface ReclamationPropriete {
 }
 
 export default function GestionnaireDashboard() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<unknown>(null);
   const [propositions, setPropositions] = useState<Proposition[]>([]);
   const [reclamations, setReclamations] = useState<ReclamationPropriete[]>([]);
     const [notifications, setNotifications] = useState<Array<{ id: string; is_read: boolean; title?: string; message?: string; data?: { review_note?: string }; created_at?: string }>>([]);
@@ -90,7 +90,7 @@ export default function GestionnaireDashboard() {
       }
 
       setUser(user);
-      loadData(user.id);
+  loadData((user as { id: string }).id);
     };
 
     checkAuth();
@@ -108,7 +108,7 @@ export default function GestionnaireDashboard() {
     if (tab === 'reclamations') {
       setActiveTab('reclamations');
     }
-  }, [router]);
+  }, [router, loadData]);
 
   useEffect(() => {
     if (!user) return;
@@ -122,7 +122,7 @@ export default function GestionnaireDashboard() {
           event: 'INSERT',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${user.id}`
+          filter: `user_id=eq.${(user as { id: string }).id}`
         },
         (payload) => {
           const newNotification = payload.new;
@@ -228,7 +228,7 @@ export default function GestionnaireDashboard() {
     const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
-      .eq('user_id', user.id)
+  .eq('user_id', (user as { id: string }).id)
       .eq('is_read', false);
 
     if (!error) {
@@ -288,7 +288,7 @@ export default function GestionnaireDashboard() {
               <Image src="/logoDF.png" alt="Logo" width={32} height={32} style={{ height: '2rem', width: 'auto', marginRight: '1rem' }} />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Tableau de bord gestionnaire</h1>
-                <p className="text-sm text-gray-600">Bienvenue, {user?.email}</p>
+                <p className="text-sm text-gray-600">Bienvenue, {(user as { email?: string })?.email}</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -484,10 +484,10 @@ export default function GestionnaireDashboard() {
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <h3 className="text-lg font-medium text-gray-900">
-                            {typeof proposition.payload === 'object' && proposition.payload !== null && 'nom' in proposition.payload ? (proposition.payload as any).nom : 'Établissement sans nom'}
+                            {typeof proposition.payload === 'object' && proposition.payload !== null && 'nom' in proposition.payload ? (proposition.payload as Record<string, unknown>).nom as string : 'Établissement sans nom'}
                           </h3>
                           <p className="mt-1 text-sm text-gray-600">
-                            {typeof proposition.payload === 'object' && proposition.payload !== null && 'ville' in proposition.payload ? (proposition.payload as any).ville : ''} • Type: {typeof proposition.payload === 'object' && proposition.payload !== null && 'habitat_type' in proposition.payload && typeof (proposition.payload as any).habitat_type === 'string' ? (proposition.payload as any).habitat_type.replace('_', ' ') : ''}
+                            {typeof proposition.payload === 'object' && proposition.payload !== null && 'ville' in proposition.payload ? (proposition.payload as Record<string, unknown>).ville as string : ''} • Type: {typeof proposition.payload === 'object' && proposition.payload !== null && 'habitat_type' in proposition.payload && typeof (proposition.payload as Record<string, unknown>).habitat_type === 'string' ? ((proposition.payload as Record<string, unknown>).habitat_type as string).replace('_', ' ') : ''}
                           </p>
                           <p className="mt-2 text-sm text-gray-500">
                             Demandé le {formatDate(proposition.created_at)}

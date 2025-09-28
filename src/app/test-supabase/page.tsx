@@ -9,12 +9,12 @@ interface Etablissement {
 }
 
 interface Results {
-  count?: { count: number | null; error?: any };
-  etablissements?: { data: Etablissement[]; error?: any; count?: number };
-  sousCategories?: { data: any[]; error?: any };
-  user?: { data?: { id?: string; email?: string }; error?: any };
-  rpc?: { data?: any; error?: any };
-  error?: any;
+  count?: { count: number | null; error?: unknown };
+  etablissements?: { data: Etablissement[]; error?: unknown; count?: number };
+  sousCategories?: { data: unknown[]; error?: unknown };
+  user?: { data?: { id?: string; email?: string }; error?: unknown };
+  rpc?: { data?: unknown; error?: unknown };
+  error?: unknown;
 }
 import { supabase } from '@/lib/supabaseClient';
 
@@ -92,7 +92,7 @@ export default function TestSupabasePage() {
           <h2 className="font-bold text-blue-800">📊 Count des établissements</h2>
           <pre className="text-sm mt-2 text-blue-700">
             Count: {results?.count?.count ?? 'null'}
-            {results?.count?.error && `\nErreur: ${JSON.stringify(results.count.error, null, 2)}`}
+            {results?.count?.error ? `\nErreur: ${String(results.count.error)}` : null}
           </pre>
         </div>
 
@@ -101,7 +101,7 @@ export default function TestSupabasePage() {
           <h2 className="font-bold text-green-800">🏢 Établissements récupérés</h2>
           <pre className="text-sm mt-2 text-green-700">
             Nombre: {results?.etablissements?.count ?? 0}
-            {results?.etablissements?.error && `\nErreur: ${JSON.stringify(results.etablissements.error, null, 2)}`}
+            {results?.etablissements?.error ? `\nErreur: ${String(results.etablissements.error)}` : null}
           </pre>
           {results?.etablissements?.data && results.etablissements.data.length > 0 && (
             <div className="mt-2">

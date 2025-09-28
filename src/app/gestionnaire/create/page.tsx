@@ -7,7 +7,7 @@ import Link from 'next/link';
 import AddressAutocomplete from '@/components/AddressAutocomplete';
 import ImageUpload from '@/components/ImageUpload';
 import DepartmentAutocomplete from '@/components/DepartmentAutocomplete';
-import { HABITAT_TAXONOMY, getAllSousCategories } from '@/lib/habitatTaxonomy';
+import { HABITAT_TAXONOMY } from '@/lib/habitatTaxonomy';
 
 interface FormData {
   nom: string;
@@ -48,10 +48,8 @@ export default function CreateEtablissement() {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [user, setUser] = useState<any>(null);
-  const [sousCategories, setSousCategories] = useState<any[]>([]);
-  const [equipementsList, setEquipementsList] = useState<any[]>([]);
-  const [servicesList, setServicesList] = useState<any[]>([]);
+  const [user, setUser] = useState<unknown>(null);
+  // Removed unused state variables: sousCategories, equipementsList, servicesList
   const router = useRouter();
 
   // Vérification de l'authentification
@@ -110,29 +108,7 @@ export default function CreateEtablissement() {
   // Charger les options de sélection
   useEffect(() => {
     const loadOptions = async () => {
-      // Charger les sous-catégories
-      const { data: sousCategs } = await supabase
-        .from('sous_categories')
-        .select('*')
-        .order('nom');
-      
-      if (sousCategs) setSousCategories(sousCategs);
-
-      // Charger les équipements
-      const { data: equips } = await supabase
-        .from('equipements')
-        .select('*')
-        .order('nom');
-      
-      if (equips) setEquipementsList(equips);
-
-      // Charger les services
-      const { data: servs } = await supabase
-        .from('services')
-        .select('*')
-        .order('nom');
-      
-      if (servs) setServicesList(servs);
+      // Removed loading of sous-catégories, équipements, and services (unused)
     };
 
     loadOptions();
@@ -208,7 +184,7 @@ export default function CreateEtablissement() {
         action: 'create',
         statut: 'en_attente',
         source: 'gestionnaire',
-        created_by: user.id,
+  created_by: (user as { id: string }).id,
         payload: {
           ...formData,
           // Inclure le chemin de l'image si elle a été uploadée
@@ -230,8 +206,12 @@ export default function CreateEtablissement() {
       if (error) throw error;
 
       router.push('/gestionnaire/dashboard?success=creation');
-    } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue');
+    } catch (err: unknown) {
+      if (typeof err === 'object' && err !== null && 'message' in err) {
+        setError((err as { message?: string }).message || 'Une erreur est survenue');
+      } else {
+        setError('Une erreur est survenue');
+      }
     } finally {
       setLoading(false);
     }
@@ -428,25 +408,7 @@ export default function CreateEtablissement() {
               </div>
             </div>
 
-            {/* Sous-catégories */}
-            {sousCategories.length > 0 && (
-              <div className="border-b border-gray-200 pb-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Sous-catégories</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {sousCategories.map((categorie) => (
-                    <label key={categorie.id} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={formData.sous_categories.includes(categorie.id.toString())}
-                        onChange={(e) => handleCheckboxChange('sous_categories', categorie.id.toString(), e.target.checked)}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">{categorie.nom}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Sous-catégories section removed (unused) */}
 
             {/* Photo de l'établissement */}
             <div className="border-b border-gray-200 pb-6">

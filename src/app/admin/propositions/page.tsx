@@ -23,9 +23,9 @@ export type PropositionPayload = {
   modifications?: {
     nouvelle_photo_base64?: string;
     nouvelle_photo_filename?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 // Type for profiles field

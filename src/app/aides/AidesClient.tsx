@@ -64,9 +64,9 @@ export default function AidesClient() {
               <div className="flex items-start gap-3">
                 <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-100 text-sm font-semibold text-orange-700">3</span>
                 <div className="space-y-1">
-                  <h3 className="font-semibold text-orange-900">Le point d’entrée pour les infos : votre mairie</h3>
+                  <h3 className="font-semibold text-orange-900">Le point d&apos;entrée pour les infos : votre mairie</h3>
                   <p className="text-gray-700">
-                    Le paysage des aides est un vrai labyrinthe (CLIC, France Services, Département, Service public départemental de l’autonomie…). Dans la pratique, la <strong>mairie</strong> est souvent le meilleur point d’entrée : elle vous oriente vers la bonne porte du territoire.
+                    Le paysage des aides est un vrai labyrinthe (CLIC, France Services, Département, Service public départemental de l&apos;autonomie…). Dans la pratique, la <strong>mairie</strong> est souvent le meilleur point d’entrée : elle vous oriente vers la bonne porte du territoire.
                   </p>
                 </div>
               </div>

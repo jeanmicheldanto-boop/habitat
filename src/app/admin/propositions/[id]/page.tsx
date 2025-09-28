@@ -6,8 +6,21 @@ import type { Database } from "@/lib/database.types";
 import Link from "next/link";
 
 // Types
-export type Proposition = Database["public"]["Tables"]["propositions"]["Row"];
+export type Proposition = Database["public"]["Tables"]["propositions"]["Row"] & { profiles?: { prenom?: string; nom?: string; email?: string; organisation?: string } };
 export type PropositionItem = Database["public"]["Tables"]["proposition_items"]["Row"];
+interface EtablissementPayload {
+  nom?: string;
+  habitat_type?: string;
+  ville?: string;
+  adresse?: string;
+  capacite?: number;
+  telephone?: string;
+  email?: string;
+  description?: string;
+  [key: string]: unknown;
+}
+
+// export type PropositionItem = Database["public"]["Tables"]["proposition_items"]["Row"];
 
 export default function PropositionModerationPage({ params }: { params: { id: string } }) {
   const [proposition, setProposition] = useState<Proposition | null>(null);
@@ -86,7 +99,7 @@ export default function PropositionModerationPage({ params }: { params: { id: st
           console.log('🏗️ Création d\'un nouvel établissement avec payload:', proposition.payload);
           
           // Préparer les données pour l'insertion
-          const etablissementData = { ...(proposition.payload as any) };
+          const etablissementData = { ...(proposition.payload as Record<string, unknown>) };
           
           // Supprimer les champs qui ne doivent pas être dans etablissements
           delete etablissementData.proposeur;
@@ -208,7 +221,7 @@ export default function PropositionModerationPage({ params }: { params: { id: st
   // Debug - afficher les données dans la console
   console.log('🔍 Proposition data:', proposition);
   console.log('🔍 Payload:', proposition.payload);
-  console.log('🔍 Profile:', (proposition as any).profiles);
+  console.log('🔍 Profile:', proposition.profiles);
   console.log('🔍 Items count:', items.length);
   console.log('🔍 Loading state:', loading);
   console.log('🔍 Error state:', error);
@@ -225,8 +238,8 @@ export default function PropositionModerationPage({ params }: { params: { id: st
         {/* Header avec titre et statut */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white">
           <h1 className="text-2xl font-bold">
-            {proposition.action === 'create' ? '🆕 Création d\'établissement' : 
-             proposition.action === 'update' ? '✏️ Modification d\'établissement' : 
+            {proposition.action === 'create' ? '🆕 Création d&apos;établissement' : 
+             proposition.action === 'update' ? '✏️ Modification d&apos;établissement' : 
              'Proposition'}
           </h1>
           <div className="flex items-center mt-2 space-x-4">
@@ -252,7 +265,7 @@ export default function PropositionModerationPage({ params }: { params: { id: st
 
         <div className="p-6 space-y-6">
           {/* Informations du créateur - EN PREMIER */}
-          {(proposition as any).profiles && (
+          {proposition.profiles && (
             <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-6 border border-green-200">
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
@@ -267,17 +280,17 @@ export default function PropositionModerationPage({ params }: { params: { id: st
                 <div className="bg-white rounded-lg p-4">
                   <span className="font-medium text-gray-700 block text-sm mb-1">Nom complet</span>
                   <p className="text-lg font-semibold text-gray-900">
-                    {(proposition as any).profiles.prenom} {(proposition as any).profiles.nom}
+                    {proposition.profiles?.prenom ?? ''} {proposition.profiles?.nom ?? ''}
                   </p>
                 </div>
                 <div className="bg-white rounded-lg p-4">
                   <span className="font-medium text-gray-700 block text-sm mb-1">Email</span>
-                  <p className="text-lg text-gray-900">{(proposition as any).profiles.email}</p>
+                  <p className="text-lg text-gray-900">{proposition.profiles?.email ?? ''}</p>
                 </div>
-                {(proposition as any).profiles.organisation && (
+                {proposition.profiles?.organisation && (
                   <div className="bg-white rounded-lg p-4">
                     <span className="font-medium text-gray-700 block text-sm mb-1">Organisation</span>
-                    <p className="text-lg text-gray-900">{(proposition as any).profiles.organisation}</p>
+                    <p className="text-lg text-gray-900">{proposition.profiles?.organisation ?? ''}</p>
                   </div>
                 )}
               </div>

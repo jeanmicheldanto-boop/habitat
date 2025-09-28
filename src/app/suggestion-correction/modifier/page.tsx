@@ -40,7 +40,7 @@ interface EtablissementData {
   departement?: string;
   geom?: { coordinates: [number, number] };
   logements_types?: LogementType[];
-  restaurations?: any[];
+  restaurations?: unknown[];
   services?: string[];
   tarifications?: TarificationType[];
   sous_categories?: string[];
@@ -57,6 +57,7 @@ interface SousCategorieOption {
 }
 
 export default function ModifierEtablissementPage() {
+  import { useCallback } from 'react';
   const searchParams = useSearchParams();
   const router = useRouter();
   const etablissementId = searchParams.get('etablissement');
@@ -156,7 +157,7 @@ export default function ModifierEtablissementPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState('');
 
-  const loadEtablissementData = async () => {
+  const loadEtablissementData = useCallback(async () => {
     try {
       const { data: etab, error } = await supabase
         .from('etablissements')
@@ -520,7 +521,7 @@ export default function ModifierEtablissementPage() {
                         value={modificationData.telephone}
                         onChange={(e) => setModificationData({...modificationData, telephone: e.target.value})}
                         className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder={etablissement.telephone || 'Non renseigné'}
+                              placeholder={etablissement.telephone || 'Non renseign&eacute;'}
                       />
                     </div>
                     <div>
@@ -532,7 +533,7 @@ export default function ModifierEtablissementPage() {
                         value={modificationData.email}
                         onChange={(e) => setModificationData({...modificationData, email: e.target.value})}
                         className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder={etablissement.email || 'Non renseigné'}
+                              placeholder={etablissement.email || 'Non renseign&eacute;'}
                       />
                     </div>
                     <div>
@@ -544,7 +545,7 @@ export default function ModifierEtablissementPage() {
                         value={modificationData.site_web}
                         onChange={(e) => setModificationData({...modificationData, site_web: e.target.value})}
                         className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder={etablissement.site_web || 'Non renseigné'}
+                              placeholder={etablissement.site_web || 'Non renseign&eacute;'}
                       />
                     </div>
                   </div>
@@ -566,7 +567,7 @@ export default function ModifierEtablissementPage() {
                           value={modificationData.adresse_l1}
                           onChange={(e) => setModificationData({...modificationData, adresse_l1: e.target.value})}
                           className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder={etablissement.adresse_l1 || 'Non renseigné'}
+                          placeholder={etablissement.adresse_l1 || 'Non renseign&eacute;'}
                         />
                       </div>
                       <div>
@@ -578,7 +579,7 @@ export default function ModifierEtablissementPage() {
                           value={modificationData.adresse_l2}
                           onChange={(e) => setModificationData({...modificationData, adresse_l2: e.target.value})}
                           className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder={etablissement.adresse_l2 || 'Non renseigné'}
+                          placeholder={etablissement.adresse_l2 || 'Non renseign&eacute;'}
                         />
                       </div>
                     </div>
@@ -592,7 +593,7 @@ export default function ModifierEtablissementPage() {
                           value={modificationData.code_postal}
                           onChange={(e) => setModificationData({...modificationData, code_postal: e.target.value})}
                           className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder={etablissement.code_postal || 'Non renseigné'}
+                          placeholder={etablissement.code_postal || 'Non renseign&eacute;'}
                         />
                       </div>
                       <div>
@@ -604,7 +605,7 @@ export default function ModifierEtablissementPage() {
                           value={modificationData.commune}
                           onChange={(e) => setModificationData({...modificationData, commune: e.target.value})}
                           className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder={etablissement.commune || 'Non renseigné'}
+                          placeholder={etablissement.commune || 'Non renseign&eacute;'}
                         />
                       </div>
                       <div>
@@ -614,7 +615,7 @@ export default function ModifierEtablissementPage() {
                         <DepartmentAutocomplete
                           value={modificationData.departement}
                           onChange={(value) => setModificationData({...modificationData, departement: value})}
-                          placeholder={etablissement.departement || 'Non renseigné'}
+                          placeholder={etablissement.departement || 'Non renseign&eacute;'}
                           className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
@@ -672,10 +673,11 @@ export default function ModifierEtablissementPage() {
               {activeSection === 'type' && (
                 <div className="bg-white rounded-lg shadow-sm p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">🏠 Type d'habitat et sous-catégorie</h3>
+  <h3 className="text-lg font-semibold text-gray-900 mb-4">🏠 Type d&#39;habitat et sous-catégorie</h3>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Type d'habitat
+                        Type d&#39;habitat
                       </label>
                       <select
                         value={modificationData.habitat_type}
@@ -688,7 +690,7 @@ export default function ModifierEtablissementPage() {
                         <option value="habitat_partage">Habitat partagé</option>
                       </select>
                       <p className="text-sm text-gray-500 mt-1">
-                        Actuel : {etablissement.habitat_type || 'Non renseigné'}
+                        Actuel : {etablissement.habitat_type || 'Non renseign&eacute;'}
                       </p>
                     </div>
                     <div>
@@ -792,7 +794,7 @@ export default function ModifierEtablissementPage() {
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Nombre d'unités
+                              Nombre d&#39;unit&eacute;s
                             </label>
                             <input
                               type="number"
@@ -893,7 +895,7 @@ export default function ModifierEtablissementPage() {
                           }}
                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />
-                        <span className="text-sm">{service.libelle}</span>
+                        <span className="text-sm">{service.libelle.replace("'", "&#39;").replace('"', '&quot;')}</span>
                       </label>
                     ))}
                   </div>

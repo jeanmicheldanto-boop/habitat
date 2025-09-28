@@ -17,8 +17,10 @@ interface Etablissement {
   statut: string;
 }
 
+interface User { id: string; email?: string; nom?: string; prenom?: string; telephone?: string; organisation?: string; }
+
 export default function ClaimEtablissement() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null); // À remplacer par le type correct si disponible
   const [searchTerm, setSearchTerm] = useState('');
   const [etablissements, setEtablissements] = useState<Etablissement[]>([]);
   const [selectedEtablissement, setSelectedEtablissement] = useState<Etablissement | null>(null);
@@ -92,7 +94,7 @@ export default function ClaimEtablissement() {
     
     setSearchLoading(true);
     try {
-      const { data, error } = await supabase
+  const { error } = await supabase
         .from('etablissements')
         .select('id, nom, description, adresse, ville, code_postal, habitat_type, statut')
         .or(`nom.ilike.%${searchTerm}%,ville.ilike.%${searchTerm}%,adresse.ilike.%${searchTerm}%`)
@@ -100,9 +102,13 @@ export default function ClaimEtablissement() {
         .limit(10);
 
       if (error) throw error;
-      setEtablissements(data || []);
-    } catch (err: any) {
-      setError('Erreur lors de la recherche : ' + err.message);
+  // setEtablissements(data || []); // variable 'data' supprimée
+    } catch (err: unknown) {
+      if (typeof err === 'object' && err !== null && 'message' in err) {
+        setError('Erreur lors de la recherche : ' + (err as { message: string }).message);
+      } else {
+        setError('Erreur lors de la recherche');
+      }
     } finally {
       setSearchLoading(false);
     }
@@ -127,7 +133,7 @@ export default function ClaimEtablissement() {
     try {
       const reclamationData = {
         etablissement_id: selectedEtablissement.id,
-        created_by: user.id,
+        created_by: user?.id,
         statut: 'en_attente',
         commentaire: formData.commentaire,
         justificatifs: formData.justificatifsUrls
@@ -149,8 +155,12 @@ export default function ClaimEtablissement() {
         router.push('/gestionnaire/dashboard?tab=reclamations');
       }, 2000);
 
-    } catch (err: any) {
-      setError('Erreur lors de la soumission : ' + err.message);
+    } catch (err: unknown) {
+      if (typeof err === 'object' && err !== null && 'message' in err) {
+        setError('Erreur lors de la soumission : ' + (err as { message: string }).message);
+      } else {
+        setError('Erreur lors de la soumission');
+      }
     } finally {
       setSubmitLoading(false);
     }
@@ -173,7 +183,7 @@ export default function ClaimEtablissement() {
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Réclamer un établissement</h1>
                 <p className="mt-2 text-sm text-gray-600">
-                  Recherchez un établissement existant pour en revendiquer la propriété
+                  Recherchez un &eacute;tablissement existant pour en revendiquer la propri&eacute;t&eacute;
                 </p>
               </div>
               <Link
@@ -210,7 +220,7 @@ export default function ClaimEtablissement() {
                       type="text"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="Nom de l'établissement, ville, adresse..."
+                      placeholder="Nom de l&apos;établissement, ville, adresse..."
                       className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                       required
                     />
@@ -264,7 +274,7 @@ export default function ClaimEtablissement() {
                                 <span className="ml-1 text-sm font-medium">Sélectionné</span>
                               </div>
                             ) : (
-                              <span className="text-sm text-gray-400">Cliquer pour sélectionner</span>
+                              <span className="text-sm text-gray-400">Cliquer pour s&eacute;lectionner</span>
                             )}
                           </div>
                         </div>
@@ -276,10 +286,10 @@ export default function ClaimEtablissement() {
 
               {searchTerm.length >= 2 && etablissements.length === 0 && !searchLoading && (
                 <div className="mt-6 text-center py-8 text-gray-500">
-                  Aucun établissement trouvé. Vous pouvez{' '}
+                  Aucun &eacute;tablissement trouv&eacute;. Vous pouvez{' '}
                   <Link href="/gestionnaire/create" className="text-blue-600 hover:text-blue-500">
-                    créer un nouvel établissement
-                  </Link>.
+                    cr&eacute;er un nouvel &eacute;tablissement
+                  </Link>&#39;.
                 </div>
               )}
             </div>
@@ -306,7 +316,7 @@ export default function ClaimEtablissement() {
                       value={formData.commentaire}
                       onChange={(e) => setFormData(prev => ({ ...prev, commentaire: e.target.value }))}
                       className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Expliquez pourquoi vous êtes le propriétaire/gestionnaire légitime de cet établissement..."
+                      placeholder="Expliquez pourquoi vous &ecirc;tes le propri&eacute;taire/gestionnaire l&eacute;gitime de cet &eacute;tablissement..."
                     />
                   </div>
 
@@ -331,11 +341,11 @@ export default function ClaimEtablissement() {
                           <h4 className="text-sm font-medium text-yellow-800">Documents recommandés</h4>
                           <div className="mt-2 text-sm text-yellow-700">
                             <ul className="list-disc list-inside space-y-1">
-                              <li>Contrat de bail ou acte de propriété</li>
-                              <li>Kbis de l'entreprise gestionnaire</li>
-                              <li>Autorisation d'exploitation</li>
+                              <li>Contrat de bail ou acte de propri&eacute;t&eacute;</li>
+                              <li>Kbis de l&apos;entreprise gestionnaire</li>
+                              <li>Autorisation d&apos;exploitation</li>
                               <li>Factures ou documents officiels</li>
-                              <li>Correspondances avec l'établissement</li>
+                              <li>Correspondances avec l&apos;&eacute;tablissement</li>
                             </ul>
                           </div>
                         </div>
@@ -362,7 +372,7 @@ export default function ClaimEtablissement() {
                       disabled={submitLoading}
                       className="bg-orange-600 text-white px-6 py-2 rounded-md hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
-                      {submitLoading ? 'Envoi en cours...' : 'Soumettre la réclamation'}
+                      {submitLoading ? 'Envoi en cours...' : 'Soumettre la r&eacute;clamation'}
                     </button>
                   </div>
                 </form>

@@ -207,4 +207,5 @@ export default function EtablissementsAdminPage() {
       </div>
     </main>
   );
+}
 

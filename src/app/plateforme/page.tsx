@@ -204,23 +204,24 @@ export default function Page() {
   }, []);
 
   function getFilteredData() {
-    let filtered = data.filter((etab:any) => {
+    const filtered = data.filter((etab:unknown) => {
+      const etabObj = etab as Etablissement;
       // Catégories d'habitat (nouvelles catégories principales)
       if (selectedHabitatCategories.length > 0) {
-        if (!etab.habitat_type) return false;
-        if (!selectedHabitatCategories.includes(etab.habitat_type)) return false;
+        if (!etabObj.habitat_type) return false;
+        if (!selectedHabitatCategories.includes(etabObj.habitat_type)) return false;
       }
       
       // Sous-catégories d'habitat
       if (selectedSousCategories.length > 0) {
-        if (!etab.sous_categories || !Array.isArray(etab.sous_categories)) return false;
-        const hasMatch = selectedSousCategories.some(sc => etab.sous_categories.includes(sc));
+        if (!etabObj.sous_categories || !Array.isArray(etabObj.sous_categories)) return false;
+        const hasMatch = selectedSousCategories.some(sc => etabObj.sous_categories.includes(sc));
         if (!hasMatch) return false;
       }
       
       // Prix
       if (selectedPrices.length > 0) {
-        const dbValue = etab.fourchette_prix;
+        const dbValue = etabObj.fourchette_prix;
         if (!dbValue) return false;
         const uiValue = PRICE_DB_TO_UI[dbValue] as "€"|"€€"|"€€€"|undefined;
         if (!uiValue || !selectedPrices.includes(uiValue)) return false;
@@ -228,22 +229,22 @@ export default function Page() {
       
       // Services dynamiques (au moins un des services sélectionnés doit être présent)
       if (selectedServices.length > 0) {
-        if (!etab.services || !Array.isArray(etab.services)) return false;
-        const hasServiceMatch = selectedServices.some(s => etab.services.includes(s));
+        if (!etabObj.services || !Array.isArray(etabObj.services)) return false;
+        const hasServiceMatch = selectedServices.some(s => etabObj.services.includes(s));
         if (!hasServiceMatch) return false;
       }
       
       // Restauration (toutes les cases cochées doivent être vraies)
       if (Object.values(selectedRestauration).some(Boolean)) {
         for (const key of Object.keys(selectedRestauration)) {
-          if (selectedRestauration[key] && !etab[key]) return false;
+          if (selectedRestauration[key] && !(etabObj as any)[key]) return false;
         }
       }
       
       // Types de logement (au moins un type sélectionné doit être présent)
       if (selectedLogementTypes.length > 0) {
-        if (!Array.isArray(etab.logements_types)) return false;
-        const found = etab.logements_types.some((lt:any) => selectedLogementTypes.includes(lt.libelle));
+        if (!Array.isArray(etabObj.logements_types)) return false;
+        const found = etabObj.logements_types.some((lt:unknown) => selectedLogementTypes.includes((lt as LogementType).libelle));
         if (!found) return false;
       }
       
@@ -256,19 +257,20 @@ export default function Page() {
         selectedCaracteristiques.surface_min ||
         selectedCaracteristiques.surface_max
       ) {
-        if (!Array.isArray(etab.logements_types)) return false;
-        const found = etab.logements_types.some((lt:any) => {
-          if (selectedCaracteristiques.meuble && !lt.meuble) return false;
-          if (selectedCaracteristiques.pmr && !lt.pmr) return false;
-          if (selectedCaracteristiques.domotique && !lt.domotique) return false;
-          if (selectedCaracteristiques.plain_pied && !lt.plain_pied) return false;
+        if (!Array.isArray(etabObj.logements_types)) return false;
+        const found = etabObj.logements_types.some((lt:unknown) => {
+          const logement = lt as LogementType;
+          if (selectedCaracteristiques.meuble && !logement.meuble) return false;
+          if (selectedCaracteristiques.pmr && !logement.pmr) return false;
+          if (selectedCaracteristiques.domotique && !logement.domotique) return false;
+          if (selectedCaracteristiques.plain_pied && !logement.plain_pied) return false;
           if (
             selectedCaracteristiques.surface_min &&
-            (lt.surface_min == null || Number(lt.surface_min) < Number(selectedCaracteristiques.surface_min))
+            (logement.surface_min == null || Number(logement.surface_min) < Number(selectedCaracteristiques.surface_min))
           ) return false;
           if (
             selectedCaracteristiques.surface_max &&
-            (lt.surface_max == null || Number(lt.surface_max) > Number(selectedCaracteristiques.surface_max))
+            (logement.surface_max == null || Number(logement.surface_max) > Number(selectedCaracteristiques.surface_max))
           ) return false;
           return true;
         });
@@ -277,27 +279,27 @@ export default function Page() {
       
       // Public cible (au moins une case cochée doit être présente)
       if (selectedPublicCible.length > 0) {
-        if (!Array.isArray(etab.public_cible)) return false;
-        if (!selectedPublicCible.some(pc => etab.public_cible.includes(pc))) return false;
+        if (!Array.isArray(etabObj.public_cible)) return false;
+        if (!selectedPublicCible.some(pc => etabObj.public_cible.includes(pc))) return false;
       }
       
       // Localisation - Support des codes et noms de départements
-      if (selectedDepartement && etab.departement) {
+  if (selectedDepartement && etabObj.departement) {
         // Si selectedDepartement est un code (2-3 chiffres ou lettres), on compare directement
         // Sinon on fait une recherche textuelle dans le nom du département
         const isCode = /^[\d]{1,3}[AB]?$/.test(selectedDepartement);
         if (isCode) {
           // Comparaison exacte avec le code
-          if (etab.departement !== selectedDepartement) return false;
+          if (etabObj.departement !== selectedDepartement) return false;
         } else {
           // Recherche textuelle dans le nom (pour compatibilité)
-          if (!etab.departement.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(selectedDepartement.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, ''))) return false;
+          if (!etabObj.departement.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(selectedDepartement.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, ''))) return false;
         }
       }
       
       // Filtre éligibilité AVP
-      if (selectedAvpEligibility && etab.eligibilite_statut !== selectedAvpEligibility) return false;
-      if (selectedCommune && etab.commune && !etab.commune.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(selectedCommune.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, ''))) return false;
+  if (selectedAvpEligibility && etabObj.eligibilite_statut !== selectedAvpEligibility) return false;
+  if (selectedCommune && etabObj.commune && !etabObj.commune.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(selectedCommune.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, ''))) return false;
       
       // Recherche texte - recherche globale dans tous les champs pertinents
       if (search) {
@@ -306,43 +308,43 @@ export default function Page() {
         
         const matchesSearch = searchTerms.every(term => {
           // Recherche dans le nom de l'établissement
-          if (etab.nom && etab.nom.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
+          if (etabObj.nom && etabObj.nom.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
           
           // Recherche dans la présentation
-          if (etab.presentation && etab.presentation.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
+          if (etabObj.presentation && etabObj.presentation.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
           
           // Recherche dans la localisation (commune, département, région)
-          if (etab.commune && etab.commune.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
-          if (etab.departement && etab.departement.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
-          if (etab.region && etab.region.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
+          if (etabObj.commune && etabObj.commune.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
+          if (etabObj.departement && etabObj.departement.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
+          if (etabObj.region && etabObj.region.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
           
           // Recherche dans le type d'habitat
-          if (etab.habitat_type) {
-            const habitatLabel = HABITAT_TYPE_LABELS[etab.habitat_type] || etab.habitat_type;
+          if (etabObj.habitat_type) {
+            const habitatLabel = HABITAT_TYPE_LABELS[etabObj.habitat_type] || etabObj.habitat_type;
             if (habitatLabel.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
           }
           
           // Recherche dans les sous-catégories
-          if (Array.isArray(etab.sous_categories)) {
-            if (etab.sous_categories.some((sc: string) => 
+          if (Array.isArray(etabObj.sous_categories)) {
+            if (etabObj.sous_categories.some((sc: string) => 
               sc.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)
             )) return true;
           }
           
           // Recherche dans les services
-          if (Array.isArray(etab.services)) {
-            if (etab.services.some((service: string) => 
+          if (Array.isArray(etabObj.services)) {
+            if (etabObj.services.some((service: string) => 
               service.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)
             )) return true;
           }
           
           // Recherche dans le gestionnaire
-          if (etab.gestionnaire && etab.gestionnaire.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
+          if (etabObj.gestionnaire && etabObj.gestionnaire.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)) return true;
           
           // Recherche dans les types de logement
-          if (Array.isArray(etab.logements_types)) {
-            if (etab.logements_types.some((lt: any) => 
-              lt.libelle && lt.libelle.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)
+          if (Array.isArray(etabObj.logements_types)) {
+            if (etabObj.logements_types.some((lt: unknown) => 
+              (lt as LogementType).libelle && (lt as LogementType).libelle.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes(term)
             )) return true;
           }
           
@@ -402,7 +404,7 @@ export default function Page() {
             </svg>
             <input
               type="text"
-              placeholder="Nom, ville, département, type d'habitat..."
+              placeholder="Nom, ville, département, type d&#39;habitat..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               style={{

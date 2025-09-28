@@ -91,7 +91,7 @@ export default function HomePage() {
         }}>
           <OblongButtonLink href="/aides">Faire le point sur les aides</OblongButtonLink>
           <OblongButtonLink href="/contact" variant="orange">Qui sommes-nous</OblongButtonLink>
-          <OblongButtonLink href="/solutions">Faire le point sur son projet d'habitat</OblongButtonLink>
+          <OblongButtonLink href="/solutions">Faire le point sur son projet d&#39;habitat</OblongButtonLink>
         </div>
       </div>
 
