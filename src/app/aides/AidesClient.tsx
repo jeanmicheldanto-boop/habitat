@@ -10,14 +10,14 @@ export default function AidesClient() {
       <header className="mb-10">
         <h1 className="text-3xl font-bold text-orange-700 mb-4">Les aides</h1>
         <p className="text-lg text-gray-700 mb-2">
-          Rassurez-vous, même des professionnels aguerris s’y perdent parfois dans les dispositifs. Si ce n’est pas clair pour vous, ce n’est pas vous le responsable. La plateforme <em>habitat-intermediaire.fr</em> met à votre disposition des outils <strong>simples</strong> et <strong>pratiques</strong> pour vous repérer et mettre en place, pour vous ou vos proches, les aides utiles pour bien vieillir.
+          Rassurez-vous, même des professionnels aguerris s&#39;y perdent parfois dans les dispositifs. Si ce n&#39;est pas clair pour vous, ce n&#39;est pas vous le responsable. La plateforme <em>habitat-intermediaire.fr</em> met à votre disposition des outils <strong>simples</strong> et <strong>pratiques</strong> pour vous repérer et mettre en place, pour vous ou vos proches, les aides utiles pour bien vieillir.
         </p>
         <p className="text-md text-gray-600 mb-2">
-          Notre objectif n’est pas de vous vendre quoi que ce soit, mais de rendre accessibles les services offerts aux personnes en perte d’autonomie, quel que soit leur statut. Notre approche s’appuie sur notre <strong>expérience d’aidant</strong> et notre <strong>expertise du secteur</strong>. Nous ne sommes pas une institution officielle, ce qui nous permet de parler vrai. On parle ici de ce qui compte au quotidien : <em>participation</em> à l’APA, <em>vrai coût</em> des solutions, et repères concrets.
+          Notre objectif n&#39;est pas de vous vendre quoi que ce soit, mais de rendre accessibles les services offerts aux personnes en perte d&#39;autonomie, quel que soit leur statut. Notre approche s&#39;appuie sur notre <strong>expérience d&#39;aidant</strong> et notre <strong>expertise du secteur</strong>. Nous ne sommes pas une institution officielle, ce qui nous permet de parler vrai. On parle ici de ce qui compte au quotidien : <em>participation</em> à l&#39;APA, <em>vrai coût</em> des solutions, et repères concrets.
         </p>
         <div className="mt-6 p-6 bg-orange-50 rounded-lg border border-orange-200">
           <p className="text-md text-orange-900">
-            Si vous traversez une période de stress — “Comment on s&apos;organise ?”, “Rester chez moi ?”, “Combien ça coûte ?” — vous n&apos;êtes pas seul. Ces moments peuvent aussi ouvrir sur de <strong>belles rencontres</strong> et une vraie <strong>prévention</strong>. Bonne nouvelle : <strong>des aides existent</strong> et vous pouvez être accompagné.
+            Si vous traversez une période de stress — “Comment on s&#39;organise ?”, “Rester chez moi ?”, “Combien ça coûte ?” — vous n&#39;êtes pas seul. Ces moments peuvent aussi ouvrir sur de <strong>belles rencontres</strong> et une vraie <strong>prévention</strong>. Bonne nouvelle : <strong>des aides existent</strong> et vous pouvez être accompagné.
           </p>
         </div>
       </header>
@@ -41,7 +41,7 @@ export default function AidesClient() {
                 <div className="space-y-1">
                   <h3 className="font-semibold text-orange-900">Penser prévention avant de penser « dépendance »</h3>
                   <p className="text-gray-700">
-                    Inutile de trop anticiper sur ce qui n’ira pas : on peut agir aujourd’hui pour aller mieux demain. Trois domaines ont largement fait leurs preuves : <strong>parler</strong>, <strong>bouger</strong>, <strong>bien manger</strong>. Le <em>lien social</em> (conversations régulières), l’<em>activité physique</em> (même douce) et une <em>alimentation</em> saine et plaisante préservent vos capacités. Pour évaluer votre degré d'autonomie et accéder à des conseils personnalisés, vous pouvez utiliser {" "}
+                    Inutile de trop anticiper sur ce qui n’ira pas : on peut agir aujourd’hui pour aller mieux demain. Trois domaines ont largement fait leurs preuves : <strong>parler</strong>, <strong>bouger</strong>, <strong>bien manger</strong>. Le <em>lien social</em> (conversations régulières), l’<em>activité physique</em> (même douce) et une <em>alimentation</em> saine et plaisante préservent vos capacités. Pour évaluer votre degré d&#39;autonomie et accéder à des conseils personnalisés, vous pouvez utiliser {" "}
                     <Link href="https://jeanmicheldanto-boop-simulateur-apa-simple-app-ynirfr.streamlit.app/" target="_blank" rel="noopener noreferrer" className="font-semibold !text-orange-600 hover:!text-orange-700 underline !decoration-orange-600 decoration-2 underline-offset-2">notre simulateur GIR</Link>
                   </p>
                 </div>
@@ -64,9 +64,9 @@ export default function AidesClient() {
               <div className="flex items-start gap-3">
                 <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-100 text-sm font-semibold text-orange-700">3</span>
                 <div className="space-y-1">
-                  <h3 className="font-semibold text-orange-900">Le point d&apos;entrée pour les infos : votre mairie</h3>
+                  <h3 className="font-semibold text-orange-900">Le point d&#39;entrée pour les infos : votre mairie</h3>
                   <p className="text-gray-700">
-                    Le paysage des aides est un vrai labyrinthe (CLIC, France Services, Département, Service public départemental de l&apos;autonomie…). Dans la pratique, la <strong>mairie</strong> est souvent le meilleur point d’entrée : elle vous oriente vers la bonne porte du territoire.
+                    Le paysage des aides est un vrai labyrinthe (CLIC, France Services, Département, Service public départemental de l&#39;autonomie…). Dans la pratique, la <strong>mairie</strong> est souvent le meilleur point d&#39;entrée : elle vous oriente vers la bonne porte du territoire.
                   </p>
                 </div>
               </div>
