@@ -163,7 +163,7 @@ export default function SuggestionCorrectionPage() {
             {/* Type de correction */}
             <div>
               <label htmlFor="typeCorrection" className="block text-sm font-medium text-gray-700 mb-1">
-                Type d'information à corriger *
+                Type d&apos;information à corriger *
               </label>
               <select
                 id="typeCorrection"

@@ -129,7 +129,7 @@ export default function EtablissementsAdminPage() {
     fetchEtabs();
   }, [search, departement]);
 
-  // Récupère la liste unique des départements pour l'autocomplétion
+  // Récupère la liste unique des départements pour l&apos;autocomplétion
   useEffect(() => {
     async function fetchDepartements() {
   const { data }: { data: Array<{ departement: string }> | null } = await supabase

@@ -6,7 +6,7 @@ import { getHabitatImage } from '@/lib/habitatImages';
 import BadgeIcon from './BadgeIcon';
 import AvpBadge from './AvpBadge';
 
-interface EtablissementResult {
+export interface EtablissementResult {
   etab_id: string;
   nom: string;
   commune?: string;

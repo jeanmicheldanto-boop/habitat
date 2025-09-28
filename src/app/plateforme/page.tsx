@@ -6,6 +6,7 @@ import HeaderSubnavGate from "@/components/HeaderSubnavGate";
 import DepartmentAutocomplete from "@/components/DepartmentAutocomplete";
 import MobileFilters from "@/components/MobileFilters";
 import MobileResultsList from "@/components/MobileResultsList";
+import type { EtablissementResult } from "@/components/MobileResultsList";
 import { supabase } from "../../lib/supabaseClient";
 import { HABITAT_TAXONOMY, getSousCategorieColor, getAllSousCategories, getCategoryByKey } from "@/lib/habitatTaxonomy";
 import { getHabitatImage } from "@/lib/habitatImages";
@@ -504,7 +505,7 @@ export default function Page() {
             </div>
           ) : (
             <MobileResultsList 
-              results={filteredData}
+              results={filteredData as EtablissementResult[]}
               publicCibleOptions={PUBLIC_CIBLE_OPTIONS}
               restaurationOptions={RESTAURATION_OPTIONS}
             />
@@ -548,7 +549,7 @@ export default function Page() {
           selectedCaracteristiques={selectedCaracteristiques}
           setSelectedCaracteristiques={setSelectedCaracteristiques}
           allServices={allServices}
-          allLogementTypes={allLogementTypes}
+          // allLogementTypes prop removed to match MobileFiltersProps
           resultsCount={filteredData.length}
         />
       </main>

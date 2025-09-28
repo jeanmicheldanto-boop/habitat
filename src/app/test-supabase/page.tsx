@@ -1,10 +1,25 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
+interface Etablissement {
+  id: string;
+  nom: string;
+  ville?: string;
+}
+
+interface Results {
+  count?: { count: number | null; error?: any };
+  etablissements?: { data: Etablissement[]; error?: any; count?: number };
+  sousCategories?: { data: any[]; error?: any };
+  user?: { data?: { id?: string; email?: string }; error?: any };
+  rpc?: { data?: any; error?: any };
+  error?: any;
+}
 import { supabase } from '@/lib/supabaseClient';
 
 export default function TestSupabasePage() {
-  const [results, setResults] = useState<Record<string, unknown> | null>(null);
+  const [results, setResults] = useState<Results | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,9 +62,9 @@ export default function TestSupabasePage() {
 
         setResults({
           count: { count, error: countError },
-          etablissements: { data: etablissements, error: errorEtab, count: etablissements?.length },
-          sousCategories: { data: sousCategories, error: scError },
-          user: { data: user, error: userError },
+          etablissements: { data: etablissements ?? [], error: errorEtab, count: etablissements?.length ?? 0 },
+          sousCategories: { data: sousCategories ?? [], error: scError },
+          user: { data: user ?? {}, error: userError },
           rpc: { data: rpcResult, error: rpcError }
         });
       } catch (err) {

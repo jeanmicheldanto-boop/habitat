@@ -1,19 +1,34 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+
+interface Proposition {
+  id: string;
+  payload?: {
+    nom?: string;
+    ville?: string;
+  };
+  type_cible?: string;
+  action?: string;
+  source?: string;
+  statut?: string;
+  created_at?: string;
+  reviewed_at?: string;
+  review_note?: string;
+}
 import { supabase } from '@/lib/supabaseClient';
 
 export default function CheckPropositions() {
-  const [propositions, setPropositions] = useState([]);
-  const [stats, setStats] = useState({ total: 0, etablissements: 0 });
+  const [propositions, setPropositions] = useState<Proposition[]>([]);
+  const [stats, setStats] = useState<{ total: number; etablissements: number }>({ total: 0, etablissements: 0 });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     checkData();
   }, []);
 
-  const checkData = async () => {
+  const checkData = async (): Promise<void> => {
     setLoading(true);
     setError(null);
     
@@ -38,17 +53,21 @@ export default function CheckPropositions() {
       setStats({ total: propCount || 0, etablissements: etabCount || 0 });
       
     } catch (err) {
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Erreur inconnue');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString('fr-FR');
+  const formatDate = (dateString: string | undefined): string => {
+    return dateString ? new Date(dateString).toLocaleString('fr-FR') : '';
   };
 
-  const getStatusBadge = (statut) => {
+  const getStatusBadge = (statut: string | undefined) => {
     const colors = {
       en_attente: { bg: '#fef3c7', text: '#92400e', border: '#f59e0b' },
       approuvee: { bg: '#d1fae5', text: '#065f46', border: '#10b981' },
@@ -56,9 +75,7 @@ export default function CheckPropositions() {
       rejetee: { bg: '#fee2e2', text: '#991b1b', border: '#ef4444' },
       retiree: { bg: '#f3f4f6', text: '#374151', border: '#6b7280' }
     };
-    
-    const color = colors[statut] || colors.en_attente;
-    
+    const color = statut && colors[statut as keyof typeof colors] ? colors[statut as keyof typeof colors] : colors.en_attente;
     return (
       <span
         style={{
