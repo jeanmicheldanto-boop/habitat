@@ -87,8 +87,8 @@ export default function ModifierEtablissementPage() {
   const etablissementId = '';
   
   const [etablissement, setEtablissement] = useState<EtablissementData | null>(null);
-  const [servicesOptions, setServicesOptions] = useState<ServiceOption[]>([]);
-  const [sousCategories, setSousCategories] = useState<SousCategorieOption[]>([]);
+  const [servicesOptions] = useState<ServiceOption[]>([]);
+  const [sousCategories] = useState<SousCategorieOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('contact');
   
@@ -584,14 +584,14 @@ export default function ModifierEtablissementPage() {
               {/* Section Photo */}
               {activeSection === 'photo' && (
                 <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">📷 Photo de l'établissement</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">📷 Photo de l&#39;établissement</h3>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Proposer une nouvelle photo
                       </label>
                       <p className="text-sm text-gray-500 mb-4">
-                        Vous pouvez proposer une nouvelle photo pour remplacer ou compléter la photo actuelle de l'établissement.
+                        Vous pouvez proposer une nouvelle photo pour remplacer ou compléter la photo actuelle de l&#39;établissement.
                       </p>
                       <ImageUpload
                         onImageSelected={(url, file) => setModificationData({
@@ -614,7 +614,7 @@ export default function ModifierEtablissementPage() {
                             <ul className="list-disc list-inside space-y-1">
                               <li>Formats acceptés : JPG, PNG, WebP</li>
                               <li>Taille maximum : 5 MB</li>
-                              <li>Privilégiez les photos de qualité et représentatives de l'établissement</li>
+                              <li>Privilégiez les photos de qualité et représentatives de l&#39;établissement</li>
                               <li>La photo proposée sera examinée avant validation</li>
                               <li>L'image sera stockée temporairement avec votre proposition</li>
                             </ul>
@@ -629,7 +629,7 @@ export default function ModifierEtablissementPage() {
               {/* Section Type & Catégorie */}
               {activeSection === 'type' && (
                 <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">🏠 Type d'habitat et sous-catégorie</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">🏠 Type d&#39;habitat et sous-catégorie</h3>
   <h3 className="text-lg font-semibold text-gray-900 mb-4">🏠 Type d&#39;habitat et sous-catégorie</h3>
                   <div className="space-y-4">
                     <div>
@@ -642,9 +642,9 @@ export default function ModifierEtablissementPage() {
                         className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="">Sélectionner un type</option>
-                        <option value="logement_independant">Logement indépendant</option>
+                        <option value="logement_independant">Logement ind&eacute;pendant</option>
                         <option value="residence">Résidence</option>
-                        <option value="habitat_partage">Habitat partagé</option>
+                        <option value="habitat_partage">Habitat partag&eacute;</option>
                       </select>
                       <p className="text-sm text-gray-500 mt-1">
                         Actuel : {etablissement.habitat_type || 'Non renseign&eacute;'}
@@ -789,7 +789,7 @@ export default function ModifierEtablissementPage() {
                     ))}
                     {modificationData.logements_types.length === 0 && (
                       <p className="text-gray-500 text-center py-8">
-                        Aucun type de logement configuré. Cliquez sur "Ajouter un type" pour commencer.
+                        Aucun type de logement configur&eacute;. Cliquez sur &quot;Ajouter un type&quot; pour commencer.
                       </p>
                     )}
                   </div>
@@ -852,7 +852,7 @@ export default function ModifierEtablissementPage() {
                           }}
                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />
-                        <span className="text-sm">{service.libelle.replace("'", "&#39;").replace('"', '&quot;')}</span>
+                        <span className="text-sm">{service.libelle.replace(/'/g, "&#39;").replace(/"/g, "&quot;")}</span>
                       </label>
                     ))}
                   </div>
@@ -971,7 +971,7 @@ export default function ModifierEtablissementPage() {
                     ))}
                     {modificationData.tarifications.length === 0 && (
                       <p className="text-gray-500 text-center py-8">
-                        Aucun tarif configuré. Cliquez sur "Ajouter un tarif" pour commencer.
+                        Aucun tarif configur&eacute;. Cliquez sur &quot;Ajouter un tarif&quot; pour commencer.
                       </p>
                     )}
                   </div>
