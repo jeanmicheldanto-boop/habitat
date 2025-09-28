@@ -7,9 +7,9 @@ export default function AdminPage() {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      window.location.href = '/';
+  window.location.href = "/";
     } catch (error) {
-      console.error('Erreur lors de la déconnexion:', error);
+  console.error('Erreur lors de la déconnexion:', error);
     }
   };
 

@@ -8,7 +8,7 @@ function loadEnvVars() {
   const envPath = path.join(__dirname, '.env.local');
   
   if (!fs.existsSync(envPath)) {
-    console.error('❌ Fichier .env.local non trouvé');
+  console.error('❌ Fichier .env.local non trouvé');
     process.exit(1);
   }
 
