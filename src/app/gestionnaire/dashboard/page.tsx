@@ -43,6 +43,42 @@ export default function GestionnaireDashboard() {
   const [successMessage, setSuccessMessage] = useState('');
   const router = useRouter();
 
+    // Déclaration déplacée : loadData
+    const loadData = async (userId: string) => {
+      try {
+        // Charger les propositions
+        const { data: proposData } = await supabase
+          .from('propositions')
+          .select('*')
+          .eq('created_by', userId)
+          .order('created_at', { ascending: false });
+
+        if (proposData) setPropositions(proposData);
+
+        // Charger les réclamations de propriété
+        const { data: reclamData } = await supabase
+          .from('reclamations_propriete')
+          .select(`
+            *,
+            etablissement:etablissements(nom, ville)
+          `)
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
+
+        if (reclamData) setReclamations(reclamData);
+
+        // Charger les notifications
+        await loadNotifications(userId);
+      } catch (error) {
+        console.error('Erreur lors du chargement:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+
+  // Déclaration déplacée : loadData
+
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -90,7 +126,7 @@ export default function GestionnaireDashboard() {
       }
 
       setUser(user);
-  loadData((user as { id: string }).id);
+      loadData((user as { id: string }).id);
     };
 
     checkAuth();
@@ -162,37 +198,6 @@ export default function GestionnaireDashboard() {
     }
   }, [showNotifications]);
 
-  const loadData = async (userId: string) => {
-    try {
-      // Charger les propositions
-      const { data: proposData } = await supabase
-        .from('propositions')
-        .select('*')
-        .eq('created_by', userId)
-        .order('created_at', { ascending: false });
-
-      if (proposData) setPropositions(proposData);
-
-      // Charger les réclamations de propriété
-      const { data: reclamData } = await supabase
-        .from('reclamations_propriete')
-        .select(`
-          *,
-          etablissement:etablissements(nom, ville)
-        `)
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (reclamData) setReclamations(reclamData);
-
-      // Charger les notifications
-      await loadNotifications(userId);
-    } catch (error) {
-      console.error('Erreur lors du chargement:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const loadNotifications = async (userId: string) => {
     const { data: notificationsData, error } = await supabase
