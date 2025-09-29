@@ -47,17 +47,37 @@ export default function MobileResultsList({ results, publicCibleOptions, restaur
         const badgeLabel = sousCat?.label || sousCategorie?.charAt(0).toUpperCase() + sousCategorie?.slice(1) || "Autre";
         return (
           <div key={etab.etab_id} style={{ background: '#fff', borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', overflow: 'hidden', border: '1px solid #f0f0f0' }}>
-            <div style={{ width: '100%', height: 200, background: '#f8f8f8', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+            <div style={{ 
+              width: '100%', 
+              height: 220, 
+              background: '#f8f8f8', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              position: 'relative',
+              overflow: 'hidden',
+              borderRadius: '16px 16px 0 0'
+            }}>
               <Image
                 src={etab.image_path 
                   ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${etab.image_path}`
                   : getHabitatImage(etab.sous_categories ?? null)}
-                alt={etab.nom}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                width={400}
-                height={200}
-                className="rounded-md w-20 h-20 object-cover border"
-                unoptimized
+                alt={`Image de ${etab.nom}`}
+                fill
+                style={{ 
+                  objectFit: 'cover',
+                  objectPosition: 'center'
+                }}
+                sizes="(max-width: 768px) 100vw, 400px"
+                placeholder="blur"
+                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLCJvTUReu+lQblbqfVZP2mvs="
+                priority={false}
+                unoptimized={false}
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  target.style.objectFit = 'contain';
+                  target.style.backgroundColor = '#f8f8f8';
+                }}
               />
               <div style={{ position: 'absolute', top: 12, left: 12, background: badgeColor, color: 'white', padding: '6px 12px', borderRadius: 20, fontSize: '0.8rem', fontWeight: 600, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>{badgeLabel}</div>
               <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 2, background: 'rgba(255,255,255,0.9)', padding: '6px 10px', borderRadius: 16, backdropFilter: 'blur(10px)' }}>
@@ -119,4 +139,3 @@ export default function MobileResultsList({ results, publicCibleOptions, restaur
     </div>
   );
 }
-

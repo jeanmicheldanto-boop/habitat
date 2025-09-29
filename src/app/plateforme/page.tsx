@@ -8,7 +8,7 @@ import MobileFilters from "@/components/MobileFilters";
 import MobileResultsList from "@/components/MobileResultsList";
 import type { EtablissementResult } from "@/components/MobileResultsList";
 import { supabase } from "../../lib/supabaseClient";
-import { HABITAT_TAXONOMY, getSousCategorieColor, getAllSousCategories, getCategoryByKey } from "@/lib/habitatTaxonomy";
+import { HABITAT_TAXONOMY, getSousCategorieColor, getAllSousCategories, getCategoryByKey, getHabitatTypeFromSousCategorie, doesSousCategorieMatchHabitatType, findSousCategorieWithTolerance } from "@/lib/habitatTaxonomy";
 import { getHabitatImage } from "@/lib/habitatImages";
 import { getSupabaseImageUrl } from "@/lib/imageUtils";
 import BadgeIcon from "@/components/BadgeIcon";
@@ -16,12 +16,12 @@ import AvpBadge from "@/components/AvpBadge";
 import "./plateforme.css";
 import Image from "next/image";
 
+// Labels des habitat_type selon le nouveau mapping centralisé
 const HABITAT_TYPE_LABELS: Record<string, string> = {
-  // Anciens labels - remplacés par la taxonomie
-  logement_independant: "Logement indépendant",
   residence: "Résidence",
-  habitat_partage: "Habitat partagé",
-  // Nouveaux labels de la taxonomie
+  habitat_partage: "Habitat partagé", 
+  logement_independant: "Logement indépendant",
+  // Anciens labels pour compatibilité
   habitat_individuel: "Habitat individuel",
   logement_individuel_en_residence: "Logement individuel en résidence",
 };
@@ -177,17 +177,50 @@ export default function Page(): JSX.Element {
 
   function getFilteredData(): Etablissement[] {
     const filtered = data.filter((etab: Etablissement) => {
-      // Catégories d'habitat (nouvelles catégories principales)
+      // Logique de filtres améliorée avec correspondance centralisée
+
+      // 1. Catégories d'habitat (avec validation du mapping)
       if (selectedHabitatCategories.length > 0) {
         if (!etab.habitat_type) return false;
         if (!selectedHabitatCategories.includes(etab.habitat_type)) return false;
       }
 
-      // Sous-catégories d'habitat
+      // 2. Sous-catégories d'habitat avec validation de la correspondance habitat_type
       if (selectedSousCategories.length > 0) {
         if (!etab.sous_categories || !Array.isArray(etab.sous_categories)) return false;
-        const hasMatch = selectedSousCategories.some((sc) => etab.sous_categories!.includes(sc));
-        if (!hasMatch) return false;
+        
+        // Vérifier qu'au moins une sous-catégorie de l'établissement correspond aux filtres sélectionnés
+        const hasValidMatch = etab.sous_categories.some((sc) => {
+          // D'abord, vérifier si la sous-catégorie est directement sélectionnée
+          if (!selectedSousCategories.includes(sc)) return false;
+          
+          // Si des catégories habitat sont aussi sélectionnées, vérifier la cohérence
+          if (selectedHabitatCategories.length > 0) {
+            const sousCategorieHabitatType = getHabitatTypeFromSousCategorie(sc);
+            if (!sousCategorieHabitatType) return true; // Si pas de mapping trouvé, on accepte
+            return selectedHabitatCategories.includes(sousCategorieHabitatType);
+          }
+          
+          return true;
+        });
+        
+        if (!hasValidMatch) return false;
+      }
+
+      // 3. Cohérence entre habitat_type de l'établissement et les sous-catégories sélectionnées
+      if (selectedSousCategories.length > 0 && etab.habitat_type && etab.sous_categories) {
+        const isConsistent = etab.sous_categories.some((sc) => {
+          return doesSousCategorieMatchHabitatType(sc, etab.habitat_type!);
+        });
+        
+        // Si aucune sous-catégorie ne correspond au habitat_type, on essaie la recherche avec tolérance
+        if (!isConsistent) {
+          const hasToleranceMatch = etab.sous_categories.some((sc) => {
+            const foundSc = findSousCategorieWithTolerance(sc);
+            return foundSc && doesSousCategorieMatchHabitatType(foundSc.key, etab.habitat_type!);
+          });
+          if (!hasToleranceMatch) return false;
+        }
       }
 
       // Prix

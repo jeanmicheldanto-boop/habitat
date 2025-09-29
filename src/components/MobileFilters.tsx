@@ -131,7 +131,7 @@ export default function MobileFilters({
 
   return (
     <>
-      {/* Bouton de déclenchement des filtres */}
+          {/* Bouton de déclenchement des filtres */}
       <div style={{ 
         position: 'fixed', 
         bottom: 20, 
@@ -144,20 +144,23 @@ export default function MobileFilters({
       }}>
         <button
           onClick={() => setIsOpen(true)}
+          onTouchStart={() => {}} // Améliore la réactivité tactile
           style={{
             background: 'linear-gradient(135deg, #a85b2b 0%, #d35400 100%)',
             color: 'white',
             border: 'none',
             borderRadius: 25,
-            padding: '12px 24px',
-            fontSize: '0.95rem',
+            padding: '16px 28px', // Zone tactile plus grande
+            fontSize: '1rem',
             fontWeight: 600,
             boxShadow: '0 4px 20px rgba(168, 91, 43, 0.4)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: 8,
-            transition: 'all 0.3s ease'
+            gap: 10,
+            transition: 'all 0.3s ease',
+            minHeight: 48, // Taille minimale recommandée pour mobile
+            touchAction: 'manipulation' // Optimise les interactions tactiles
           }}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -233,16 +236,18 @@ export default function MobileFilters({
             </h2>
             <button
               onClick={() => setIsOpen(false)}
+              onTouchStart={() => {}} // Améliore la réactivité tactile
               style={{
                 background: 'rgba(255,255,255,0.2)',
                 border: 'none',
                 borderRadius: '50%',
-                width: 36,
-                height: 36,
+                width: 44, // Zone tactile plus grande
+                height: 44,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                touchAction: 'manipulation'
               }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

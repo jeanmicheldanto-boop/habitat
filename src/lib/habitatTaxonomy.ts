@@ -1,8 +1,9 @@
-// Nouvelle taxonomie des types d'habitat
+// Taxonomie des types d'habitat - Mapping centralisé selon les spécifications
 export interface HabitatCategory {
   key: string;
   label: string;
   icon: string;
+  color: string;
   sousCategories: SousCategorie[];
 }
 
@@ -12,76 +13,94 @@ export interface SousCategorie {
   aliases?: string[];
 }
 
+// MAPPING CENTRAL : chaque habitat_type avec ses sous-catégories exactes
 export const HABITAT_TAXONOMY: HabitatCategory[] = [
   {
-    key: "habitat_individuel",
-    label: "Habitat individuel",
-    icon: "🏠",
+    key: "residence",
+    label: "Résidence",
+    icon: "🏢",
+    color: "#0074d9", // Bleu
     sousCategories: [
       {
-        key: "beguinage",
-        label: "Béguinage"
+        key: "residence_autonomie",
+        label: "Résidence autonomie",
+        aliases: ["ra", "foyer-logement", "résidence autonomie"]
       },
       {
-        key: "habitat_regroupe",
-        label: "Habitat regroupé"
+        key: "residence_services_seniors",
+        label: "Résidence services seniors",
+        aliases: ["résidence services", "résidence services séniors", "résidence service séniors"]
       },
       {
-        key: "village_seniors",
-        label: "Village seniors"
+        key: "marpa",
+        label: "MARPA",
+        aliases: ["marpa"]
       }
     ]
   },
   {
     key: "habitat_partage",
-    label: "Habitat partagé", 
+    label: "Habitat partagé",
     icon: "👥",
+    color: "#ff851b", // Orange
     sousCategories: [
       {
-        key: "accueil_familial",
-        label: "Accueil familial"
-      },
-      {
         key: "colocation_avec_services",
-        label: "Colocation avec services"
-      },
-      {
-        key: "habitat_alternatif",
-        label: "Habitat alternatif"
-      },
-      {
-        key: "habitat_inclusif",
-        label: "Habitat inclusif"
+        label: "Colocation avec services",
+        aliases: ["colocation"]
       },
       {
         key: "habitat_intergenerationnel",
         label: "Habitat intergénérationnel",
-        aliases: ["intergénérationnel"]
+        aliases: ["intergénérationnel", "intergenerationnel"]
+      },
+      {
+        key: "habitat_inclusif",
+        label: "Habitat inclusif",
+        aliases: ["inclusif"]
+      },
+      {
+        key: "habitat_alternatif",
+        label: "Habitat alternatif",
+        aliases: ["alternatif", "autre", "maison partagée"]
+      },
+      {
+        key: "accueil_familial",
+        label: "Accueil familial",
+        aliases: ["accueil"]
       },
       {
         key: "maison_accueil_familial",
-        label: "Maison d'accueil familial"
+        label: "Maison d'accueil familial",
+        aliases: ["maf", "maison accueil"]
       }
     ]
   },
   {
-    key: "logement_individuel_en_residence", 
-    label: "Logement individuel en résidence",
-    icon: "🏢",
+    key: "logement_independant",
+    label: "Logement indépendant",
+    icon: "🏠",
+    color: "#2e8b57", // Vert
     sousCategories: [
       {
-        key: "marpa",
-        label: "MARPA"
+        key: "beguinage",
+        label: "Béguinage",
+        aliases: ["béguinage"]
       },
       {
-        key: "residence_autonomie",
-        label: "Résidence autonomie",
-        aliases: ["ra", "foyer-logement"]
+        key: "village_seniors",
+        label: "Village seniors",
+        aliases: ["village senior", "village"]
       },
       {
-        key: "residence_services_seniors",
-        label: "Résidence services seniors",
-        aliases: ["résidence services"]
+        key: "logement_adapte",
+        label: "Logement adapté",
+        aliases: ["logement adapté", "adapte"]
+      },
+      {
+        key: "habitat_regroupe",
+        label: "Habitat regroupé",
+        aliases: ["habitat regroupé", "regroupe", "regroupé"]
       }
     ]
   }
@@ -128,58 +147,56 @@ export const findSousCategorieByLabelOrAlias = (search: string): SousCategorie |
   });
 };
 
-// Mapper les anciennes valeurs vers les nouvelles clés
-export const MIGRATION_MAP: Record<string, string> = {
-  // Anciens habitat_type vers nouvelles catégories
-  "logement_independant": "habitat_individuel",
-  "residence": "logement_individuel_en_residence", 
-  "habitat_partage": "habitat_partage",
-  
-  // Anciennes sous-catégories vers nouvelles clés
-  "résidence autonomie": "residence_autonomie",
-  "résidence services": "residence_services_seniors",
-  "résidence service séniors": "residence_services_seniors",
-  "colocation": "colocation_avec_services",
-  "maison partagée": "habitat_alternatif",
-  "béguinage": "beguinage",
-  "ehpad": "residence_autonomie", // À revoir selon le contexte
-  "foyer logement": "residence_autonomie",
-  "habitat inclusif": "habitat_inclusif",
-  "accueil familial": "accueil_familial",
-  "logement accompagné": "habitat_inclusif",
-  "autre": "habitat_alternatif"
-};
-
-// Couleurs pour l'affichage des catégories et sous-catégories
-export const CATEGORY_COLORS: Record<string, string> = {
-  // Catégories principales
-  "habitat_individuel": "#2b7fa8",
-  "habitat_partage": "#2ba85b", 
-  "logement_individuel_en_residence": "#a85b2b",
-  
-  // Sous-catégories spécifiques (optionnel, hérite de la catégorie parent sinon)
-  "beguinage": "#2b7fa8", // Maintenant couleur habitat_individuel
-  "residence_autonomie": "#a85b2b",
-  "residence_services_seniors": "#2b7fa8",
-  "marpa": "#a85b2b",
-  "habitat_inclusif": "#2ba8a8",
-  "accueil_familial": "#8b4513",
-  "habitat_intergenerationnel": "#9932cc",
-};
-
-// Obtenir la couleur d'une sous-catégorie
-export const getSousCategorieColor = (sousCategorieKey: string): string => {
-  // Vérifier d'abord si la sous-catégorie a une couleur spécifique
-  if (CATEGORY_COLORS[sousCategorieKey]) {
-    return CATEGORY_COLORS[sousCategorieKey];
-  }
-  
-  // Sinon, utiliser la couleur de la catégorie parent
+// Fonction pour obtenir l'habitat_type à partir d'une sous-catégorie
+export const getHabitatTypeFromSousCategorie = (sousCategorieKey: string): string | null => {
   const parentCategory = getParentCategoryBySousCategorie(sousCategorieKey);
-  if (parentCategory && CATEGORY_COLORS[parentCategory.key]) {
-    return CATEGORY_COLORS[parentCategory.key];
+  return parentCategory ? parentCategory.key : null;
+};
+
+// Fonction pour vérifier si une sous-catégorie appartient à un habitat_type
+export const doesSousCategorieMatchHabitatType = (sousCategorieKey: string, habitatType: string): boolean => {
+  const parentCategory = getParentCategoryBySousCategorie(sousCategorieKey);
+  return parentCategory ? parentCategory.key === habitatType : false;
+};
+
+// Fonction pour normaliser les noms (tolérance casse/accents)
+export const normalizeString = (str: string): string => {
+  return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+};
+
+// Fonction pour rechercher une sous-catégorie avec tolérance
+export const findSousCategorieWithTolerance = (search: string): SousCategorie | undefined => {
+  const normalizedSearch = normalizeString(search);
+  
+  return getAllSousCategories().find(sc => {
+    // Vérifier le label principal
+    if (normalizeString(sc.label).includes(normalizedSearch) || normalizedSearch.includes(normalizeString(sc.label))) return true;
+    
+    // Vérifier les aliases
+    if (sc.aliases) {
+      return sc.aliases.some(alias => 
+        normalizeString(alias).includes(normalizedSearch) || normalizedSearch.includes(normalizeString(alias))
+      );
+    }
+    
+    return false;
+  });
+};
+
+// Obtenir la couleur d'une sous-catégorie selon le mapping centralisé
+export const getSousCategorieColor = (sousCategorieKey: string): string => {
+  // Utiliser la couleur de la catégorie parent selon le nouveau mapping
+  const parentCategory = getParentCategoryBySousCategorie(sousCategorieKey);
+  if (parentCategory && parentCategory.color) {
+    return parentCategory.color;
   }
   
-  // Couleur par défaut
+  // Couleur par défaut (gris)
   return "#888";
+};
+
+// Obtenir la couleur d'un habitat_type
+export const getHabitatTypeColor = (habitatTypeKey: string): string => {
+  const category = getCategoryByKey(habitatTypeKey);
+  return category ? category.color : "#888";
 };
