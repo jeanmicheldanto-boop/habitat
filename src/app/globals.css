@@ -67,6 +67,7 @@ a{color:inherit;text-decoration:none}
     font-size: 1.8rem !important;
     line-height: 1.2;
     margin-bottom: 1.5rem;
+    margin-top: 8rem !important; /* Plus d'espace sur mobile */
   }
   
   .search-bar-custom {
@@ -83,7 +84,7 @@ a{color:inherit;text-decoration:none}
 @media (max-width: 480px) {
   .hero__title {
     font-size: 1.5rem !important;
-    margin-top: 2rem !important;
+    margin-top: 10rem !important; /* Encore plus d'espace sur très petit écran */
   }
   
   .search-bar-custom {
@@ -93,6 +94,13 @@ a{color:inherit;text-decoration:none}
   .search-bar-custom input {
     padding: 0.7rem 1rem;
     font-size: 0.95rem;
+  }
+}
+
+/* Desktop - moins d'espace */
+@media (min-width: 769px) {
+  .hero__title {
+    margin-top: 4rem !important; /* Moins d'espace sur desktop */
   }
 }
 

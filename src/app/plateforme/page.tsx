@@ -1010,8 +1010,18 @@ export default function Page(): JSX.Element {
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                           {(() => {
                             const sousCategorie = Array.isArray(etab.sous_categories) && etab.sous_categories.length > 0 ? etab.sous_categories[0] : "habitat_alternatif";
-                            const color = getSousCategorieColor(sousCategorie) || getSousCategorieColor("habitat_alternatif");
-                            const sousCat = getAllSousCategories().find((sc) => sc.key === sousCategorie);
+                            
+                            // Recherche avec tolérance pour trouver la sous-catégorie dans la taxonomie
+                            let sousCat = getAllSousCategories().find((sc) => sc.key === sousCategorie);
+                            if (!sousCat) {
+                              // Recherche avec tolérance aux variations de nom
+                              sousCat = findSousCategorieWithTolerance(sousCategorie);
+                            }
+                            
+                            // Obtenir la couleur via le mapping centralisé
+                            const color = sousCat ? getSousCategorieColor(sousCat.key) : getSousCategorieColor("habitat_alternatif");
+                            const displayLabel = sousCat?.label || sousCategorie?.charAt(0).toUpperCase() + sousCategorie?.slice(1) || "Autre";
+                            
                             return (
                               <span
                                 style={{
@@ -1028,7 +1038,7 @@ export default function Page(): JSX.Element {
                                   marginRight: 2,
                                 }}
                               >
-                                {sousCat?.label || sousCategorie.charAt(0).toUpperCase() + sousCategorie.slice(1) || "Autre"}
+                                {displayLabel}
                               </span>
                             );
                           })()}

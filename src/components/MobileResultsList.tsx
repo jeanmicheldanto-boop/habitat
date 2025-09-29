@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import Image from 'next/image';
-import { getAllSousCategories, getSousCategorieColor } from '@/lib/habitatTaxonomy';
+import { getAllSousCategories, getSousCategorieColor, findSousCategorieWithTolerance } from '@/lib/habitatTaxonomy';
 import { getHabitatImage } from '@/lib/habitatImages';
 import BadgeIcon from './BadgeIcon';
 import AvpBadge from './AvpBadge';
@@ -42,8 +42,16 @@ export default function MobileResultsList({ results, publicCibleOptions, restaur
         const sousCategorie = Array.isArray(etab.sous_categories) && etab.sous_categories.length > 0 
           ? etab.sous_categories[0] 
           : "habitat_alternatif";
-        const badgeColor = getSousCategorieColor(sousCategorie);
-        const sousCat = getAllSousCategories().find(sc => sc.key === sousCategorie);
+        
+        // Recherche avec tolérance pour trouver la sous-catégorie dans la taxonomie
+        let sousCat = getAllSousCategories().find(sc => sc.key === sousCategorie);
+        if (!sousCat) {
+          // Recherche avec tolérance aux variations de nom
+          sousCat = findSousCategorieWithTolerance(sousCategorie);
+        }
+        
+        // Obtenir la couleur via le mapping centralisé
+        const badgeColor = sousCat ? getSousCategorieColor(sousCat.key) : getSousCategorieColor("habitat_alternatif");
         const badgeLabel = sousCat?.label || sousCategorie?.charAt(0).toUpperCase() + sousCategorie?.slice(1) || "Autre";
         return (
           <div key={etab.etab_id} style={{ background: '#fff', borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', overflow: 'hidden', border: '1px solid #f0f0f0' }}>
