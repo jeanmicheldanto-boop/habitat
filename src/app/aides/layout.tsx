@@ -44,13 +44,11 @@ export default function AidesLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <SecondaryMenu />
-      <AidesSubnav />
-      <div style={{ 
-        flex: 1, 
-        marginLeft: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : 260,
-        minHeight: "calc(100vh - 64px)"
-      }}>
-        {children}
+      <div style={{ display: "flex", minHeight: "calc(100vh - 64px)" }}>
+        <AidesSubnav />
+        <div className="aides-content-wrapper">
+          {children}
+        </div>
       </div>
     </>
   );

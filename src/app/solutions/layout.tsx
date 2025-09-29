@@ -42,13 +42,11 @@ export default function SolutionsLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <SecondaryMenu />
-      <SolutionsSubnav />
-      <div style={{ 
-        flex: 1, 
-        marginLeft: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : 260,
-        minHeight: "calc(100vh - 64px)"
-      }}>
-        {children}
+      <div style={{ display: "flex", minHeight: "calc(100vh - 64px)" }}>
+        <SolutionsSubnav />
+        <div className="solutions-content-wrapper">
+          {children}
+        </div>
       </div>
     </>
   );

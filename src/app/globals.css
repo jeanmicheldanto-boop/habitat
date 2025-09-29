@@ -104,6 +104,53 @@ a{color:inherit;text-decoration:none}
   }
 }
 
+/* Layout responsive pour pages aides/solutions */
+.aides-content-wrapper {
+  flex: 1;
+  padding: 0;
+  width: 100%;
+}
+
+/* Desktop : marge pour le menu latéral */
+@media (min-width: 769px) {
+  .aides-content-wrapper {
+    margin-left: 260px;
+    padding: 0 2rem;
+  }
+}
+
+/* Mobile : pleine largeur */
+@media (max-width: 768px) {
+  .aides-content-wrapper {
+    margin-left: 0;
+    padding: 0 1rem;
+    width: 100%;
+  }
+}
+
+.solutions-content-wrapper {
+  flex: 1;
+  padding: 0;
+  width: 100%;
+}
+
+/* Desktop : marge pour le menu latéral */
+@media (min-width: 769px) {
+  .solutions-content-wrapper {
+    margin-left: 260px;
+    padding: 0 2rem;
+  }
+}
+
+/* Mobile : pleine largeur */
+@media (max-width: 768px) {
+  .solutions-content-wrapper {
+    margin-left: 0;
+    padding: 0 1rem;
+    width: 100%;
+  }
+}
+
 /* Ancien deuxième voile (désactivé) */
 .hi-hero__scrim{ display:none; }
 

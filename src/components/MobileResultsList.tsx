@@ -26,9 +26,11 @@ interface MobileResultsListProps {
   results: EtablissementResult[];
   publicCibleOptions: Array<{key: string, label: string}>;
   restaurationOptions: Array<{key: string, label: string}>;
+  displayCount?: number;
+  onLoadMore?: () => void;
 }
 
-export default function MobileResultsList({ results, publicCibleOptions, restaurationOptions }: MobileResultsListProps) {
+export default function MobileResultsList({ results, publicCibleOptions, restaurationOptions, displayCount = 25, onLoadMore }: MobileResultsListProps) {
   if (!results || results.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '60px 20px' }}>
@@ -38,7 +40,7 @@ export default function MobileResultsList({ results, publicCibleOptions, restaur
   }
   return (
     <div style={{ padding: '0 16px 100px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-  {results.map((etab: EtablissementResult) => {
+      {results.slice(0, displayCount).map((etab: EtablissementResult) => {
         const sousCategorie = Array.isArray(etab.sous_categories) && etab.sous_categories.length > 0 
           ? etab.sous_categories[0] 
           : "habitat_alternatif";
@@ -144,6 +146,48 @@ export default function MobileResultsList({ results, publicCibleOptions, restaur
           </div>
         );
       })}
+      
+      {/* Bouton "Voir plus" pour mobile */}
+      {displayCount < results.length && onLoadMore && (
+        <div style={{ textAlign: 'center', marginTop: '1.5rem', paddingBottom: '20px' }}>
+          <button
+            onClick={onLoadMore}
+            style={{
+              background: "linear-gradient(135deg, #a85b2b 0%, #d35400 100%)",
+              color: "white",
+              border: "none",
+              borderRadius: 12,
+              padding: "16px 24px",
+              fontSize: "1rem",
+              fontWeight: 600,
+              cursor: "pointer",
+              boxShadow: "0 4px 12px rgba(168, 91, 43, 0.3)",
+              transition: "all 0.3s ease",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              margin: "0 auto",
+              minHeight: 48,
+              touchAction: "manipulation"
+            }}
+            onTouchStart={() => {}}
+          >
+            <span>Voir plus de résultats</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="6,9 12,15 18,9"></polyline>
+            </svg>
+            <span style={{ 
+              background: "rgba(255,255,255,0.2)", 
+              borderRadius: "12px", 
+              padding: "4px 8px", 
+              fontSize: "0.85rem",
+              marginLeft: "4px"
+            }}>
+              +25
+            </span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

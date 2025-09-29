@@ -132,6 +132,8 @@ export default function Page(): JSX.Element {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
   const [selectedCommune, setSelectedCommune] = useState<string>("");
+  // État pour la pagination des résultats
+  const [displayCount, setDisplayCount] = useState(25);
 
   // Récupérer le paramètre de recherche depuis l'URL
   useEffect(() => {
@@ -139,6 +141,11 @@ export default function Page(): JSX.Element {
     const searchParam = urlParams.get("search");
     if (searchParam) setSearch(searchParam);
   }, []);
+
+  // Reset du compteur d'affichage quand les filtres changent
+  useEffect(() => {
+    setDisplayCount(25);
+  }, [selectedHabitatCategories, selectedSousCategories, selectedPrices, selectedServices, selectedRestauration, selectedLogementTypes, selectedCaracteristiques, selectedPublicCible, selectedDepartement, selectedCommune, selectedAvpEligibility, search]);
 
   useEffect(() => {
     async function fetchData() {
@@ -474,7 +481,13 @@ export default function Page(): JSX.Element {
             )}
           </div>
         ) : (
-          <MobileResultsList results={filteredData as EtablissementResult[]} publicCibleOptions={PUBLIC_CIBLE_OPTIONS} restaurationOptions={RESTAURATION_OPTIONS as unknown as { key: string; label: string }[]} />
+          <MobileResultsList 
+            results={filteredData as EtablissementResult[]} 
+            publicCibleOptions={PUBLIC_CIBLE_OPTIONS} 
+            restaurationOptions={RESTAURATION_OPTIONS as unknown as { key: string; label: string }[]}
+            displayCount={displayCount}
+            onLoadMore={() => setDisplayCount(prev => prev + 25)}
+          />
         ))}
 
         {loading && (
@@ -961,24 +974,25 @@ export default function Page(): JSX.Element {
                 )}
               </div>
             ) : (
-              <div style={{ display: "grid", gap: "1rem", margin: 0, padding: 0, width: "100%", maxWidth: 900, marginLeft: "auto", marginRight: "auto", fontSize: "0.82rem" }}>
-                {filteredData.map((etab) => (
-                  <div
-                    key={etab.etab_id}
-                    style={{
-                      background: "#fff",
-                      borderRadius: "18px",
-                      boxShadow: "0 2px 8px 0 rgba(0,0,0,0.08)",
-                      border: "1.5px solid #e0e2e6",
-                      padding: 0,
-                      overflow: "hidden",
-                      display: "flex",
-                      flexDirection: "row",
-                      gap: 0,
-                      alignItems: "stretch",
-                      minHeight: 160,
-                    }}
-                  >
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem", margin: 0, padding: 0, width: "100%", maxWidth: 900, marginLeft: "auto", marginRight: "auto", fontSize: "0.82rem" }}>
+                <div style={{ display: "grid", gap: "1rem" }}>
+                  {filteredData.slice(0, displayCount).map((etab) => (
+                    <div
+                      key={etab.etab_id}
+                      style={{
+                        background: "#fff",
+                        borderRadius: "18px",
+                        boxShadow: "0 2px 8px 0 rgba(0,0,0,0.08)",
+                        border: "1.5px solid #e0e2e6",
+                        padding: 0,
+                        overflow: "hidden",
+                        display: "flex",
+                        flexDirection: "row",
+                        gap: 0,
+                        alignItems: "stretch",
+                        minHeight: 160,
+                      }}
+                    >
                     {/* Vignette image */}
                     <div
                       style={{
@@ -1122,6 +1136,54 @@ export default function Page(): JSX.Element {
                     </div>
                   </div>
                 ))}
+              </div>
+              
+              {/* Bouton "Voir plus" */}
+              {!loading && !error && tab === "liste" && displayCount < filteredData.length && (
+                <div style={{ textAlign: "center", marginTop: "2rem" }}>
+                  <button
+                    onClick={() => setDisplayCount(prev => prev + 25)}
+                    style={{
+                      background: "linear-gradient(135deg, #a85b2b 0%, #d35400 100%)",
+                      color: "white",
+                      border: "none",
+                      borderRadius: 12,
+                      padding: "14px 28px",
+                      fontSize: "1rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      boxShadow: "0 4px 12px rgba(168, 91, 43, 0.3)",
+                      transition: "all 0.3s ease",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      margin: "0 auto"
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.boxShadow = "0 6px 16px rgba(168, 91, 43, 0.4)";
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(168, 91, 43, 0.3)";
+                    }}
+                  >
+                    <span>Voir plus de résultats</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="6,9 12,15 18,9"></polyline>
+                    </svg>
+                    <span style={{ 
+                      background: "rgba(255,255,255,0.2)", 
+                      borderRadius: "12px", 
+                      padding: "4px 8px", 
+                      fontSize: "0.85rem",
+                      marginLeft: "4px"
+                    }}>
+                      +25
+                    </span>
+                  </button>
+                </div>
+              )}
               </div>
             ))}
             {loading && <div style={{ textAlign: "center", color: "#888", marginTop: 40 }}>Chargement...</div>}
