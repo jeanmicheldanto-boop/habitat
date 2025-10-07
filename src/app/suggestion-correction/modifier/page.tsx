@@ -1,6 +1,8 @@
 
 "use client";
 export const dynamic = 'force-dynamic';
+import { Suspense } from 'react';
+
 type ModificationDataType = {
   telephone: string;
   email: string;
@@ -22,10 +24,30 @@ type ModificationDataType = {
   };
   services: string[];
   tarifications: TarificationType[];
+  avp_infos?: {
+    statut: 'intention' | 'en_projet' | 'ouvert';
+    date_intention?: string;
+    date_en_projet?: string;
+    date_ouverture?: string;
+    pvsp_fondamentaux?: {
+      objectifs?: string;
+      animation_vie_sociale?: string;
+      gouvernance_partagee?: string;
+      ouverture_au_quartier?: string;
+      prevention_isolement?: string;
+      participation_habitants?: string;
+    };
+    public_accueilli?: string;
+    modalites_admission?: string;
+    partenaires_principaux?: Array<{ nom: string; type?: string; description?: string }>;
+    intervenants?: Array<{ nom: string; specialite?: string; contact?: string }>;
+    heures_animation_semaine?: number;
+    infos_complementaires?: string;
+  };
 };
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import ImageUpload from '@/components/ImageUpload';
 import DepartmentAutocomplete from '@/components/DepartmentAutocomplete';
@@ -54,6 +76,7 @@ interface EtablissementData {
   id: string;
   nom: string;
   habitat_type: string;
+  eligibilite_statut?: 'avp_eligible' | 'non_eligible' | 'a_verifier';
   telephone?: string;
   email?: string;
   site_web?: string;
@@ -68,6 +91,7 @@ interface EtablissementData {
   services?: string[];
   tarifications?: TarificationType[];
   sous_categories?: string[];
+  avp_infos?: unknown[];
 }
 
 interface ServiceOption {
@@ -80,18 +104,12 @@ interface SousCategorieOption {
   libelle: string;
 }
 
-export default function ModifierEtablissementPage() {
+function ModifierEtablissementPageContent() {
   const router = useRouter();
-  // Récupère l'id d'établissement depuis l'URL
-  let etablissementId = '';
-  if (typeof window !== 'undefined') {
-    // Import dynamique autorisé côté client
-    const { useSearchParams } = await import('next/navigation');
-    const searchParams = useSearchParams();
-    etablissementId = searchParams.get('etablissement') || '';
-  }
-  // LOG: Vérification de la récupération du paramètre (après initialisation)
-  console.log('Rendu ModifierEtablissementPage, etablissementId:', etablissementId);
+  
+  // Récupération directe de l'URL parameter avec useSearchParams
+  const searchParams = useSearchParams();
+  const etablissementId = searchParams.get('etablissement') || '';
   
   const [etablissement, setEtablissement] = useState<EtablissementData | null>(null);
   const [servicesOptions] = useState<ServiceOption[]>([]);
@@ -127,11 +145,49 @@ export default function ModifierEtablissementPage() {
       portage_repas: false
     },
     services: [],
-    tarifications: []
+    tarifications: [],
+    avp_infos: {
+      statut: 'intention',
+      pvsp_fondamentaux: {},
+      partenaires_principaux: [],
+      intervenants: []
+    }
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  // Helper pour mettre à jour les données AVP de manière type-safe
+  const updateAvpInfos = (updates: Partial<NonNullable<ModificationDataType['avp_infos']>>) => {
+    setModificationData(prev => ({
+      ...prev,
+      avp_infos: {
+        statut: 'intention',
+        pvsp_fondamentaux: {},
+        partenaires_principaux: [],
+        intervenants: [],
+        ...prev.avp_infos,
+        ...updates
+      }
+    }));
+  };
+
+  // Helper pour mettre à jour les PVSP
+  const updatePvsp = (field: string, value: string) => {
+    setModificationData(prev => ({
+      ...prev,
+      avp_infos: {
+        statut: 'intention',
+        partenaires_principaux: [],
+        intervenants: [],
+        ...prev.avp_infos,
+        pvsp_fondamentaux: {
+          ...prev.avp_infos?.pvsp_fondamentaux,
+          [field]: value
+        }
+      }
+    }));
+  };
 
   const loadEtablissementData = useCallback(async () => {
       console.log('Début chargement des données, etablissementId:', etablissementId);
@@ -151,7 +207,8 @@ export default function ModifierEtablissementPage() {
           etablissement_sous_categorie (
             sous_categorie_id,
             sous_categories (id, libelle)
-          )
+          ),
+          avp_infos (*)
         `)
         .eq('id', etablissementId)
         .single();
@@ -182,7 +239,13 @@ export default function ModifierEtablissementPage() {
           portage_repas: false
         },
   services: etab.etablissement_service?.map((es: { service_id: string }) => es.service_id) || [],
-        tarifications: etab.tarifications || []
+        tarifications: etab.tarifications || [],
+        avp_infos: etab.avp_infos?.[0] || {
+          statut: 'intention',
+          pvsp_fondamentaux: {},
+          partenaires_principaux: [],
+          intervenants: []
+        }
       });
       
     } catch (error) {
@@ -334,7 +397,8 @@ export default function ModifierEtablissementPage() {
     { id: 'logements', label: 'Logements', icon: '🛏️' },
     { id: 'restauration', label: 'Restauration', icon: '🍽️' },
     { id: 'services', label: 'Services', icon: '🔧' },
-    { id: 'tarifs', label: 'Tarifs', icon: '💰' }
+    { id: 'tarifs', label: 'Tarifs', icon: '💰' },
+    ...(etablissement?.eligibilite_statut === 'avp_eligible' ? [{ id: 'avp', label: 'AVP', icon: '🏡' }] : [])
   ];
 
   useEffect(() => {
@@ -988,6 +1052,158 @@ export default function ModifierEtablissementPage() {
                 </div>
               )}
 
+              {/* Section AVP - Appartement de Coordination */}
+              {activeSection === 'avp' && etablissement?.eligibilite_statut === 'avp_eligible' && (
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">🏡 Appartement de Coordination (AVP)</h3>
+                  
+                  <div className="space-y-6">
+                    {/* Statut AVP */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Statut du projet AVP
+                      </label>
+                      <select
+                        value={modificationData.avp_infos?.statut || 'intention'}
+                        onChange={(e) => updateAvpInfos({ 
+                          statut: e.target.value as 'intention' | 'en_projet' | 'ouvert'
+                        })}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="intention">Projet en intention</option>
+                        <option value="en_projet">Projet en cours</option>
+                        <option value="ouvert">Ouvert et fonctionnel</option>
+                      </select>
+                    </div>
+
+                    {/* Dates importantes */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Date d&apos;intention
+                        </label>
+                        <input
+                          type="date"
+                          value={modificationData.avp_infos?.date_intention || ''}
+                          onChange={(e) => updateAvpInfos({ date_intention: e.target.value })}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Date de mise en projet
+                        </label>
+                        <input
+                          type="date"
+                          value={modificationData.avp_infos?.date_en_projet || ''}
+                          onChange={(e) => updateAvpInfos({ date_en_projet: e.target.value })}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Date d&apos;ouverture
+                        </label>
+                        <input
+                          type="date"
+                          value={modificationData.avp_infos?.date_ouverture || ''}
+                          onChange={(e) => updateAvpInfos({ date_ouverture: e.target.value })}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+
+                    {/* PVSP - Projet de Vie Sociale Partagée */}
+                    <div>
+                      <h4 className="text-lg font-medium text-gray-900 mb-3">Projet de Vie Sociale Partagée (PVSP)</h4>
+                      <div className="space-y-4">
+                        {[
+                          { key: 'objectifs', label: 'Objectifs et finalités' },
+                          { key: 'animation_vie_sociale', label: 'Animation de la vie sociale' },
+                          { key: 'gouvernance_partagee', label: 'Gouvernance partagée' },
+                          { key: 'ouverture_au_quartier', label: 'Ouverture au quartier' },
+                          { key: 'prevention_isolement', label: 'Prévention de l&apos;isolement' },
+                          { key: 'participation_habitants', label: 'Participation des habitants' }
+                        ].map(field => (
+                          <div key={field.key}>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              {field.label}
+                            </label>
+                            <textarea
+                              rows={3}
+                              value={modificationData.avp_infos?.pvsp_fondamentaux?.[field.key as keyof typeof modificationData.avp_infos.pvsp_fondamentaux] || ''}
+                              onChange={(e) => updatePvsp(field.key, e.target.value)}
+                              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder={`Décrivez ${field.label.toLowerCase()}...`}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Public accueilli */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Public accueilli
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={modificationData.avp_infos?.public_accueilli || ''}
+                        onChange={(e) => updateAvpInfos({ public_accueilli: e.target.value })}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Décrivez le public cible de l'AVP..."
+                      />
+                    </div>
+
+                    {/* Modalités d'admission */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Modalités d&apos;admission
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={modificationData.avp_infos?.modalites_admission || ''}
+                        onChange={(e) => updateAvpInfos({ modalites_admission: e.target.value })}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Décrivez les modalités d&apos;admission..."
+                      />
+                    </div>
+
+                    {/* Heures d'animation */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Heures d&apos;animation par semaine
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={modificationData.avp_infos?.heures_animation_semaine || ''}
+                        onChange={(e) => updateAvpInfos({ 
+                          heures_animation_semaine: parseFloat(e.target.value) || undefined 
+                        })}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Ex: 10.5"
+                      />
+                    </div>
+
+                    {/* Informations complémentaires */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Informations complémentaires
+                      </label>
+                      <textarea
+                        rows={4}
+                        value={modificationData.avp_infos?.infos_complementaires || ''}
+                        onChange={(e) => updateAvpInfos({ infos_complementaires: e.target.value })}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Ajoutez toute information complémentaire sur l&apos;AVP..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Boutons de soumission */}
               <div className="bg-white rounded-lg shadow-sm p-6">
                 {error && (
@@ -1023,5 +1239,13 @@ export default function ModifierEtablissementPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ModifierEtablissementPage() {
+  return (
+    <Suspense fallback={<div>Chargement...</div>}>
+      <ModifierEtablissementPageContent />
+    </Suspense>
   );
 }

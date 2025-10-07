@@ -32,6 +32,17 @@ COMMENT ON SCHEMA public IS 'standard public schema';
 
 
 --
+-- Name: avp_statut; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.avp_statut AS ENUM (
+    'intention',
+    'en_projet',
+    'ouvert'
+);
+
+
+--
 -- Name: eligibilite_statut; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -427,6 +438,32 @@ CREATE TABLE public.admins (
 
 
 --
+-- Name: avp_infos; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.avp_infos (
+    etablissement_id uuid NOT NULL,
+    statut public.avp_statut DEFAULT 'intention'::public.avp_statut NOT NULL,
+    date_intention date,
+    date_en_projet date,
+    date_ouverture date,
+    pvsp_fondamentaux jsonb DEFAULT jsonb_build_object('objectifs', '', 'animation_vie_sociale', '', 'gouvernance_partagee', '', 'ouverture_au_quartier', '', 'prevention_isolement', '', 'participation_habitants', '') NOT NULL,
+    public_accueilli text,
+    modalites_admission text,
+    partenaires_principaux jsonb DEFAULT '[]'::jsonb NOT NULL,
+    intervenants jsonb DEFAULT '[]'::jsonb NOT NULL,
+    heures_animation_semaine numeric(4,1),
+    infos_complementaires text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT chk_intervenants_is_array CHECK ((jsonb_typeof(intervenants) = 'array'::text)),
+    CONSTRAINT chk_ouvert_requirements CHECK (((statut <> 'ouvert'::public.avp_statut) OR ((date_ouverture IS NOT NULL) AND (COALESCE(NULLIF(TRIM(BOTH FROM (pvsp_fondamentaux ->> 'animation_vie_sociale'::text)), ''::text), NULL::text) IS NOT NULL) AND (jsonb_array_length(intervenants) >= 1)))),
+    CONSTRAINT chk_partners_is_array CHECK ((jsonb_typeof(partenaires_principaux) = 'array'::text)),
+    CONSTRAINT chk_pvsp_is_object CHECK ((jsonb_typeof(pvsp_fondamentaux) = 'object'::text))
+);
+
+
+--
 -- Name: categories; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -756,6 +793,28 @@ ALTER SEQUENCE public.stg_etablissements_csv_id_seq OWNED BY public.stg_etabliss
 
 
 --
+-- Name: suggestions_corrections; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.suggestions_corrections (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    etablissement_id uuid,
+    nom_suggesteur text NOT NULL,
+    email_suggesteur text NOT NULL,
+    telephone_suggesteur text,
+    type_correction text NOT NULL,
+    description text NOT NULL,
+    valeur_actuelle text,
+    valeur_corrigee text,
+    statut text DEFAULT 'en_attente'::text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    reviewed_by uuid,
+    reviewed_at timestamp with time zone,
+    review_note text
+);
+
+
+--
 -- Name: tarifications; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -779,7 +838,7 @@ CREATE TABLE public.tarifications (
 -- Name: v_file_moderation; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW public.v_file_moderation AS
+CREATE VIEW public.v_file_moderation WITH (security_invoker='on') AS
  SELECT 'proposition'::text AS kind,
     p.id,
     p.created_at,
@@ -820,22 +879,22 @@ UNION ALL
 --
 
 CREATE VIEW public.v_liste_publication AS
- SELECT id AS etab_id,
-    nom,
-    presentation,
-    commune,
-    departement,
-    region,
-    code_postal,
-    pays,
-    geom,
-    geocode_precision,
-    eligibilite_statut,
-    telephone,
-    email,
-    site_web,
+ SELECT e.id AS etab_id,
+    e.nom,
+    e.presentation,
+    e.commune,
+    e.departement,
+    e.region,
+    e.code_postal,
+    e.pays,
+    e.geom,
+    e.geocode_precision,
+    e.eligibilite_statut,
+    e.telephone,
+    e.email,
+    e.site_web,
         CASE
-            WHEN (COALESCE(public_cible, ''::text) = ''::text) THEN ARRAY[]::text[]
+            WHEN (COALESCE(e.public_cible, ''::text) = ''::text) THEN ARRAY[]::text[]
             ELSE ( SELECT array_agg(TRIM(BOTH FROM x.x)) AS array_agg
                FROM unnest(string_to_array(e.public_cible, ','::text)) x(x))
         END AS public_cible,
@@ -895,9 +954,13 @@ CREATE VIEW public.v_liste_publication AS
          LIMIT 1) AS portage_repas,
     ( SELECT COALESCE(json_agg(json_build_object('libelle', lt.libelle, 'surface_min', lt.surface_min, 'surface_max', lt.surface_max, 'meuble', lt.meuble, 'pmr', lt.pmr, 'domotique', lt.domotique, 'nb_unites', lt.nb_unites)) FILTER (WHERE (lt.id IS NOT NULL)), '[]'::json) AS "coalesce"
            FROM public.logements_types lt
-          WHERE (lt.etablissement_id = e.id)) AS logements_types
-   FROM public.etablissements e
-  WHERE (statut_editorial = 'publie'::public.statut_editorial);
+          WHERE (lt.etablissement_id = e.id)) AS logements_types,
+    avi.statut AS avp_statut,
+    avi.date_ouverture AS avp_date_ouverture,
+    (COALESCE(NULLIF(TRIM(BOTH FROM (avi.pvsp_fondamentaux ->> 'animation_vie_sociale'::text)), ''::text), NULL::text) IS NOT NULL) AS avp_pvsp_present
+   FROM (public.etablissements e
+     LEFT JOIN public.avp_infos avi ON ((avi.etablissement_id = e.id)))
+  WHERE (e.statut_editorial = 'publie'::public.statut_editorial);
 
 
 --
@@ -905,26 +968,26 @@ CREATE VIEW public.v_liste_publication AS
 --
 
 CREATE VIEW public.v_liste_publication_geoloc AS
- SELECT id AS etab_id,
-    nom,
-    presentation,
-    commune,
-    departement,
-    region,
-    code_postal,
-    pays,
-    gestionnaire,
-    geom,
-    public.st_y(geom) AS latitude,
-    public.st_x(geom) AS longitude,
-    geocode_precision,
-    eligibilite_statut,
-    telephone,
-    email,
-    site_web,
-    habitat_type,
+ SELECT e.id AS etab_id,
+    e.nom,
+    e.presentation,
+    e.commune,
+    e.departement,
+    e.region,
+    e.code_postal,
+    e.pays,
+    e.gestionnaire,
+    e.geom,
+    public.st_y(e.geom) AS latitude,
+    public.st_x(e.geom) AS longitude,
+    e.geocode_precision,
+    e.eligibilite_statut,
+    e.telephone,
+    e.email,
+    e.site_web,
+    e.habitat_type,
         CASE
-            WHEN (COALESCE(public_cible, ''::text) = ''::text) THEN ARRAY[]::text[]
+            WHEN (COALESCE(e.public_cible, ''::text) = ''::text) THEN ARRAY[]::text[]
             ELSE ( SELECT array_agg(TRIM(BOTH FROM x.x)) AS array_agg
                FROM unnest(string_to_array(e.public_cible, ','::text)) x(x))
         END AS public_cible,
@@ -984,9 +1047,13 @@ CREATE VIEW public.v_liste_publication_geoloc AS
          LIMIT 1) AS portage_repas,
     ( SELECT COALESCE(json_agg(json_build_object('libelle', lt.libelle, 'surface_min', lt.surface_min, 'surface_max', lt.surface_max, 'meuble', lt.meuble, 'pmr', lt.pmr, 'domotique', lt.domotique, 'nb_unites', lt.nb_unites)) FILTER (WHERE (lt.id IS NOT NULL)), '[]'::json) AS "coalesce"
            FROM public.logements_types lt
-          WHERE (lt.etablissement_id = e.id)) AS logements_types
-   FROM public.etablissements e
-  WHERE (statut_editorial = 'publie'::public.statut_editorial);
+          WHERE (lt.etablissement_id = e.id)) AS logements_types,
+    avi.statut AS avp_statut,
+    avi.date_ouverture AS avp_date_ouverture,
+    (COALESCE(NULLIF(TRIM(BOTH FROM (avi.pvsp_fondamentaux ->> 'animation_vie_sociale'::text)), ''::text), NULL::text) IS NOT NULL) AS avp_pvsp_present
+   FROM (public.etablissements e
+     LEFT JOIN public.avp_infos avi ON ((avi.etablissement_id = e.id)))
+  WHERE (e.statut_editorial = 'publie'::public.statut_editorial);
 
 
 --
@@ -1002,6 +1069,14 @@ ALTER TABLE ONLY public.stg_etablissements_csv ALTER COLUMN id SET DEFAULT nextv
 
 ALTER TABLE ONLY public.admins
     ADD CONSTRAINT admins_pkey PRIMARY KEY (user_id);
+
+
+--
+-- Name: avp_infos avp_infos_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.avp_infos
+    ADD CONSTRAINT avp_infos_pkey PRIMARY KEY (etablissement_id);
 
 
 --
@@ -1181,11 +1256,54 @@ ALTER TABLE ONLY public.stg_etablissements_csv
 
 
 --
+-- Name: suggestions_corrections suggestions_corrections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.suggestions_corrections
+    ADD CONSTRAINT suggestions_corrections_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: tarifications tarifications_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.tarifications
     ADD CONSTRAINT tarifications_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: avp_date_ouverture_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX avp_date_ouverture_idx ON public.avp_infos USING btree (date_ouverture);
+
+
+--
+-- Name: avp_intervenants_gin; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX avp_intervenants_gin ON public.avp_infos USING gin (intervenants);
+
+
+--
+-- Name: avp_partners_gin; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX avp_partners_gin ON public.avp_infos USING gin (partenaires_principaux);
+
+
+--
+-- Name: avp_pvsp_gin; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX avp_pvsp_gin ON public.avp_infos USING gin (pvsp_fondamentaux);
+
+
+--
+-- Name: avp_statut_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX avp_statut_idx ON public.avp_infos USING btree (statut);
 
 
 --
@@ -1280,6 +1398,13 @@ CREATE TRIGGER reclamation_status_change_notification AFTER UPDATE ON public.rec
 
 
 --
+-- Name: avp_infos trg_avp_infos_updated; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_avp_infos_updated BEFORE UPDATE ON public.avp_infos FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
 -- Name: restaurations trg_restaurations_updated; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -1291,6 +1416,14 @@ CREATE TRIGGER trg_restaurations_updated BEFORE UPDATE ON public.restaurations F
 --
 
 CREATE TRIGGER trg_snapshot_on_publish AFTER UPDATE OF statut_editorial ON public.etablissements FOR EACH ROW EXECUTE FUNCTION public.snapshot_on_publish();
+
+
+--
+-- Name: avp_infos avp_infos_etablissement_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.avp_infos
+    ADD CONSTRAINT avp_infos_etablissement_id_fkey FOREIGN KEY (etablissement_id) REFERENCES public.etablissements(id) ON DELETE CASCADE;
 
 
 --
@@ -1422,6 +1555,14 @@ ALTER TABLE ONLY public.sous_categories
 
 
 --
+-- Name: suggestions_corrections suggestions_corrections_etablissement_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.suggestions_corrections
+    ADD CONSTRAINT suggestions_corrections_etablissement_id_fkey FOREIGN KEY (etablissement_id) REFERENCES public.etablissements(id) ON DELETE CASCADE;
+
+
+--
 -- Name: tarifications tarifications_etablissement_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1442,6 +1583,27 @@ ALTER TABLE ONLY public.tarifications
 --
 
 CREATE POLICY "Allow insert for all" ON public.etablissements FOR INSERT WITH CHECK (true);
+
+
+--
+-- Name: suggestions_corrections Allow insert for all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Allow insert for all" ON public.suggestions_corrections FOR INSERT WITH CHECK (true);
+
+
+--
+-- Name: suggestions_corrections Allow select for all; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Allow select for all" ON public.suggestions_corrections FOR SELECT USING (true);
+
+
+--
+-- Name: suggestions_corrections Allow update for admin; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Allow update for admin" ON public.suggestions_corrections FOR UPDATE TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
 
 
 --
@@ -1498,6 +1660,41 @@ ALTER TABLE public.admins ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "admins manage admins" ON public.admins TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
 
+
+--
+-- Name: avp_infos avp delete admin or owner; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "avp delete admin or owner" ON public.avp_infos FOR DELETE TO authenticated USING ((public.is_admin() OR (EXISTS ( SELECT 1
+   FROM public.etablissement_proprietaires p
+  WHERE ((p.etablissement_id = avp_infos.etablissement_id) AND (p.user_id = auth.uid()) AND (p.active = true))))));
+
+
+--
+-- Name: avp_infos avp insert admin or owner; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "avp insert admin or owner" ON public.avp_infos FOR INSERT TO authenticated WITH CHECK ((public.is_admin() OR (EXISTS ( SELECT 1
+   FROM public.etablissement_proprietaires p
+  WHERE ((p.etablissement_id = avp_infos.etablissement_id) AND (p.user_id = auth.uid()) AND (p.active = true))))));
+
+
+--
+-- Name: avp_infos avp update admin or owner; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "avp update admin or owner" ON public.avp_infos FOR UPDATE TO authenticated USING ((public.is_admin() OR (EXISTS ( SELECT 1
+   FROM public.etablissement_proprietaires p
+  WHERE ((p.etablissement_id = avp_infos.etablissement_id) AND (p.user_id = auth.uid()) AND (p.active = true)))))) WITH CHECK ((public.is_admin() OR (EXISTS ( SELECT 1
+   FROM public.etablissement_proprietaires p
+  WHERE ((p.etablissement_id = avp_infos.etablissement_id) AND (p.user_id = auth.uid()) AND (p.active = true))))));
+
+
+--
+-- Name: avp_infos; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.avp_infos ENABLE ROW LEVEL SECURITY;
 
 --
 -- Name: categories; Type: ROW SECURITY; Schema: public; Owner: -
@@ -1630,6 +1827,15 @@ ALTER TABLE public.proposition_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.propositions ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: avp_infos public read avp via parent publie; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "public read avp via parent publie" ON public.avp_infos FOR SELECT USING ((EXISTS ( SELECT 1
+   FROM public.etablissements e
+  WHERE ((e.id = avp_infos.etablissement_id) AND (e.statut_editorial = 'publie'::public.statut_editorial)))));
+
+
+--
 -- Name: categories public read categories; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -1749,6 +1955,12 @@ ALTER TABLE public.services ENABLE ROW LEVEL SECURITY;
 --
 
 ALTER TABLE public.sous_categories ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: suggestions_corrections; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.suggestions_corrections ENABLE ROW LEVEL SECURITY;
 
 --
 -- Name: tarifications; Type: ROW SECURITY; Schema: public; Owner: -

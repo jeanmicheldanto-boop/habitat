@@ -31,6 +31,7 @@ interface FormData {
   services: string[];
   photo_file?: File;
   photo_url?: string;
+  eligibilite_statut?: 'avp_eligible' | 'non_eligible' | 'a_verifier';
 }
 
 export default function CreateEtablissement() {
@@ -270,6 +271,28 @@ export default function CreateEtablissement() {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                {/* Éligibilité AVP */}
+                <div>
+                  <label htmlFor="eligibilite_statut" className="block text-sm font-medium text-gray-700">
+                    🏡 Éligibilité Appartement de Coordination (AVP)
+                  </label>
+                  <select
+                    name="eligibilite_statut"
+                    id="eligibilite_statut"
+                    value={formData.eligibilite_statut || ''}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Non renseigné</option>
+                    <option value="avp_eligible">Éligible AVP</option>
+                    <option value="non_eligible">Non éligible</option>
+                    <option value="a_verifier">À vérifier</option>
+                  </select>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Les Appartements de Coordination sont des habitats inclusifs avec animation de la vie sociale.
+                  </p>
                 </div>
 
                 {/* Sous-catégories - Affichage conditionnel selon la catégorie sélectionnée */}

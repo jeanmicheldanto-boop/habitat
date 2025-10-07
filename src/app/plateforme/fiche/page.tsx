@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getHabitatImage } from "../../../lib/habitatImages";
 import Image from "next/image";
+import { AvpInfosSection, type AvpInfos } from "../../../components/AvpInfosSection";
 
 export default async function FichePage({ searchParams }: { searchParams: { id?: string } }) {
   const etabId = searchParams.id;
@@ -16,6 +17,20 @@ export default async function FichePage({ searchParams }: { searchParams: { id?:
     .single();
 
   if (error || !data) return notFound();
+
+  // Récupération des informations AVP si l'établissement est éligible
+  let avpInfos: AvpInfos | null = null;
+  if (data.eligibilite_statut === 'avp_eligible') {
+    const { data: avpData, error: avpError } = await supabase
+      .from("avp_infos")
+      .select("*")
+      .eq("etablissement_id", etabId)
+      .single();
+    
+    if (!avpError && avpData) {
+      avpInfos = avpData as AvpInfos;
+    }
+  }
 
   // Organisation élégante des infos (exemple, à adapter selon besoins)
   return (
@@ -80,7 +95,11 @@ export default async function FichePage({ searchParams }: { searchParams: { id?:
         {data.resto_collectif && <li>Resto collectif</li>}
         {data.portage_repas && <li>Portage repas</li>}
       </ul>
-      {/* Source supprimée */}
+      
+      {/* Section AVP - Affichage des informations AVP si l'établissement est éligible */}
+      {avpInfos && (
+        <AvpInfosSection avpInfos={avpInfos} isPublic={true} />
+      )}
       
       {/* Section Gestionnaire */}
       <div style={{ marginTop: 48, paddingTop: 32, borderTop: "2px solid #f0f0f0" }}>
