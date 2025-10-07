@@ -85,6 +85,8 @@ export default function ModifierEtablissementPage() {
   // Récupère l'id d'établissement depuis l'URL
   const searchParams = typeof window !== 'undefined' ? require('next/navigation').useSearchParams() : null;
   const etablissementId = searchParams ? searchParams.get('etablissement') : '';
+  // LOG: Vérification de la récupération du paramètre (après initialisation)
+  console.log('Rendu ModifierEtablissementPage, etablissementId:', etablissementId);
   
   const [etablissement, setEtablissement] = useState<EtablissementData | null>(null);
   const [servicesOptions] = useState<ServiceOption[]>([]);
@@ -127,7 +129,9 @@ export default function ModifierEtablissementPage() {
   const [error, setError] = useState('');
 
   const loadEtablissementData = useCallback(async () => {
+      console.log('Début chargement des données, etablissementId:', etablissementId);
     try {
+        console.log('Connexion à Supabase...');
       const { data: etab, error } = await supabase
         .from('etablissements')
         .select(`
@@ -146,6 +150,7 @@ export default function ModifierEtablissementPage() {
         `)
         .eq('id', etablissementId)
         .single();
+        console.log('Résultat requête Supabase:', { etab, error });
 
       if (error) throw error;
 
