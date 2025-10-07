@@ -22,8 +22,8 @@ export default function AidesClient() {
         </div>
       </header>
 
-      {/* Navigation rapide */}
-      <nav className="mb-8 flex flex-wrap gap-4 justify-center">
+      {/* Navigation rapide - masquée sur mobile */}
+      <nav className="mb-8 hidden md:flex flex-wrap gap-4 justify-center">
         <a href="#bons-reflexes" className="px-4 py-2 rounded-full bg-orange-100 text-orange-900 font-semibold hover:bg-orange-200 transition">Bons réflexes</a>
         <a href="#reperes-aides" className="px-4 py-2 rounded-full bg-orange-100 text-orange-900 font-semibold hover:bg-orange-200 transition">Repères sur les aides</a>
         <a href="#simulateurs" className="px-4 py-2 rounded-full bg-orange-700 text-white font-semibold hover:bg-orange-800 transition">Simulateurs</a>

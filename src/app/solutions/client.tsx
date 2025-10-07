@@ -218,8 +218,8 @@ export default function Client() {
         </div>
       </header>
 
-      {/* Navigation rapide */}
-      <nav className="mb-8 flex flex-wrap gap-4 justify-center">
+      {/* Navigation rapide - masquée sur mobile */}
+      <nav className="mb-8 hidden md:flex flex-wrap gap-4 justify-center">
         {sections.map((section) => (
           <a
             key={section.key}
