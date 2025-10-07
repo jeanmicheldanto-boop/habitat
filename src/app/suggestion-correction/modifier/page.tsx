@@ -81,11 +81,10 @@ interface SousCategorieOption {
 }
 
 export default function ModifierEtablissementPage() {
-  // const searchParams = useSearchParams();
   const router = useRouter();
-  // const etablissementId = searchParams.get('etablissement');
-  // Remplacer par une valeur statique ou une prop pour test
-  const etablissementId = '';
+  // Récupère l'id d'établissement depuis l'URL
+  const searchParams = typeof window !== 'undefined' ? require('next/navigation').useSearchParams() : null;
+  const etablissementId = searchParams ? searchParams.get('etablissement') : '';
   
   const [etablissement, setEtablissement] = useState<EtablissementData | null>(null);
   const [servicesOptions] = useState<ServiceOption[]>([]);
