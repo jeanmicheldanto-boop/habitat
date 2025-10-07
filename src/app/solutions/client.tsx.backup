@@ -33,7 +33,7 @@ const sections = [
         summary:
           "Petits logements individuels côte à côte, avec espaces communs. Autonomie + voisinage solidaire.",
         details: [
-          "Pour qui ? Ceux qui veulent garder leur indépendance sans s&apos;isoler.",
+          "Pour qui ? Ceux qui veulent garder leur indépendance sans s’isoler.",
           "À retenir : compromis souple, souvent porté par des collectivités.",
           "Réflexe : vérifier le dynamisme du lieu (animations, vie collective).",
         ],
@@ -55,18 +55,18 @@ const sections = [
         title: "Béguinage",
         image: images.beguinage,
         summary:
-          "Logements indépendants autour d'espaces communs, ambiance conviviale portée par associations.",
+          "Logements indépendants autour d’espaces communs, ambiance conviviale portée par associations.",
         details: [
           "Pour qui ? Seniors autonomes, petit collectif.",
           "À retenir : esprit simple et solidaire.",
-          "Réflexe : vérifier l'animation réelle de la vie collective.",
+          "Réflexe : vérifier l’animation réelle de la vie collective.",
         ],
       },
     ],
   },
   {
     key: "habitat_partage",
-    title: "👥 Habitat partagé : inventer d'autres façons de vivre ensemble",
+    title: "👥 Habitat partagé : inventer d’autres façons de vivre ensemble",
     description:
       "Catégorie innovante : colocation, habitat inclusif, accueil familial… Ici, on réinvente la vie collective.",
     solutions: [
@@ -75,7 +75,7 @@ const sections = [
         title: "Habitat inclusif",
         image: images.habitat_inclusif,
         summary:
-          "Logements regroupés avec projet de vie sociale et partagée, soutenu par l'AVP.",
+          "Logements regroupés avec projet de vie sociale et partagée, soutenu par l’AVP.",
         details: [
           "Pour qui ? Autonomie + vie collective, cadre sécurisant.",
           "À retenir : projet collectif en plein essor.",
@@ -89,9 +89,9 @@ const sections = [
         summary:
           "Une personne/couple accueille une ou deux personnes âgées chez eux, ambiance familiale.",
         details: [
-          "Pour qui ? Cadre intime, moins cher qu'un établissement.",
+          "Pour qui ? Cadre intime, moins cher qu’un établissement.",
           "À retenir : relation humaine forte.",
-          "Réflexe : tester la compatibilité avant de s'engager.",
+          "Réflexe : tester la compatibilité avant de s’engager.",
         ],
       },
       {
@@ -113,9 +113,9 @@ const sections = [
         summary:
           "Projets militants : éco-hameaux, coopératives, résidences solidaires.",
         details: [
-          "Pour qui ? Ceux qui veulent s&apos;engager dans un collectif.",
+          "Pour qui ? Ceux qui veulent s’engager dans un collectif.",
           "À retenir : enthousiasmant mais parfois exigeant.",
-          "Réflexe : mesurer son envie réelle d&apos;implication.",
+          "Réflexe : mesurer son envie réelle d’implication.",
         ],
       },
       {
@@ -132,7 +132,7 @@ const sections = [
       },
       {
         key: "maison_accueil_familial",
-        title: "Maison d'accueil familial",
+        title: "Maison d’accueil familial",
         image: images.maison_accueil_familial,
         summary:
           "Plusieurs accueillants familiaux regroupent leurs accueils sous un même toit.",
@@ -171,7 +171,7 @@ const sections = [
         details: [
           "Pour qui ? Seniors autonomes mais isolés.",
           "À retenir : compromis abordable, variable selon la commune.",
-          "Réflexe : vérifier l'état du bâti et la qualité des animations.",
+          "Réflexe : vérifier l’état du bâti et la qualité des animations.",
         ],
       },
       {
@@ -199,21 +199,21 @@ export default function Client() {
           Habitats intermédiaires : mieux comprendre pour mieux choisir
         </h1>
         <p className="text-lg text-gray-700 mb-2">
-          Entre le domicile « classique » et l&apos;EHPAD, il existe une galaxie de solutions qu&apos;on regroupe sous un terme encore flou pour beaucoup : l&apos;habitat intermédiaire.
+          Entre le domicile « classique » et l’EHPAD, il existe une galaxie de solutions qu’on regroupe sous un terme encore flou pour beaucoup : l’habitat intermédiaire.
         </p>
         <p className="text-md text-gray-600 mb-2">
-          Derrière ce mot se cachent des réalités très variées : du petit béguinage convivial à la résidence autonomie, en passant par l&apos;habitat inclusif ou les villages seniors.
+          Derrière ce mot se cachent des réalités très variées : du petit béguinage convivial à la résidence autonomie, en passant par l’habitat inclusif ou les villages seniors.
         </p>
         <div className="mt-6 p-6 bg-orange-50 rounded-lg border border-orange-200">
-          <h2 className="text-xl font-semibold text-orange-800 mb-2">L&apos;idée commune ?</h2>
+          <h2 className="text-xl font-semibold text-orange-800 mb-2">L’idée commune ?</h2>
           <ul className="list-disc pl-6 text-orange-900 space-y-1">
-            <li>Proposer une alternative qui permet de vieillir chez soi, mais pas tout seul, avec un environnement plus adapté qu&apos;un logement standard, et moins médicalisé qu&apos;un établissement.</li>
+            <li>Proposer une alternative qui permet de vieillir chez soi, mais pas tout seul, avec un environnement plus adapté qu’un logement standard, et moins médicalisé qu’un établissement.</li>
             <li>Répondre aux enjeux de solitude, accessibilité, coût et, surtout, au désir de choisir comment on veut vivre demain.</li>
           </ul>
         </div>
         <div className="mt-6 p-6 bg-amber-100 rounded-lg border border-amber-300">
           <p className="text-md text-orange-900">
-            Rendre cette offre lisible, c&apos;est donc un enjeu citoyen : pour les familles, les élus, les professionnels… mais surtout pour les personnes âgées elles-mêmes. Voici une boussole pour comprendre ce que recouvre chaque solution, ses atouts, ses limites, et quelques réflexes à garder en tête avant de s&apos;engager.
+            Rendre cette offre lisible, c’est donc un enjeu citoyen : pour les familles, les élus, les professionnels… mais surtout pour les personnes âgées elles-mêmes. Voici une boussole pour comprendre ce que recouvre chaque solution, ses atouts, ses limites, et quelques réflexes à garder en tête avant de s’engager.
           </p>
         </div>
       </header>
@@ -270,12 +270,25 @@ export default function Client() {
         </section>
       ))}
 
-      {/* Simulateur d'habitat */}
+      {/* Espace simulateurs */}
       <section id="simulateurs" className="mb-16">
         <div className="bg-orange-50 border border-orange-200 rounded-xl p-8 text-center">
-          <h2 className="text-2xl font-bold text-orange-900 mb-2">🧮 Simulateur des solutions d&apos;habitat intermédiaire</h2>
+          <h2 className="text-2xl font-bold text-orange-900 mb-2">🧮 Simulateurs à venir</h2>
+          <p className="text-md text-orange-800 mb-2">
+            Bientôt, vous pourrez accéder à des outils interactifs pour comparer les solutions, estimer les coûts, et simuler votre projet d’habitat intermédiaire.
+          </p>
+          <p className="text-sm text-orange-700">
+            <em>Cette section sera enrichie prochainement avec des simulateurs pratiques et des guides personnalisés.</em>
+          </p>
+        </div>
+      </section>
+
+      {/* Simulateur */}
+      <section className="mb-10">
+        <div className="bg-orange-50 border border-orange-200 rounded-xl p-8 text-center">
+          <h2 className="text-2xl font-bold text-orange-900 mb-2">🧮 Trouvez votre solution idéale</h2>
           <p className="text-md text-orange-800 mb-6">
-            Accédez ici à un outil interactif permettant de se repérer dans les différentes solutions d&apos;habitat pour seniors à partir de vos besoins et préférences.
+            Utilisez notre simulateur personnalisé pour découvrir les solutions d&apos;habitat intermédiaire qui correspondent le mieux à vos besoins et préférences.
           </p>
           <Link 
             href="/simulateur-habitat" 
@@ -284,7 +297,7 @@ export default function Client() {
             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
               <path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z"/>
             </svg>
-            Simulateur des solutions d&apos;habitat intermédiaire
+            Lancer le simulateur d&apos;habitat
           </Link>
         </div>
       </section>
@@ -294,11 +307,11 @@ export default function Client() {
         <div className="bg-amber-100 border border-amber-300 rounded-xl p-8">
           <h2 className="text-xl font-bold text-orange-900 mb-2">🎯 En résumé</h2>
           <p className="text-md text-orange-900 mb-2">
-            L&apos;habitat intermédiaire, ce n&apos;est pas « une case unique » mais une constellation de réponses.
-            Chaque solution a ses promesses et ses angles morts. L&apos;essentiel, c&apos;est de ne pas choisir sur un coup de cœur ou une plaquette commerciale : aller voir, poser des questions, tester la vie quotidienne.
+            L’habitat intermédiaire, ce n’est pas « une case unique » mais une constellation de réponses.
+            Chaque solution a ses promesses et ses angles morts. L’essentiel, c’est de ne pas choisir sur un coup de cœur ou une plaquette commerciale : aller voir, poser des questions, tester la vie quotidienne.
           </p>
           <p className="text-md text-orange-800">
-            👉 L&apos;habitat, ce n&apos;est pas que des murs. C&apos;est un projet de vie.
+            👉 L’habitat, ce n’est pas que des murs. C’est un projet de vie.
           </p>
         </div>
       </section>

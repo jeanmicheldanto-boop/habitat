@@ -3,16 +3,110 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+// Icônes SVG monochromes modernes
+const Icons = {
+  brain: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M21.33 12.91C21.42 14.46 20.71 15.95 19.44 16.86L19.46 17.78C19.46 19.15 18.35 20.26 16.98 20.26C15.61 20.26 14.5 19.15 14.5 17.78V16.5C14.5 15.67 13.83 15 13 15S11.5 15.67 11.5 16.5V17.78C11.5 19.15 10.39 20.26 9.02 20.26C7.65 20.26 6.54 19.15 6.54 17.78L6.56 16.86C5.29 15.95 4.58 14.46 4.67 12.91C4.75 11.35 5.61 9.96 6.95 9.17C6.95 9.17 7.64 8.8 8.5 8.5C9.14 6.66 10.85 5.33 12.83 5.06C15.5 4.72 18 6.5 18.5 9.17C19.36 9.47 20.05 9.84 20.05 9.84C21.39 10.63 22.25 12.02 21.33 12.91Z"/>
+    </svg>
+  ),
+  compass: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12S7.59 4 12 4 20 7.59 20 12 16.41 20 12 20ZM12 6L8 14L16 10L12 6Z"/>
+    </svg>
+  ),
+  shower: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M9 20H15V22H9V20ZM12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 10V12H3V10H21ZM5 14H19V16H5V14ZM12 8C10.9 8 10 7.1 10 6H14C14 7.1 13.1 8 12 8Z"/>
+    </svg>
+  ),
+  shirt: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M16 4L18.29 8.29L22 9L18.5 12.5L19.5 16L16 14L12.5 16L13.5 12.5L10 9L13.71 8.29L15 4V2H9V4L10.29 8.29L14 9L10.5 12.5L11.5 16L8 14L4.5 16L5.5 12.5L2 9L5.71 8.29L7 4V2H17V4H16Z"/>
+    </svg>
+  ),
+  utensils: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M8.1 13.34L2.91 8.15C2.66 7.9 2.66 7.47 2.91 7.22L7.22 2.91C7.47 2.66 7.9 2.66 8.15 2.91L13.34 8.1C14.93 6.51 17.45 6.51 19.04 8.1S21.49 12.07 19.9 13.66L13.66 19.9C12.07 21.49 9.55 21.49 7.96 19.9S6.47 16.93 8.06 15.34L8.1 13.34Z"/>
+    </svg>
+  ),
+  toilet: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M19 12H17V10C17 8.9 16.1 8 15 8H9C7.9 8 7 8.9 7 10V12H5C4.45 12 4 12.45 4 13S4.45 14 5 14H7V18C7 19.1 7.9 20 9 20H15C16.1 20 17 19.1 17 18V14H19C19.55 14 20 13.55 20 13S19.55 12 19 12ZM15 18H9V10H15V18Z"/>
+    </svg>
+  ),
+  person: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12 12C14.21 12 16 10.21 16 8S14.21 4 12 4 8 5.79 8 8 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"/>
+    </svg>
+  ),
+  home: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z"/>
+    </svg>
+  ),
+  walk: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M13.5 5.5C14.6 5.5 15.5 4.6 15.5 3.5S14.6 1.5 13.5 1.5 11.5 2.4 11.5 3.5 12.4 5.5 13.5 5.5ZM9.8 8.9L7 23H9.1L10.9 15L13 17V23H15V15.5L12.9 13.5L13.5 10.5C14.8 12 16.8 13 19 13V11C17.1 11 15.5 10 14.7 8.6L13.7 7C13.3 6.4 12.7 6 12 6S10.7 6.4 10.3 7L7.8 10.5L9.8 8.9Z"/>
+    </svg>
+  ),
+  phone: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M6.62 10.79C8.06 13.62 10.38 15.94 13.21 17.38L15.41 15.18C15.69 14.9 16.08 14.82 16.43 14.93C17.55 15.3 18.75 15.5 20 15.5C20.55 15.5 21 15.95 21 16.5V20C21 20.55 20.55 21 20 21C10.61 21 3 13.39 3 4C3 3.45 3.45 3 4 3H7.5C8.05 3 8.5 3.45 8.5 4C8.5 5.25 8.7 6.45 9.07 7.57C9.18 7.92 9.1 8.31 8.82 8.59L6.62 10.79Z"/>
+    </svg>
+  ),
+  activity: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M22 12C22 17.5 17.5 22 12 22S2 17.5 2 12 6.5 2 12 2 22 6.5 22 12ZM12 7C9.8 7 8 8.8 8 11S9.8 15 12 15 16 13.2 16 11 14.2 7 12 7Z"/>
+    </svg>
+  ),
+  drink: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M5 3V7H10.5V19C10.5 20.11 11.39 21 12.5 21S14.5 20.11 14.5 19V7H20V3H5ZM7 5H18V5.5H7V5Z"/>
+    </svg>
+  ),
+  sleep: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M17.75 4.09L15.22 6.03L16.13 9.09L13.5 7.28L10.87 9.09L11.78 6.03L9.25 4.09L12.44 4L13.5 1L14.56 4L17.75 4.09ZM21.25 11L19.61 12.25L20.2 14.23L18.5 13.06L16.8 14.23L17.39 12.25L15.75 11L17.81 10.95L18.5 9L19.19 10.95L21.25 11ZM18.97 15.95C19.8 15.87 20.69 17.05 20.16 17.8C19.84 18.25 19.5 18.67 19.08 19.07C15.17 23 8.84 23 4.94 19.07C1.03 15.17 1.03 8.83 4.94 4.93C5.34 4.53 5.76 4.17 6.21 3.85C6.96 3.32 8.14 4.21 8.06 5.04C7.79 7.9 8.75 10.87 10.95 13.06C13.14 15.26 16.1 16.22 18.97 15.95Z"/>
+    </svg>
+  ),
+  security: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM12 7C13.4 7 14.5 8.1 14.5 9.5V10.5H15V16H9V10.5H9.5V9.5C9.5 8.1 10.6 7 12 7ZM12 8.2C11.2 8.2 10.7 8.7 10.7 9.5V10.5H13.3V9.5C13.3 8.7 12.8 8.2 12 8.2Z"/>
+    </svg>
+  ),
+  handshake: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M17.5 12C19.4 12 21 13.6 21 15.5S19.4 19 17.5 19 14 17.4 14 15.5 15.6 12 17.5 12ZM6.5 12C8.4 12 10 13.6 10 15.5S8.4 19 6.5 19 3 17.4 3 15.5 4.6 12 6.5 12ZM12 2.5C13.4 2.5 14.5 3.6 14.5 5S13.4 7.5 12 7.5 9.5 6.4 9.5 5 10.6 2.5 12 2.5Z"/>
+    </svg>
+  ),
+  care: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M19.14 12.94C19.73 12.35 20.04 11.53 19.96 10.63C19.83 9.24 18.71 8.12 17.32 7.99C16.42 7.91 15.6 8.22 15.01 8.81L12 11.82L8.99 8.81C8.4 8.22 7.58 7.91 6.68 7.99C5.29 8.12 4.17 9.24 4.04 10.63C3.96 11.53 4.27 12.35 4.86 12.94L12 20.08L19.14 12.94Z"/>
+    </svg>
+  ),
+  glasses: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M2 7H6C7.1 7 8 7.9 8 9V15C8 16.1 7.1 17 6 17H2C0.9 17 0 16.1 0 15V9C0 7.9 0.9 7 2 7ZM18 7H22C23.1 7 24 7.9 24 9V15C24 16.1 23.1 17 22 17H18C16.9 17 16 16.1 16 15V9C16 7.9 16.9 7 18 7ZM8 12H16"/>
+    </svg>
+  ),
+  document: (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM6 20V4H13V9H18V20H6Z"/>
+    </svg>
+  )
+};
+
 // Types
 interface Question {
   code: string;
-  icon: string;
+  iconKey: string;
   prompt: string;
 }
 
 interface Variable {
   code: string;
-  icon: string;
+  iconKey: string;
   label: string;
 }
 
@@ -27,52 +121,52 @@ interface GirResult {
 const QUESTIONS: Question[] = [
   {
     code: "Cohérence",
-    icon: "🧠",
+    iconKey: "brain",
     prompt: "Au quotidien, est-ce que vous vous sentez clair(e) dans vos idées, capable de faire des choix et de vous faire comprendre sans difficulté ?"
   },
   {
     code: "Orientation",
-    icon: "🧭",
+    iconKey: "compass",
     prompt: "Vous repérer dans le temps et les lieux est-il facile (date, rendez-vous, trajet connu) ?"
   },
   {
     code: "Toilette",
-    icon: "🚿",
+    iconKey: "shower",
     prompt: "Pour la toilette (se laver, se sécher), vous débrouillez-vous sans aide ?"
   },
   {
     code: "Habillage",
-    icon: "👕",
+    iconKey: "shirt",
     prompt: "Pour vous habiller (choix des vêtements, fermetures, chaussures), ça va tout seul ?"
   },
   {
     code: "Alimentation",
-    icon: "🍽️",
+    iconKey: "utensils",
     prompt: "Pour préparer/prendre vos repas et boire suffisamment, avez-vous besoin d'un coup de main ?"
   },
   {
     code: "Élimination",
-    icon: "🚻",
+    iconKey: "toilet",
     prompt: "Aller aux toilettes (y aller, s'installer, se rhabiller) est-ce gérable seul(e) ?"
   },
   {
     code: "Transferts",
-    icon: "🧍‍♀️",
+    iconKey: "person",
     prompt: "Vous lever, vous asseoir, vous coucher — pouvez-vous le faire sans assistance ?"
   },
   {
     code: "Déplacements intérieurs",
-    icon: "🏠",
+    iconKey: "home",
     prompt: "Vous déplacer **dans le logement** (avec ou sans aide technique), est-ce aisé ?"
   },
   {
     code: "Déplacements extérieurs",
-    icon: "🚶",
+    iconKey: "walk",
     prompt: "Sortir **à l'extérieur** pour de petites courses/rendez-vous : le faites-vous sans aide humaine ?"
   },
   {
     code: "Communication",
-    icon: "☎️",
+    iconKey: "phone",
     prompt: "Téléphone, sonnette, alarme : êtes-vous à l'aise pour **joindre quelqu'un** en cas de besoin ?"
   }
 ];
@@ -80,38 +174,38 @@ const QUESTIONS: Question[] = [
 const VARIABLES: Variable[] = [
   {
     code: "activité_physique",
-    icon: "🤸",
+    iconKey: "activity",
     label: "Bouger un peu chaque jour (marche, étirements) vous est-il facile en ce moment ?"
   },
   {
     code: "nutrition_hydratation",
-    icon: "🥤",
+    iconKey: "drink",
     label: "Buvez-vous suffisamment et vos repas sont-ils réguliers et équilibrés ?"
   },
   {
     code: "sommeil",
-    icon: "🌙",
+    iconKey: "sleep",
     label: "Votre sommeil est-il plutôt réparateur ?"
   },
   {
     code: "vision_audition",
-    icon: "👓",
+    iconKey: "glasses",
     label: "Vision et audition : êtes-vous bien équipé(e) (lunettes, appareil) et à jour des contrôles ?"
   },
   {
     code: "sécurité_logement",
-    icon: "🛠️",
-    label: "Votre logement est-il sécurisé (éclairage, tapis antidérapants, barres d'appui) ?"
+    iconKey: "security",
+    label: "Votre logement est-il sécurisé (éclairage, tapis antidérapants, barres d&apos;appui) ?"
   },
   {
     code: "liens_sociaux",
-    icon: "🤝",
+    iconKey: "handshake",
     label: "Avez-vous des contacts réguliers (famille, voisins, associations) ?"
   },
   {
     code: "administratif_budget",
-    icon: "📄",
-    label: "Vous sentez-vous à l'aise avec les démarches administratives et le budget ?"
+    iconKey: "document",
+    label: "Vous sentez-vous à l&apos;aise avec les démarches administratives et le budget ?"
   }
 ];
 
@@ -294,7 +388,7 @@ export default function SimulateurGirClient() {
                   {needHelp.map(key => (
                     <div key={key} className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                       <div className="flex items-start gap-3">
-                        <span className="text-lg">{QUESTIONS.find(q => q.code === key)?.icon}</span>
+                        <span className="text-orange-600">{Icons[QUESTIONS.find(q => q.code === key)?.iconKey as keyof typeof Icons]}</span>
                         <div>
                           <h4 className="font-medium text-slate-800">{key}</h4>
                           <p className="text-sm text-slate-600">{CHOICES[answers[key] as keyof typeof CHOICES]}</p>
@@ -316,7 +410,7 @@ export default function SimulateurGirClient() {
                     return (
                       <div key={code} className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <div className="flex items-start gap-3">
-                          <span className="text-lg">{variable?.icon}</span>
+                          <span className="text-blue-600">{Icons[variable?.iconKey as keyof typeof Icons]}</span>
                           <div>
                             <h4 className="font-medium text-slate-800">{variable?.label}</h4>
                             <p className="text-sm text-blue-700 mt-2">{VARIABLES_TIPS[code as keyof typeof VARIABLES_TIPS]}</p>
@@ -389,7 +483,7 @@ export default function SimulateurGirClient() {
             {isQuestionsPhase ? (
               <div>
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="text-3xl">{QUESTIONS[currentQuestionIndex].icon}</span>
+                  <span className="text-orange-600">{Icons[QUESTIONS[currentQuestionIndex].iconKey as keyof typeof Icons]}</span>
                   <h2 className="text-xl font-semibold text-slate-800">
                     {QUESTIONS[currentQuestionIndex].code}
                   </h2>
@@ -401,7 +495,7 @@ export default function SimulateurGirClient() {
             ) : (
               <div>
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="text-3xl">{VARIABLES[currentVariableIndex].icon}</span>
+                  <span className="text-blue-600">{Icons[VARIABLES[currentVariableIndex].iconKey as keyof typeof Icons]}</span>
                   <h2 className="text-xl font-semibold text-slate-800">
                     Prévention — {VARIABLES[currentVariableIndex].code.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </h2>

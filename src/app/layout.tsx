@@ -8,13 +8,13 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   metadataBase: new URL('https://habitat-intermediaire.fr'),
   title: {
-    default: "Habitat Intermédiaire - Plateforme de logements pour seniors | Résidences autonomie, services seniors",
+    default: "Habitat Intermédiaire - Plateforme Logements Seniors | Simulateurs Gratuits & Solutions Adaptées",
     template: "%s | Habitat Intermédiaire - Logements seniors"
   },
-  description: "Découvrez les meilleures solutions d'habitat intermédiaire pour seniors : résidences autonomie, résidences services, béguinages, MARPA. Alternative à l'EHPAD, trouvez le logement adapté près de chez vous.",
+  description: "🏠 Plateforme habitat intermédiaire : simulateurs gratuits (GIR, APA, habitat), 500+ établissements référencés. Trouvez résidence autonomie, MARPA, béguinage adaptés. Alternative EHPAD.",
   keywords: [
     "habitat intermédiaire",
-    "logement seniors",
+    "simulateur logement seniors",
     "résidence autonomie",
     "résidence services seniors", 
     "béguinage",
@@ -23,14 +23,23 @@ export const metadata: Metadata = {
     "habitat inclusif",
     "colocation seniors",
     "village seniors",
+    "simulateur GIR gratuit",
+    "simulateur APA 2025",
     "logement personnes âgées",
     "habitat adapté seniors",
     "résidence pour seniors",
-    "logement intergénérationnel"
+    "logement intergénérationnel",
+    "plateforme seniors France",
+    "aide choix habitat senior"
   ],
   authors: [{ name: "Habitat Intermédiaire" }],
   creator: "Habitat Intermédiaire",
   publisher: "Habitat Intermédiaire",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false
+  },
   robots: {
     index: true,
     follow: true,
