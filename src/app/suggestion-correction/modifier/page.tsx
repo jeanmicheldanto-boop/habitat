@@ -83,8 +83,13 @@ interface SousCategorieOption {
 export default function ModifierEtablissementPage() {
   const router = useRouter();
   // Récupère l'id d'établissement depuis l'URL
-  const searchParams = typeof window !== 'undefined' ? require('next/navigation').useSearchParams() : null;
-  const etablissementId = searchParams ? searchParams.get('etablissement') : '';
+  let etablissementId = '';
+  if (typeof window !== 'undefined') {
+    // Import dynamique autorisé côté client
+    const { useSearchParams } = await import('next/navigation');
+    const searchParams = useSearchParams();
+    etablissementId = searchParams.get('etablissement') || '';
+  }
   // LOG: Vérification de la récupération du paramètre (après initialisation)
   console.log('Rendu ModifierEtablissementPage, etablissementId:', etablissementId);
   
