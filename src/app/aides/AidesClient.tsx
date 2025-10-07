@@ -91,7 +91,7 @@ export default function AidesClient() {
                   <h3 className="font-semibold text-orange-900">Le coût n&apos;est pas tabou</h3>
                   <p className="text-gray-700">
                     Les non-dits financiers créent du stress. Mieux vaut clarifier tôt : les aides liées au vieillissement sont <em>moins avantageuses</em> que celles de la maladie/du handicap, et tiennent compte des <strong>ressources</strong> (parfois du <strong>patrimoine</strong>). Ici, on en parle franchement : commencez par notre {" "}
-                    <Link href="https://jeanmicheldanto-boop-simulateur-apa-app-rchkyz.streamlit.app/" target="_blank" rel="noopener noreferrer" className="font-semibold !text-orange-600 hover:!text-orange-700 underline !decoration-orange-600 decoration-2 underline-offset-2">simulateur APA</Link> (participation et reste à charge).
+                    <Link href="/simulateur-apa" className="font-semibold !text-orange-600 hover:!text-orange-700 underline !decoration-orange-600 decoration-2 underline-offset-2">simulateur APA</Link> (participation et reste à charge).
                   </p>
                 </div>
               </div>
@@ -126,7 +126,7 @@ export default function AidesClient() {
                   </ul>
                 </li>
                 <li>C&apos;est donc d&apos;abord un <strong>volume d&apos;heures</strong> plus qu&apos;un virement d&apos;argent : en prestataire, l&apos;APA est souvent versée à la structure et vous ne payez que le <strong>reste à charge</strong>.</li>
-                <li><strong>Participation</strong> : <em>0 €</em> jusqu&apos;à ~1 000 € de ressources mensuelles, puis de <em>0 à 90 %</em>. Faites le point avec {" "}<Link href="https://jeanmicheldanto-boop-simulateur-apa-app-rchkyz.streamlit.app/" target="_blank" rel="noopener noreferrer" className="font-semibold !text-orange-600 hover:!text-orange-700 underline !decoration-orange-600 decoration-2 underline-offset-2">notre calculateur APA</Link>.</li>
+                <li><strong>Participation</strong> : <em>0 €</em> jusqu&apos;à ~1 000 € de ressources mensuelles, puis de <em>0 à 90 %</em>. Faites le point avec {" "}<Link href="/simulateur-apa" className="font-semibold !text-orange-600 hover:!text-orange-700 underline !decoration-orange-600 decoration-2 underline-offset-2">notre calculateur APA</Link>.</li>
               </ul>
             </div>
             {/* 3) Nos deux conseils */}
@@ -146,7 +146,7 @@ export default function AidesClient() {
             <p className="text-md text-orange-800 mb-2">Deux outils pour vous repérer rapidement et préparer vos démarches.</p>
             <div className="mt-4 flex flex-wrap gap-3 justify-center">
               <Link href="/simulateur-gir" className="inline-flex items-center rounded-md bg-orange-700 px-4 py-2 text-white hover:bg-orange-800">Ouvrir l&rsquo;outil d&rsquo;estimation du GIR</Link>
-              <Link href="https://jeanmicheldanto-boop-simulateur-apa-app-rchkyz.streamlit.app/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center rounded-md bg-orange-700 px-4 py-2 text-white hover:bg-orange-800">Ouvrir le simulateur APA</Link>
+              <Link href="/simulateur-apa" className="inline-flex items-center rounded-md bg-orange-700 px-4 py-2 text-white hover:bg-orange-800">Ouvrir le simulateur APA</Link>
             </div>
           </div>
         </section>
