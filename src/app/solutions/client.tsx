@@ -283,6 +283,25 @@ export default function Client() {
         </div>
       </section>
 
+      {/* Simulateur */}
+      <section className="mb-10">
+        <div className="bg-orange-50 border border-orange-200 rounded-xl p-8 text-center">
+          <h2 className="text-2xl font-bold text-orange-900 mb-2">🧮 Trouvez votre solution idéale</h2>
+          <p className="text-md text-orange-800 mb-6">
+            Utilisez notre simulateur personnalisé pour découvrir les solutions d&apos;habitat intermédiaire qui correspondent le mieux à vos besoins et préférences.
+          </p>
+          <Link 
+            href="/simulateur-habitat" 
+            className="inline-flex items-center rounded-md bg-orange-700 px-6 py-3 text-white font-semibold hover:bg-orange-800 transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+          >
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z"/>
+            </svg>
+            Lancer le simulateur d&apos;habitat
+          </Link>
+        </div>
+      </section>
+
       {/* Résumé final */}
       <section className="mb-10">
         <div className="bg-amber-100 border border-amber-300 rounded-xl p-8">
