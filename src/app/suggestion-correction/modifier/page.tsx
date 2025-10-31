@@ -112,10 +112,12 @@ function ModifierEtablissementPageContent() {
   const etablissementId = searchParams.get('etablissement') || '';
   
   const [etablissement, setEtablissement] = useState<EtablissementData | null>(null);
-  const [servicesOptions] = useState<ServiceOption[]>([]);
-  const [sousCategories] = useState<SousCategorieOption[]>([]);
+  const [servicesOptions, setServicesOptions] = useState<ServiceOption[]>([]);
+  const [sousCategories, setSousCategories] = useState<SousCategorieOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('contact');
+  const [loadingOptions, setLoadingOptions] = useState(true);
+  const [optionsError, setOptionsError] = useState('');
   
   const [formData, setFormData] = useState({
     nom: '',
@@ -189,10 +191,64 @@ function ModifierEtablissementPageContent() {
     }));
   };
 
+  // Charger les options (services et sous-catégories) au montage
+  useEffect(() => {
+    const loadOptionsData = async () => {
+      try {
+        console.log('🔄 Début du chargement des options...');
+        setLoadingOptions(true);
+        setOptionsError('');
+        
+        // Charger les services
+        console.log('📡 Requête services: SELECT id, libelle FROM services ORDER BY libelle');
+        const { data: servicesData, error: servicesError, count: servicesCount } = await supabase
+          .from('services')
+          .select('id, libelle', { count: 'exact' })
+          .order('libelle');
+
+        console.log('📋 Services - Count:', servicesCount, 'Data:', servicesData, 'Erreur:', servicesError);
+        if (servicesError) {
+          console.error('❌ Erreur services:', servicesError);
+          setOptionsError(`Erreur services: ${servicesError.message}`);
+        } else if (servicesData) {
+          console.log('✅ Services chargés:', servicesData.slice(0, 3));
+          setServicesOptions(servicesData);
+        }
+
+        // Charger les sous-catégories
+        console.log('📡 Requête sous_categories: SELECT id, libelle FROM sous_categories ORDER BY libelle');
+        const { data: sousCategoriesData, error: sousCategoriesError, count: scCount } = await supabase
+          .from('sous_categories')
+          .select('id, libelle', { count: 'exact' })
+          .order('libelle');
+
+        console.log('📋 Sous-catégories - Count:', scCount, 'Data:', sousCategoriesData, 'Erreur:', sousCategoriesError);
+        if (sousCategoriesError) {
+          console.error('❌ Erreur sous-catégories:', sousCategoriesError);
+          setOptionsError(`Erreur sous-catégories: ${sousCategoriesError.message}`);
+        } else if (sousCategoriesData) {
+          console.log('✅ Sous-catégories chargées:', sousCategoriesData.slice(0, 3));
+          setSousCategories(sousCategoriesData);
+        }
+
+        console.log('✅ Chargement des options terminé');
+        setLoadingOptions(false);
+      } catch (error) {
+        console.error('❌ Erreur lors du chargement des options:', error);
+        setOptionsError(error instanceof Error ? error.message : 'Erreur inconnue');
+        setLoadingOptions(false);
+      }
+    };
+
+    loadOptionsData();
+  }, []); // Seulement au montage du composant
+
   const loadEtablissementData = useCallback(async () => {
       console.log('Début chargement des données, etablissementId:', etablissementId);
     try {
         console.log('Connexion à Supabase...');
+      
+      // Requête principale pour l'établissement
       const { data: etab, error } = await supabase
         .from('etablissements')
         .select(`
@@ -200,23 +256,45 @@ function ModifierEtablissementPageContent() {
           logements_types (*),
           restaurations (*),
           tarifications (*),
-          etablissement_service (
-            service_id,
-            services (id, libelle)
-          ),
-          etablissement_sous_categorie (
-            sous_categorie_id,
-            sous_categories (id, libelle)
-          ),
           avp_infos (*)
         `)
         .eq('id', etablissementId)
         .single();
-        console.log('Résultat requête Supabase:', { etab, error });
+        
+      console.log('Résultat requête Supabase (établissement):', { etab, error });
 
       if (error) throw error;
 
+      // Requêtes séparées pour les tables de jonction many-to-many
+      const { data: servicesData, error: servicesError } = await supabase
+        .from('etablissement_service')
+        .select('service_id, services(id, libelle)')
+        .eq('etablissement_id', etablissementId);
+        
+      console.log('Résultat requête services liés:', { servicesData, servicesError });
+
+      const { data: sousCategoriesData, error: sousCategoriesError } = await supabase
+        .from('etablissement_sous_categorie')
+        .select('sous_categorie_id, sous_categories(id, libelle)')
+        .eq('etablissement_id', etablissementId);
+        
+      console.log('Résultat requête sous-catégories liées:', { sousCategoriesData, sousCategoriesError });
+
+      // Ajouter les données many-to-many à l'objet établissement
+      etab.etablissement_service = servicesData || [];
+      etab.etablissement_sous_categorie = sousCategoriesData || [];
+
       setEtablissement(etab);
+      console.log('✅ Établissement chargé:', etab.nom);
+      
+      // Debug: afficher les services et sous-catégories liés
+      const servicesLies = servicesData?.map((es: { service_id: string }) => es.service_id) || [];
+      const sousCategoriesLiees = sousCategoriesData?.map((sc: { sous_categorie_id: string }) => sc.sous_categorie_id) || [];
+      
+      console.log('🔗 Services liés à l\'établissement:', servicesLies);
+      console.log('🔗 Services complets:', servicesData);
+      console.log('🔗 Sous-catégories liées:', sousCategoriesLiees);
+      console.log('🔗 Sous-catégories complètes:', sousCategoriesData);
       
       // Pré-remplir les données de modification avec les valeurs actuelles
       setModificationData({
@@ -229,7 +307,7 @@ function ModifierEtablissementPageContent() {
         commune: etab.commune || '',
         departement: etab.departement || '',
         habitat_type: etab.habitat_type || '',
-  sous_categories: etab.etablissement_sous_categorie?.map((sc: { sous_categorie_id: string }) => sc.sous_categorie_id) || [],
+        sous_categories: sousCategoriesLiees,
         nouvelle_photo_data: null, // Pas de pré-remplissage pour les nouvelles photos
         logements_types: etab.logements_types || [],
         restauration: etab.restaurations?.[0] || {
@@ -238,7 +316,7 @@ function ModifierEtablissementPageContent() {
           resto_collectif: false,
           portage_repas: false
         },
-  services: etab.etablissement_service?.map((es: { service_id: string }) => es.service_id) || [],
+        services: servicesLies,
         tarifications: etab.tarifications || [],
         avp_infos: etab.avp_infos?.[0] || {
           statut: 'intention',
@@ -247,6 +325,9 @@ function ModifierEtablissementPageContent() {
           intervenants: []
         }
       });
+      
+      console.log('📝 ModificationData.services défini à:', servicesLies);
+      console.log('📝 ModificationData.sous_categories défini à:', sousCategoriesLiees);
       
     } catch (error) {
       console.error('Erreur lors du chargement:', error);
@@ -402,9 +483,12 @@ function ModifierEtablissementPageContent() {
   ];
 
   useEffect(() => {
+    console.log('🎯 useEffect établissement déclenché avec etablissementId:', etablissementId);
     if (etablissementId) {
+      console.log('📞 Appel de loadEtablissementData');
       loadEtablissementData();
-      // loadOptions(); // Fonction non définie
+    } else {
+      console.log('⚠️ Pas d\'etablissementId');
     }
   }, [etablissementId, loadEtablissementData]);
 
@@ -704,7 +788,6 @@ function ModifierEtablissementPageContent() {
               {activeSection === 'type' && (
                 <div className="bg-white rounded-lg shadow-sm p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">🏠 Type d&#39;habitat et sous-catégorie</h3>
-  <h3 className="text-lg font-semibold text-gray-900 mb-4">🏠 Type d&#39;habitat et sous-catégorie</h3>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -728,31 +811,45 @@ function ModifierEtablissementPageContent() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Sous-catégories
                       </label>
+                      {optionsError && (
+                        <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+                          Erreur: {optionsError}
+                        </div>
+                      )}
                       <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2">
-                        {sousCategories.map(sc => (
-                          <label key={sc.id} className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              checked={modificationData.sous_categories.includes(sc.id)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setModificationData({
-                                    ...modificationData,
-                                    sous_categories: [...modificationData.sous_categories, sc.id]
-                                  });
-                                } else {
-                                  setModificationData({
-                                    ...modificationData,
-                                    sous_categories: modificationData.sous_categories.filter(id => id !== sc.id)
-                                  });
-                                }
-                              }}
-                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span className="text-sm">{sc.libelle}</span>
-                          </label>
-                        ))}
+                        {loadingOptions ? (
+                          <p className="text-sm text-gray-500 p-2">Chargement des sous-catégories...</p>
+                        ) : sousCategories.length === 0 ? (
+                          <p className="text-sm text-gray-500 p-2">Aucune sous-catégorie disponible</p>
+                        ) : (
+                          sousCategories.map(sc => (
+                            <label key={sc.id} className="flex items-center space-x-2">
+                              <input
+                                type="checkbox"
+                                checked={modificationData.sous_categories.includes(sc.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setModificationData({
+                                      ...modificationData,
+                                      sous_categories: [...modificationData.sous_categories, sc.id]
+                                    });
+                                  } else {
+                                    setModificationData({
+                                      ...modificationData,
+                                      sous_categories: modificationData.sous_categories.filter(id => id !== sc.id)
+                                    });
+                                  }
+                                }}
+                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              />
+                              <span className="text-sm">{sc.libelle}</span>
+                            </label>
+                          ))
+                        )}
                       </div>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {modificationData.sous_categories.length} catégorie(s) sélectionnée(s)
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -905,31 +1002,49 @@ function ModifierEtablissementPageContent() {
               {activeSection === 'services' && (
                 <div className="bg-white rounded-lg shadow-sm p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">🔧 Services proposés</h3>
+                  {optionsError && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+                      Erreur: {optionsError}
+                    </div>
+                  )}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
-                    {servicesOptions.map(service => (
-                      <label key={service.id} className="flex items-center space-x-3">
-                        <input
-                          type="checkbox"
-                          checked={modificationData.services.includes(service.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setModificationData({
-                                ...modificationData,
-                                services: [...modificationData.services, service.id]
-                              });
-                            } else {
-                              setModificationData({
-                                ...modificationData,
-                                services: modificationData.services.filter(id => id !== service.id)
-                              });
-                            }
-                          }}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm">{service.libelle.replace(/'/g, "&#39;").replace(/"/g, "&quot;")}</span>
-                      </label>
-                    ))}
+                    {loadingOptions ? (
+                      <div className="col-span-2 text-center py-8">
+                        <p className="text-sm text-gray-500">Chargement des services...</p>
+                      </div>
+                    ) : servicesOptions.length === 0 ? (
+                      <div className="col-span-2 text-center py-8">
+                        <p className="text-sm text-gray-500">Aucun service disponible</p>
+                      </div>
+                    ) : (
+                      servicesOptions.map(service => (
+                        <label key={service.id} className="flex items-center space-x-3">
+                          <input
+                            type="checkbox"
+                            checked={modificationData.services.includes(service.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setModificationData({
+                                  ...modificationData,
+                                  services: [...modificationData.services, service.id]
+                                });
+                              } else {
+                                setModificationData({
+                                  ...modificationData,
+                                  services: modificationData.services.filter(id => id !== service.id)
+                                });
+                              }
+                            }}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="text-sm">{service.libelle.replace(/'/g, "&#39;").replace(/"/g, "&quot;")}</span>
+                        </label>
+                      ))
+                    )}
                   </div>
+                  <p className="text-sm text-gray-500 mt-4">
+                    {modificationData.services.length} service(s) sélectionné(s)
+                  </p>
                 </div>
               )}
 

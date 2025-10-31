@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import type { JSX } from "react";
 import nextDynamic from "next/dynamic";
 import HeaderSubnavGate from "@/components/HeaderSubnavGate";
@@ -15,6 +15,7 @@ import BadgeIcon from "@/components/BadgeIcon";
 import AvpBadge from "@/components/AvpBadge";
 import "./plateforme.css";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 // Labels des habitat_type selon le nouveau mapping centralisé
 const HABITAT_TYPE_LABELS: Record<string, string> = {
@@ -64,6 +65,7 @@ interface Etablissement {
 
 export default function Page(): JSX.Element {
   // --- HOOKS ET LOGIQUE ---
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -80,6 +82,18 @@ export default function Page(): JSX.Element {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+
+  // États pour l'autocomplétion
+  const [suggestions, setSuggestions] = useState<Array<{
+    type: 'departement' | 'commune' | 'etablissement';
+    value: string;
+    label: string;
+    metadata?: string;
+  }>>([]);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
 
   // Nouveaux filtres pour habitat_type - Utilisation de la taxonomie
   const [selectedHabitatCategories, setSelectedHabitatCategories] = useState<string[]>([]);
@@ -181,6 +195,150 @@ export default function Page(): JSX.Element {
     fetchData();
     fetchSousCategories();
   }, []);
+
+  // Autocomplétion : recherche des suggestions
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (search.length < 2) {
+        setSuggestions([]);
+        return;
+      }
+
+      const allSuggestions: Array<{
+        type: 'departement' | 'commune' | 'etablissement';
+        value: string;
+        label: string;
+        metadata?: string;
+      }> = [];
+
+      try {
+        // 1. Rechercher dans les départements (priorité 1)
+        const { data: depts } = await supabase
+          .from('v_liste_publication_geoloc')
+          .select('departement')
+          .ilike('departement', `%${search}%`)
+          .limit(3);
+
+        if (depts) {
+          const uniqueDepts = Array.from(new Set(depts.map(d => d.departement)));
+          uniqueDepts.forEach(dept => {
+            if (dept) {
+              allSuggestions.push({
+                type: 'departement',
+                value: dept,
+                label: dept,
+                metadata: '📍 Département'
+              });
+            }
+          });
+        }
+
+        // 2. Rechercher dans les communes (priorité 2)
+        const { data: communes } = await supabase
+          .from('v_liste_publication_geoloc')
+          .select('commune, departement')
+          .ilike('commune', `%${search}%`)
+          .limit(5);
+
+        if (communes) {
+          const uniqueCommunes = Array.from(
+            new Map(communes.map(c => [c.commune, c])).values()
+          );
+          uniqueCommunes.forEach(item => {
+            if (item.commune) {
+              allSuggestions.push({
+                type: 'commune',
+                value: item.commune,
+                label: `${item.commune} (${item.departement})`,
+                metadata: '🏘️ Commune'
+              });
+            }
+          });
+        }
+
+        // 3. Rechercher dans les établissements (priorité 3)
+        const { data: etabs } = await supabase
+          .from('v_liste_publication_geoloc')
+          .select('etab_id, nom, commune')
+          .ilike('nom', `%${search}%`)
+          .limit(5);
+
+        if (etabs) {
+          etabs.forEach(etab => {
+            allSuggestions.push({
+              type: 'etablissement',
+              value: etab.etab_id,
+              label: etab.nom,
+              metadata: `🏠 ${etab.commune}`
+            });
+          });
+        }
+
+        setSuggestions(allSuggestions.slice(0, 8));
+        setShowSuggestions(allSuggestions.length > 0);
+      } catch (error) {
+        console.error('Erreur recherche suggestions:', error);
+      }
+    };
+
+    const timeoutId = setTimeout(fetchSuggestions, 200);
+    return () => clearTimeout(timeoutId);
+  }, [search]);
+
+  // Gérer les clics en dehors
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(event.target as Node) &&
+        searchInputRef.current &&
+        !searchInputRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Handler pour la navigation au clavier
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!showSuggestions || suggestions.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedIndex(prev => (prev < suggestions.length - 1 ? prev + 1 : prev));
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedIndex(prev => (prev > 0 ? prev - 1 : -1));
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (selectedIndex >= 0) {
+          handleSelectSuggestion(suggestions[selectedIndex]);
+        }
+        break;
+      case 'Escape':
+        setShowSuggestions(false);
+        setSelectedIndex(-1);
+        break;
+    }
+  };
+
+  const handleSelectSuggestion = (suggestion: { type: string; value: string; label: string }) => {
+    if (suggestion.type === 'etablissement') {
+      // Aller directement à la fiche établissement
+      router.push(`/plateforme/fiche?id=${encodeURIComponent(suggestion.value)}`);
+    } else {
+      // Mettre à jour la recherche avec la valeur sélectionnée
+      setSearch(suggestion.value);
+      setShowSuggestions(false);
+      setSelectedIndex(-1);
+    }
+  };
 
   function getFilteredData(): Etablissement[] {
     const filtered = data.filter((etab: Etablissement) => {
@@ -366,6 +524,7 @@ export default function Page(): JSX.Element {
               display: "flex",
               alignItems: "center",
               gap: 12,
+              position: "relative",
             }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2">
@@ -373,10 +532,14 @@ export default function Page(): JSX.Element {
               <path d="M21 21l-4.35-4.35"></path>
             </svg>
             <input
+              ref={searchInputRef}
               type="text"
               placeholder="Nom, ville, département, type d'habitat..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+              autoComplete="off"
               style={{
                 flex: 1,
                 border: "none",
@@ -388,7 +551,11 @@ export default function Page(): JSX.Element {
             />
             {search && (
               <button
-                onClick={() => setSearch("")}
+                onClick={() => {
+                  setSearch("");
+                  setShowSuggestions(false);
+                  setSuggestions([]);
+                }}
                 style={{
                   background: "none",
                   border: "none",
@@ -402,6 +569,59 @@ export default function Page(): JSX.Element {
                   <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
               </button>
+            )}
+
+            {/* Dropdown des suggestions mobile */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div
+                ref={suggestionsRef}
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  marginTop: 8,
+                  background: '#fff',
+                  borderRadius: 16,
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                  maxHeight: 300,
+                  overflowY: 'auto',
+                  zIndex: 1000,
+                  border: '1px solid #e0e0e0'
+                }}
+              >
+                {suggestions.map((suggestion, index) => (
+                  <div
+                    key={`${suggestion.type}-${suggestion.value}-${index}`}
+                    onClick={() => handleSelectSuggestion(suggestion)}
+                    style={{
+                      padding: '12px 16px',
+                      cursor: 'pointer',
+                      background: selectedIndex === index ? '#f0f8ff' : '#fff',
+                      borderBottom: index < suggestions.length - 1 ? '1px solid #f0f0f0' : 'none',
+                      borderRadius: index === 0 ? '16px 16px 0 0' : index === suggestions.length - 1 ? '0 0 16px 16px' : 0,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      transition: 'background 0.15s'
+                    }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 500, color: '#333', fontSize: '0.9rem' }}>
+                        {suggestion.label}
+                      </div>
+                      {suggestion.metadata && (
+                        <div style={{ fontSize: '0.75rem', color: '#999', marginTop: 2 }}>
+                          {suggestion.metadata}
+                        </div>
+                      )}
+                    </div>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5 12h14M12 5l7 7-7 7" stroke="#bbb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 
@@ -873,23 +1093,46 @@ export default function Page(): JSX.Element {
               boxShadow: "0 2px 8px 0 rgba(0,0,0,0.03), 0 -4px 12px -4px rgba(0,0,0,0.04)",
             }}
           >
-            <div style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "flex-start", marginBottom: 0, marginTop: 0 }}>
+            <div style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "flex-start", marginBottom: 0, marginTop: 0, position: "relative" }}>
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
                 }}
-                style={{ display: "flex", alignItems: "center", width: 420, justifyContent: "center" }}
+                style={{ display: "flex", alignItems: "center", width: 420, justifyContent: "center", position: "relative" }}
               >
-                <div style={{ background: "#fff", borderRadius: 32, boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)", display: "flex", alignItems: "center", width: 420, padding: "0.2em 0.3em" }}>
+                <div style={{ background: "#fff", borderRadius: 32, boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)", display: "flex", alignItems: "center", width: 420, padding: "0.2em 0.3em", position: "relative" }}>
                   <input
+                    ref={searchInputRef}
                     type="text"
                     placeholder="Nom, ville, département, type d'habitat, service..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                    autoComplete="off"
                     className="search-oblong"
-                    style={{ flex: 1, border: "none", outline: "none", background: "transparent", fontSize: "0.98rem", padding: "0.7em 1.1em", borderRadius: 32 }}
+                    style={{ 
+                      flex: 1, 
+                      border: "none", 
+                      outline: "none", 
+                      background: "transparent", 
+                      fontSize: "0.98rem", 
+                      padding: "0.7em 1.1em", 
+                      borderRadius: 32 
+                    }}
                   />
-                  <button type="submit" className="search-btn" style={{ border: "none", background: "none", marginLeft: -44, zIndex: 2, cursor: "pointer", padding: 0 }}>
+                  <button 
+                    type="submit" 
+                    className="search-btn" 
+                    style={{ 
+                      border: "none", 
+                      background: "none", 
+                      marginLeft: -44, 
+                      zIndex: 2, 
+                      cursor: "pointer", 
+                      padding: 0 
+                    }}
+                  >
                     <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, borderRadius: "50%", background: "#e0e2e6" }}>
                       <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                         <circle cx="9" cy="9" r="7" stroke="#888" strokeWidth="2" />
@@ -898,6 +1141,69 @@ export default function Page(): JSX.Element {
                     </span>
                   </button>
                 </div>
+
+                {/* Dropdown des suggestions */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <div
+                    ref={suggestionsRef}
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      marginTop: 8,
+                      background: '#fff',
+                      borderRadius: 16,
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                      maxHeight: 400,
+                      overflowY: 'auto',
+                      zIndex: 1000,
+                      border: '1px solid #e0e0e0'
+                    }}
+                  >
+                    {suggestions.map((suggestion, index) => (
+                      <div
+                        key={`${suggestion.type}-${suggestion.value}-${index}`}
+                        onClick={() => handleSelectSuggestion(suggestion)}
+                        style={{
+                          padding: '12px 16px',
+                          cursor: 'pointer',
+                          background: selectedIndex === index ? '#f0f8ff' : '#fff',
+                          borderBottom: index < suggestions.length - 1 ? '1px solid #f0f0f0' : 'none',
+                          borderRadius: index === 0 ? '16px 16px 0 0' : index === suggestions.length - 1 ? '0 0 16px 16px' : 0,
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          transition: 'background 0.15s'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (selectedIndex !== index) {
+                            e.currentTarget.style.background = '#f8f9fa';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (selectedIndex !== index) {
+                            e.currentTarget.style.background = '#fff';
+                          }
+                        }}
+                      >
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 500, color: '#333', fontSize: '0.95rem' }}>
+                            {suggestion.label}
+                          </div>
+                          {suggestion.metadata && (
+                            <div style={{ fontSize: '0.8rem', color: '#999', marginTop: 2 }}>
+                              {suggestion.metadata}
+                            </div>
+                          )}
+                        </div>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M5 12h14M12 5l7 7-7 7" stroke="#bbb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </form>
             </div>
 
@@ -1020,44 +1326,45 @@ export default function Page(): JSX.Element {
 
                     {/* Corps carte */}
                     <div style={{ flex: 1, padding: "1rem 1.3rem", display: "flex", flexDirection: "column", gap: "0.5rem", justifyContent: "center", fontSize: "0.91rem" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 2, justifyContent: "space-between" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          {(() => {
-                            const sousCategorie = Array.isArray(etab.sous_categories) && etab.sous_categories.length > 0 ? etab.sous_categories[0] : "habitat_alternatif";
-                            
-                            // Recherche avec tolérance pour trouver la sous-catégorie dans la taxonomie
-                            let sousCat = getAllSousCategories().find((sc) => sc.key === sousCategorie);
-                            if (!sousCat) {
-                              // Recherche avec tolérance aux variations de nom
-                              sousCat = findSousCategorieWithTolerance(sousCategorie);
-                            }
-                            
-                            // Obtenir la couleur via le mapping centralisé
-                            const color = sousCat ? getSousCategorieColor(sousCat.key) : getSousCategorieColor("habitat_alternatif");
-                            const displayLabel = sousCat?.label || sousCategorie?.charAt(0).toUpperCase() + sousCategorie?.slice(1) || "Autre";
-                            
-                            return (
-                              <span
-                                style={{
-                                  display: "inline-block",
-                                  minWidth: 0,
-                                  padding: "0.18em 0.7em",
-                                  fontSize: "0.86rem",
-                                  fontWeight: 600,
-                                  borderRadius: 7,
-                                  background: color,
-                                  color: "#fff",
-                                  letterSpacing: "0.01em",
-                                  boxShadow: "0 2px 8px 0 rgba(0,0,0,0.06)",
-                                  marginRight: 2,
-                                }}
-                              >
-                                {displayLabel}
-                              </span>
-                            );
-                          })()}
-                          <div style={{ fontWeight: "bold", fontSize: "1.02rem", color: "#a85b2b" }}>{etab.nom}</div>
-                          <div style={{ display: "flex", gap: 3, alignItems: "center", marginLeft: 8 }}>
+                      <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 2, justifyContent: "space-between" }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1, minWidth: 0 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                            {(() => {
+                              const sousCategorie = Array.isArray(etab.sous_categories) && etab.sous_categories.length > 0 ? etab.sous_categories[0] : "habitat_alternatif";
+                              
+                              // Recherche avec tolérance pour trouver la sous-catégorie dans la taxonomie
+                              let sousCat = getAllSousCategories().find((sc) => sc.key === sousCategorie);
+                              if (!sousCat) {
+                                // Recherche avec tolérance aux variations de nom
+                                sousCat = findSousCategorieWithTolerance(sousCategorie);
+                              }
+                              
+                              // Obtenir la couleur via le mapping centralisé
+                              const color = sousCat ? getSousCategorieColor(sousCat.key) : getSousCategorieColor("habitat_alternatif");
+                              const displayLabel = sousCat?.label || sousCategorie?.charAt(0).toUpperCase() + sousCategorie?.slice(1) || "Autre";
+                              
+                              return (
+                                <span
+                                  style={{
+                                    display: "inline-block",
+                                    minWidth: 0,
+                                    padding: "0.18em 0.7em",
+                                    fontSize: "0.86rem",
+                                    fontWeight: 600,
+                                    borderRadius: 7,
+                                    background: color,
+                                    color: "#fff",
+                                    letterSpacing: "0.01em",
+                                    boxShadow: "0 2px 8px 0 rgba(0,0,0,0.06)",
+                                  }}
+                                >
+                                  {displayLabel}
+                                </span>
+                              );
+                            })()}
+                            <div style={{ fontWeight: "bold", fontSize: "1.02rem", color: "#a85b2b", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{etab.nom}</div>
+                          </div>
+                          <div style={{ display: "flex", gap: 3, alignItems: "center", flexShrink: 0 }}>
                             <span style={{ fontSize: "1.02rem", color: etab.fourchette_prix === "euro" ? "#a85b2b" : "#e0e2e6", fontWeight: 700 }}>€</span>
                             <span style={{ fontSize: "1.02rem", color: etab.fourchette_prix === "deux_euros" ? "#a85b2b" : "#e0e2e6", fontWeight: 700 }}>€€</span>
                             <span style={{ fontSize: "1.02rem", color: etab.fourchette_prix === "trois_euros" ? "#a85b2b" : "#e0e2e6", fontWeight: 700 }}>€€€</span>

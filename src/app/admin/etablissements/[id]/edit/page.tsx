@@ -49,8 +49,6 @@ export default function EditEtablissementPage(): JSX.Element {
     public_cible: "",
   });
   const [presentationError, setPresentationError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -59,13 +57,11 @@ export default function EditEtablissementPage(): JSX.Element {
       const { data, error: err } = await supabase.from("etablissements").select("*").eq("id", id).single();
       if (cancelled) return;
       if (err) {
-        setError(err.message);
-        setLoading(false);
+        setPresentationError(err.message);
         return;
       }
       setEtab(data as Etablissement);
       setForm(data as Partial<Etablissement>);
-      setLoading(false);
     }
     fetchEtab();
     return () => {
@@ -119,7 +115,7 @@ export default function EditEtablissementPage(): JSX.Element {
       .single();
 
     if (propError || !proposition) {
-      setError("Erreur lors de la création de la proposition.");
+      setPresentationError("Erreur lors de la création de la proposition.");
       return;
     }
 
@@ -134,7 +130,7 @@ export default function EditEtablissementPage(): JSX.Element {
 
     const { error: itemsError } = await supabase.from("proposition_items").insert(items);
     if (itemsError) {
-      setError("Erreur lors de la création des items de proposition.");
+      setPresentationError("Erreur lors de la création des items de proposition.");
       return;
     }
 

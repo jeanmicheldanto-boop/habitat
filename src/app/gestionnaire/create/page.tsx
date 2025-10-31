@@ -131,10 +131,6 @@ export default function CreateEtablissement() {
     }));
   };
 
-  const handleCheckboxChange = (name: string, value: string, checked: boolean) => {
-    // UNUSED: Remove to fix lint warning
-  };
-
   const uploadPhotoIfExists = async (etablissementId: string): Promise<string | null> => {
     if (!formData.photo_file) return null;
     

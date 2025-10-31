@@ -1,0 +1,19 @@
+info,column_name,data_type,is_nullable
+PROPOSITIONS - Colonnes,id,uuid,NO
+PROPOSITIONS - Colonnes,etablissement_id,uuid,YES
+PROPOSITIONS - Colonnes,cible_id,uuid,YES
+PROPOSITIONS - Colonnes,type_cible,text,NO
+PROPOSITIONS - Colonnes,action,text,NO
+PROPOSITIONS - Colonnes,statut,USER-DEFINED,NO
+PROPOSITIONS - Colonnes,source,text,NO
+PROPOSITIONS - Colonnes,created_by,uuid,YES
+PROPOSITIONS - Colonnes,created_at,timestamp with time zone,NO
+PROPOSITIONS - Colonnes,reviewed_by,uuid,YES
+PROPOSITIONS - Colonnes,reviewed_at,timestamp with time zone,YES
+PROPOSITIONS - Colonnes,review_note,text,YES
+PROPOSITIONS - Colonnes,payload,jsonb,YES
+PROPOSITIONS - Colonnes,habitat_type,USER-DEFINED,YES
+PROPOSITIONS - Colonnes,surface_min,numeric,YES
+PROPOSITIONS - Colonnes,surface_max,numeric,YES
+PROPOSITIONS - Colonnes,plain_pied,boolean,YES
+PROPOSITIONS - Colonnes,espace_partage,boolean,YES

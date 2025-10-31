@@ -8,17 +8,6 @@ import Link from "next/link";
 // Types
 export type Proposition = Database["public"]["Tables"]["propositions"]["Row"] & { profiles?: { prenom?: string; nom?: string; email?: string; organisation?: string } };
 export type PropositionItem = Database["public"]["Tables"]["proposition_items"]["Row"];
-interface EtablissementPayload {
-  nom?: string;
-  habitat_type?: string;
-  ville?: string;
-  adresse?: string;
-  capacite?: number;
-  telephone?: string;
-  email?: string;
-  description?: string;
-  [key: string]: unknown;
-}
 
 // export type PropositionItem = Database["public"]["Tables"]["proposition_items"]["Row"];
 

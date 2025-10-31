@@ -24,7 +24,6 @@ interface Etablissement {
 }
 
 export default function MesEtablissements() {
-  const [userId, setUserId] = useState<string | null>(null);
   const [etablissements, setEtablissements] = useState<Etablissement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -74,8 +73,7 @@ export default function MesEtablissements() {
         return;
       }
 
-  setUserId(user.id);
-  loadEtablissements(user.id);
+      loadEtablissements(user.id);
     };
 
     checkAuth();

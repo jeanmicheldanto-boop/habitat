@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import OblongButtonLink from "../components/OblongButtonLink";
+import SearchAutocomplete from "../components/SearchAutocomplete";
 
 export default function HomePage() {
   return (
@@ -27,57 +28,8 @@ export default function HomePage() {
       <div className="hero__content">
     <h1 className="hero__title" style={{ marginTop: "6rem" }}>Plateforme experte du logement inclusif pour séniors [test]</h1>
 
-        {/* Barre de recherche centrale */}
-        <form
-          className="search-bar-custom"
-          action="/plateforme"
-          method="get"
-          style={{ margin: "2rem auto", maxWidth: 480 }}
-        >
-            <label htmlFor="search-location" style={{ fontWeight: "bold", fontSize: "1.2rem", marginBottom: 8, display: "block", color: "#ffb366" }}>
-            Où cherchez-vous un habitat intermédiaire&nbsp;?
-          </label>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <input
-              id="search-location"
-              name="search"
-              type="text"
-              placeholder="Ville, département, type d&#39;habitat, nom..."
-              style={{
-                flex: 1,
-                padding: "0.75rem 1.2rem",
-                borderRadius: "32px",
-                border: "1px solid #eee",
-                fontSize: "1rem",
-                background: "#fff",
-                color: "#444",
-                boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
-                outline: "none"
-              }}
-            />
-            <button
-              type="submit"
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: "50%",
-                background: "#fff",
-                border: "1px solid #eee",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
-                cursor: "pointer",
-                transition: "background 0.2s"
-              }}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="11" cy="11" r="8" stroke="#bbb" strokeWidth="2" fill="none" />
-                <path d="M21 21l-4.35-4.35" stroke="#bbb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-              </svg>
-            </button>
-          </div>
-        </form>
+        {/* Barre de recherche centrale avec autocomplétion */}
+        <SearchAutocomplete />
 
         {/* Boutons oblong pour aides, qui sommes-nous et solutions */}
         <div style={{ 

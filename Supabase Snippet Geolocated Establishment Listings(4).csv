@@ -1,0 +1,11 @@
+constraint_name,table_name,column_name,references_table,references_column
+identities_user_id_fkey,auth.identities,user_id,auth.users,id
+sessions_user_id_fkey,auth.sessions,user_id,auth.users,id
+mfa_factors_user_id_fkey,auth.mfa_factors,user_id,auth.users,id
+one_time_tokens_user_id_fkey,auth.one_time_tokens,user_id,auth.users,id
+propositions_created_by_fkey,propositions,created_by,profiles,id
+propositions_reviewed_by_fkey,propositions,reviewed_by,profiles,id
+reclamations_propriete_user_id_fkey,reclamations_propriete,user_id,profiles,id
+notifications_user_id_fkey,notifications,user_id,auth.users,id
+oauth_authorizations_user_id_fkey,auth.oauth_authorizations,user_id,auth.users,id
+oauth_consents_user_id_fkey,auth.oauth_consents,user_id,auth.users,id
