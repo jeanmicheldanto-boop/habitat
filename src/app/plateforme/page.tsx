@@ -465,7 +465,7 @@ export default function Page(): JSX.Element {
 
       // Recherche texte - globale
       if (search) {
-        const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+        const normalize = (s: string | null | undefined) => s ? s.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "") : "";
         const searchTerms = normalize(search).split(/\s+/).filter((term) => term.length > 1);
 
         const matchesSearch = searchTerms.every((term) => {
