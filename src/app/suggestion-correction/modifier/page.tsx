@@ -437,6 +437,7 @@ function ModifierEtablissementPageContent() {
           type_cible: 'etablissement',
           action: 'update',
           source: 'public', // Proposition venant du public
+          created_by: null, // Utilisateur non-authentifié
           payload: {
             // Informations du proposeur
             proposeur: {
@@ -453,8 +454,7 @@ function ModifierEtablissementPageContent() {
               nouvelle_photo_filename: modificationData.nouvelle_photo_data?.file.name || null
             }
           },
-          statut: 'en_attente',
-          created_at: new Date().toISOString()
+          statut: 'en_attente'
         }]);
 
       if (submitError) {

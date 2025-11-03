@@ -1,0 +1,19 @@
+column_name,data_type,is_nullable
+id,uuid,NO
+etablissement_id,uuid,YES
+cible_id,uuid,YES
+type_cible,text,NO
+action,text,NO
+statut,USER-DEFINED,NO
+source,text,NO
+created_by,uuid,YES
+created_at,timestamp with time zone,NO
+reviewed_by,uuid,YES
+reviewed_at,timestamp with time zone,YES
+review_note,text,YES
+payload,jsonb,YES
+habitat_type,USER-DEFINED,YES
+surface_min,numeric,YES
+surface_max,numeric,YES
+plain_pied,boolean,YES
+espace_partage,boolean,YES
