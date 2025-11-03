@@ -493,6 +493,7 @@ export default function ModerationDashboard() {
 
       const modifications = (proposition.payload?.modifications || {}) as Record<string, unknown>;
       console.log('🔄 Application des modifications:', modifications);
+      console.log('📝 Établissement ID:', proposition.etablissement_id);
 
       // 1. Mettre à jour les champs de la table etablissements
       const etablissementUpdates: Record<string, unknown> = {};
@@ -507,12 +508,16 @@ export default function ModerationDashboard() {
       });
 
       if (Object.keys(etablissementUpdates).length > 0) {
+        console.log('📤 Envoi des mises à jour:', etablissementUpdates);
         const { error: updateError } = await supabase
           .from('etablissements')
           .update(etablissementUpdates)
           .eq('id', proposition.etablissement_id);
         
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error('❌ Erreur mise à jour établissement:', updateError);
+          throw new Error(`Erreur mise à jour établissement: ${updateError.message}`);
+        }
         console.log('✅ Établissement mis à jour:', etablissementUpdates);
       }
 
@@ -637,7 +642,9 @@ export default function ModerationDashboard() {
 
       console.log('✅ Toutes les modifications ont été appliquées');
     } catch (error) {
-      console.error('❌ Erreur mise à jour établissement:', error);
+      console.error('❌ Erreur complète dans updateEtablissementFromProposition:', error);
+      console.error('❌ Type d\'erreur:', typeof error);
+      console.error('❌ Erreur stringifiée:', JSON.stringify(error, null, 2));
       throw error;
     }
   };
