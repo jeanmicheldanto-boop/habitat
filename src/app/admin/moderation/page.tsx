@@ -356,7 +356,7 @@ export default function ModerationDashboard() {
         statut: action,
         review_note: reviewNote || null,
         reviewed_at: new Date().toISOString(),
-  reviewed_by: user?.id ?? ''
+        reviewed_by: user?.id || null
       };
 
       if (type === 'proposition') {
