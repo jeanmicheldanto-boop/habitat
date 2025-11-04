@@ -160,7 +160,8 @@ export const doesSousCategorieMatchHabitatType = (sousCategorieKey: string, habi
 };
 
 // Fonction pour normaliser les noms (tolérance casse/accents)
-export const normalizeString = (str: string): string => {
+export const normalizeString = (str: string | null | undefined): string => {
+  if (!str) return "";
   return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 };
 
