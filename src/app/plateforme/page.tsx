@@ -343,6 +343,13 @@ export default function Page(): JSX.Element {
   function getFilteredData(): Etablissement[] {
     const filtered = data.filter((etab: Etablissement) => {
       // Logique de filtres améliorée avec correspondance centralisée
+      
+      // Debug: log pour comprendre le filtrage des villes
+      if (search && (search.toLowerCase().includes('royan') || search.toLowerCase().includes('angoul'))) {
+        console.log(`🔍 Filtrage de ${etab.nom} (${etab.commune})`);
+        console.log(`  - search: "${search}"`);
+        console.log(`  - selectedCommune: "${selectedCommune}"`);
+      }
 
       // 1. Catégories d'habitat (avec validation du mapping)
       if (selectedHabitatCategories.length > 0) {
@@ -488,7 +495,18 @@ export default function Page(): JSX.Element {
           return false;
         });
 
-        if (!matchesSearch) return false;
+        if (!matchesSearch) {
+          // Debug pour villes problématiques
+          if (search.toLowerCase().includes('royan') || search.toLowerCase().includes('angoul')) {
+            console.log(`  ❌ ${etab.nom} filtré (pas de match)`);
+          }
+          return false;
+        }
+        
+        // Debug pour villes problématiques
+        if (search.toLowerCase().includes('royan') || search.toLowerCase().includes('angoul')) {
+          console.log(`  ✅ ${etab.nom} accepté`);
+        }
       }
 
       return true;
