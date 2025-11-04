@@ -458,7 +458,10 @@ export default function Page(): JSX.Element {
 
       // Filtre éligibilité AVP
       if (selectedAvpEligibility && etab.eligibilite_statut !== selectedAvpEligibility) return false;
-      if (selectedCommune && etab.commune) {
+      
+      // Correction : ignorer le filtre selectedCommune si search est utilisé
+      // Cela évite les conflits entre recherche textuelle et filtre de commune
+      if (!search && selectedCommune && etab.commune) {
         const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
         if (!normalize(etab.commune).includes(normalize(selectedCommune))) return false;
       }
