@@ -95,7 +95,7 @@ export default function ClaimEtablissement() {
     
     setSearchLoading(true);
     try {
-  const { error } = await supabase
+  const { data, error } = await supabase
         .from('etablissements')
         .select('id, nom, description, adresse, ville, code_postal, habitat_type, statut')
         .or(`nom.ilike.%${searchTerm}%,ville.ilike.%${searchTerm}%,adresse.ilike.%${searchTerm}%`)
@@ -103,7 +103,7 @@ export default function ClaimEtablissement() {
         .limit(10);
 
       if (error) throw error;
-  // setEtablissements(data || []); // variable data supprimée
+  setEtablissements(data || []);
     } catch (err: unknown) {
       if (typeof err === 'object' && err !== null && 'message' in err) {
         setError('Erreur lors de la recherche : ' + (err as { message: string }).message);

@@ -10,7 +10,7 @@ interface Proposition {
   id: string;
   type_cible: string;
   action: string;
-  statut: 'en_attente' | 'approuve' | 'rejete';
+  statut: 'en_attente' | 'approuvee' | 'rejetee';
   etablissement_id?: string;
   source?: string;
   payload: Record<string, unknown>; // Type sûr pour les objets génériques
@@ -34,7 +34,7 @@ interface ReclamationPropriete {
   id: string;
   etablissement_id: string;
   user_id?: string;
-  statut: 'en_attente' | 'approuve' | 'rejete';
+  statut: 'en_attente' | 'approuvee' | 'rejetee';
   justificatifs?: string[];
   commentaire?: string;
   review_note?: string;
@@ -349,15 +349,20 @@ export default function ModerationDashboard() {
     }
   };
 
-  const handleAction = async (itemId: string, action: 'approuve' | 'rejete', type: 'proposition' | 'reclamation') => {
+  const handleAction = async (itemId: string, action: 'approuvee' | 'rejetee', type: 'proposition' | 'reclamation') => {
     setActionLoading(true);
     try {
+      console.log('🔍 Action reçue:', action);
+      console.log('🔍 Type:', typeof action);
+      
       const updateData = {
         statut: action,
         review_note: reviewNote || null,
         reviewed_at: new Date().toISOString(),
         reviewed_by: user?.id || null
       };
+      
+      console.log('📤 Données à envoyer:', updateData);
 
       if (type === 'proposition') {
         const { error } = await supabase
@@ -368,7 +373,7 @@ export default function ModerationDashboard() {
         if (error) throw error;
 
         // Si approuvée et action=create, créer l'établissement
-        if (action === 'approuve') {
+        if (action === 'approuvee') {
           const proposition = propositions.find(p => p.id === itemId);
           if (proposition?.action === 'create') {
             await createEtablissementFromProposition(proposition);
@@ -390,8 +395,24 @@ export default function ModerationDashboard() {
       setSelectedItem(null);
       setReviewNote('');
     } catch (error) {
-      console.error('Erreur:', error);
-      alert('Erreur lors de la mise à jour: ' + (error instanceof Error ? error.message : String(error)));
+      console.error('❌ Erreur complète lors de la modération:', error);
+      console.error('❌ Type d\'erreur:', typeof error);
+      console.error('❌ Détails:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+      
+      // Meilleure gestion de l'affichage de l'erreur
+      let errorMessage = 'Erreur inconnue';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (error && typeof error === 'object') {
+        // Si c'est un objet Supabase error
+        const supabaseError = error as { message?: string; details?: string; hint?: string; code?: string };
+        errorMessage = supabaseError.message || JSON.stringify(error);
+        if (supabaseError.details) errorMessage += `\nDétails: ${supabaseError.details}`;
+        if (supabaseError.hint) errorMessage += `\nSuggestion: ${supabaseError.hint}`;
+        if (supabaseError.code) errorMessage += `\nCode: ${supabaseError.code}`;
+      }
+      
+      alert('Erreur lors de la mise à jour:\n' + errorMessage);
     } finally {
       setActionLoading(false);
     }
@@ -713,14 +734,14 @@ export default function ModerationDashboard() {
   const getStatutBadge = (statut: string) => {
     const colors = {
       en_attente: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      approuve: 'bg-green-100 text-green-800 border-green-200',
-      rejete: 'bg-red-100 text-red-800 border-red-200'
+      approuvee: 'bg-green-100 text-green-800 border-green-200',
+      rejetee: 'bg-red-100 text-red-800 border-red-200'
     };
 
     const labels = {
       en_attente: 'En attente',
-      approuve: 'Approuvée',
-      rejete: 'Rejetée'
+      approuvee: 'Approuvée',
+      rejetee: 'Rejetée'
     };
 
     return (
@@ -808,7 +829,7 @@ export default function ModerationDashboard() {
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Propositions approuvées</dt>
                     <dd className="text-lg font-medium text-gray-900">
-                      {propositions.filter(p => p.statut === 'approuve').length}
+                      {propositions.filter(p => p.statut === 'approuvee').length}
                     </dd>
                   </dl>
                 </div>
@@ -1314,7 +1335,7 @@ export default function ModerationDashboard() {
                 <button
                   type="button"
                   disabled={actionLoading}
-                  onClick={() => handleAction(selectedItem.id, 'approuve', selectedItem.type)}
+                  onClick={() => handleAction(selectedItem.id, 'approuvee', selectedItem.type)}
                   className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:col-start-2 sm:text-sm disabled:bg-gray-400"
                 >
                   {actionLoading ? 'En cours...' : 'Approuver'}
@@ -1322,7 +1343,7 @@ export default function ModerationDashboard() {
                 <button
                   type="button"
                   disabled={actionLoading}
-                  onClick={() => handleAction(selectedItem.id, 'rejete', selectedItem.type)}
+                  onClick={() => handleAction(selectedItem.id, 'rejetee', selectedItem.type)}
                   className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:mt-0 sm:col-start-1 sm:text-sm disabled:bg-gray-400"
                 >
                   {actionLoading ? 'En cours...' : 'Rejeter'}

@@ -10,7 +10,7 @@ interface Proposition {
   id: string;
   type_cible: string;
   action: string;
-  statut: 'en_attente' | 'approuve' | 'rejete';
+  statut: 'en_attente' | 'approuvee' | 'rejetee';
     payload: Record<string, unknown>;
   review_note?: string;
   created_at: string;
@@ -20,7 +20,7 @@ interface Proposition {
 interface ReclamationPropriete {
   id: string;
   etablissement_id: string;
-  statut: 'en_attente' | 'approuve' | 'rejete';
+  statut: 'en_attente' | 'verifiee' | 'rejetee';
   justificatifs: string[];
   commentaire?: string;
   review_note?: string;
@@ -258,14 +258,16 @@ export default function GestionnaireDashboard() {
   const getStatutBadge = (statut: string) => {
     const colors = {
       en_attente: 'bg-yellow-100 text-yellow-800',
-      approuve: 'bg-green-100 text-green-800',
-      rejete: 'bg-red-100 text-red-800'
+      approuvee: 'bg-green-100 text-green-800',
+      verifiee: 'bg-green-100 text-green-800',
+      rejetee: 'bg-red-100 text-red-800'
     };
 
     const labels = {
       en_attente: 'En attente',
-      approuve: 'Approuvée',
-      rejete: 'Rejetée'
+      approuvee: 'Approuvée',
+      verifiee: 'Vérifiée',
+      rejetee: 'Rejetée'
     };
 
     return (
