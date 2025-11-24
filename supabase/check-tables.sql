@@ -1,4 +1,4 @@
--- Vérifier quelles tables de propositions existent
+    -- Vérifier quelles tables de propositions existent
 
 -- 1. Lister toutes les tables liées aux propositions
 SELECT table_name 
