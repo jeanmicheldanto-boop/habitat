@@ -456,10 +456,16 @@ export default function Page(): JSX.Element {
       if (selectedDepartement && etab.departement) {
         const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
         const isCode = /^[\d]{1,3}[AB]?$/.test(selectedDepartement);
+        
         if (isCode) {
-          if (etab.departement !== selectedDepartement) return false;
+          // Si on recherche par code (ex: "36"), vérifier si le code est dans le département
+          // Gère les formats: "36", "Indre (36)", etc.
+          const etabDeptCode = etab.departement.match(/\((\d{1,3}[AB]?)\)/)?.[1] || etab.departement;
+          if (etabDeptCode !== selectedDepartement) return false;
         } else {
-          if (!normalize(etab.departement).includes(normalize(selectedDepartement))) return false;
+          // Si on recherche par nom, enlever le code entre parenthèses pour la comparaison
+          const etabDeptName = etab.departement.replace(/\s*\(\d{1,3}[AB]?\)\s*$/, '').trim();
+          if (!normalize(etabDeptName).includes(normalize(selectedDepartement))) return false;
         }
       }
 
