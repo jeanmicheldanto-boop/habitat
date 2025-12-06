@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/lib/database.types";
 
@@ -13,7 +13,8 @@ const emptyForm: Partial<Restauration> = {
   kitchenette: false,
 };
 
-export default function RestaurationPage({ params }: { params: { id: string } }) {
+export default function RestaurationPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const [restauration, setRestauration] = useState<Restauration | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +28,7 @@ export default function RestaurationPage({ params }: { params: { id: string } })
       const { data, error } = await supabase
         .from("restaurations")
         .select("*")
-        .eq("etablissement_id", params.id)
+        .eq("etablissement_id", id)
         .single();
       if (error) {
         setError("Erreur lors du chargement de la restauration.");
@@ -38,7 +39,7 @@ export default function RestaurationPage({ params }: { params: { id: string } })
       setLoading(false);
     }
     fetchRestauration();
-  }, [params.id, modalOpen]);
+  }, [id, modalOpen]);
 
   function openModal() {
     setForm(restauration ? { ...restauration } : { ...emptyForm });
@@ -59,12 +60,12 @@ export default function RestaurationPage({ params }: { params: { id: string } })
     setError(null);
     // Création d'une proposition pour ajout ou édition
     const action = restauration ? "update" : "create";
-    const payload = { ...form, etablissement_id: params.id };
+    const payload = { ...form, etablissement_id: id };
     const { data: proposition, error: propError } = await supabase
       .from("propositions")
       .insert([
         {
-          etablissement_id: params.id,
+          etablissement_id: id,
           type_cible: "restaurations",
           action,
           statut: "en_attente",

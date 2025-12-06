@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/lib/database.types";
 import Link from "next/link";
@@ -11,7 +11,8 @@ export type PropositionItem = Database["public"]["Tables"]["proposition_items"][
 
 // export type PropositionItem = Database["public"]["Tables"]["proposition_items"]["Row"];
 
-export default function PropositionModerationPage({ params }: { params: { id: string } }) {
+export default function PropositionModerationPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const [proposition, setProposition] = useState<Proposition | null>(null);
   const [items, setItems] = useState<PropositionItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +27,7 @@ export default function PropositionModerationPage({ params }: { params: { id: st
       const { data: prop, error: propError } = await supabase
         .from("propositions")
         .select("*")
-        .eq("id", params.id)
+        .eq("id", id)
         .single();
         
       if (propError || !prop) {
@@ -61,7 +62,7 @@ export default function PropositionModerationPage({ params }: { params: { id: st
       const { data: itemsData, error: itemsError } = await supabase
         .from("proposition_items")
         .select("*")
-        .eq("proposition_id", params.id);
+        .eq("proposition_id", id);
         
       if (itemsError) {
         setError("Erreur lors du chargement des items");
@@ -73,7 +74,7 @@ export default function PropositionModerationPage({ params }: { params: { id: st
       setLoading(false);
     }
     fetchData();
-  }, [params.id]);
+  }, [id]);
 
   async function handleModerate(statut: "approuvee" | "rejetee") {
     if (!proposition) return;

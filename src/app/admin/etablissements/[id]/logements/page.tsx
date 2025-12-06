@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/lib/database.types";
 
@@ -17,7 +17,8 @@ const emptyForm: Partial<LogementType> = {
 
 };
 
-export default function LogementsTypesPage({ params }: { params: { id: string } }) {
+export default function LogementsTypesPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const [logements, setLogements] = useState<LogementType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +33,7 @@ export default function LogementsTypesPage({ params }: { params: { id: string } 
       const { data, error } = await supabase
         .from("logements_types")
         .select("*")
-        .eq("etablissement_id", params.id);
+        .eq("etablissement_id", id);
       if (error) {
         setError("Erreur lors du chargement des logements.");
         setLoading(false);
@@ -42,7 +43,7 @@ export default function LogementsTypesPage({ params }: { params: { id: string } 
       setLoading(false);
     }
     fetchLogements();
-  }, [params.id, modalOpen]);
+  }, [id, modalOpen]);
 
   function openAddModal() {
     setForm({ ...emptyForm });
@@ -78,12 +79,12 @@ export default function LogementsTypesPage({ params }: { params: { id: string } 
     setError(null);
     // Création d'une proposition pour ajout ou édition
     const action = editId ? "update" : "create";
-    const payload = { ...form, etablissement_id: params.id };
+    const payload = { ...form, etablissement_id: id };
     const { data: proposition, error: propError } = await supabase
       .from("propositions")
       .insert([
         {
-          etablissement_id: params.id,
+          etablissement_id: id,
           type_cible: "logements_types",
           action,
           statut: "en_attente",

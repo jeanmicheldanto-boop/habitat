@@ -8,7 +8,7 @@ export default function HomePage() {
     <section className="hero" aria-label="Accueil habitat-intermediaire.fr">
       <div className="hero__bg" aria-hidden="true">
         <Image
-          src="/hero_habitat.png"
+          src="/hero_habitat.jpg"
           alt="Illustration habitat intermédiaire"
           fill
           sizes="100vw"
@@ -16,7 +16,7 @@ export default function HomePage() {
           priority
         />
         <Image
-          src="/hero_habitat.png"
+          src="/hero_habitat.jpg"
           alt="Illustration habitat intermédiaire"
           fill
           sizes="100vw"

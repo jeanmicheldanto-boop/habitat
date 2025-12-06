@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/lib/database.types";
 
@@ -20,7 +20,8 @@ const PRIX_CATEGORIES = [
   { label: "€€€ (> 1500€)", value: "trois_euros" },
 ];
 
-export default function TarifsPage({ params }: { params: { id: string } }) {
+export default function TarifsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const [tarifs, setTarifs] = useState<Tarif[]>([]);
   const [logementsTypes, setLogementsTypes] = useState<{ id: string; libelle: string }[]>([]);
   useEffect(() => {
@@ -28,11 +29,11 @@ export default function TarifsPage({ params }: { params: { id: string } }) {
       const { data } = await supabase
         .from("logements_types")
         .select("id, libelle")
-        .eq("etablissement_id", params.id);
+        .eq("etablissement_id", id);
       setLogementsTypes(data || []);
     }
     fetchLogementsTypes();
-  }, [params.id]);
+  }, [id]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -46,7 +47,7 @@ export default function TarifsPage({ params }: { params: { id: string } }) {
       const { data, error } = await supabase
         .from("tarifications")
         .select("*")
-        .eq("etablissement_id", params.id);
+        .eq("etablissement_id", id);
       if (error) {
         setError("Erreur lors du chargement des tarifs.");
         setLoading(false);
@@ -56,10 +57,10 @@ export default function TarifsPage({ params }: { params: { id: string } }) {
       setLoading(false);
     }
     fetchTarifs();
-  }, [params.id, modalOpen]);
+  }, [id, modalOpen]);
 
   function openAddModal() {
-    setForm({ ...emptyForm, etablissement_id: params.id });
+    setForm({ ...emptyForm, etablissement_id: id });
     setEditId(null);
     setModalOpen(true);
   }
@@ -88,12 +89,12 @@ export default function TarifsPage({ params }: { params: { id: string } }) {
     setError(null);
     // Création d'une proposition pour ajout ou édition
     const action = editId ? "update" : "create";
-    const payload = { ...form, etablissement_id: params.id };
+    const payload = { ...form, etablissement_id: id };
     const { data: proposition, error: propError } = await supabase
       .from("propositions")
       .insert([
         {
-          etablissement_id: params.id,
+          etablissement_id: id,
           type_cible: "tarifications",
           action,
           statut: "en_attente",

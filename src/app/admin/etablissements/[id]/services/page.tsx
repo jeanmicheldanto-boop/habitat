@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/lib/database.types";
 
 type EtablissementService = Database["public"]["Tables"]["etablissement_service"]["Row"];
 type Service = Database["public"]["Tables"]["services"]["Row"];
 
-export default function ServicesPage({ params }: { params: { id: string } }) {
+export default function ServicesPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const [services, setServices] = useState<Service[]>([]);
   const [liens, setLiens] = useState<EtablissementService[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +24,7 @@ export default function ServicesPage({ params }: { params: { id: string } }) {
       const { data: etabServices, error: err2 } = await supabase
         .from("etablissement_service")
         .select("*")
-        .eq("etablissement_id", params.id);
+        .eq("etablissement_id", id);
       if (err1 || err2) {
         setError("Erreur lors du chargement des services.");
         setLoading(false);
@@ -34,19 +35,19 @@ export default function ServicesPage({ params }: { params: { id: string } }) {
       setLoading(false);
     }
     fetchServices();
-  }, [params.id, submitting]);
+  }, [id, submitting]);
 
   async function handleToggle(service: Service, isLinked: boolean) {
     setSubmitting(true);
     setError(null);
     // Création d'une proposition pour ajout ou suppression de lien
     const action = isLinked ? "delete" : "create";
-    const payload = { etablissement_id: params.id, service_id: service.id };
+    const payload = { etablissement_id: id, service_id: service.id };
     const { data: proposition, error: propError } = await supabase
       .from("propositions")
       .insert([
         {
-          etablissement_id: params.id,
+          etablissement_id: id,
           type_cible: "etablissement_service",
           action,
           statut: "en_attente",

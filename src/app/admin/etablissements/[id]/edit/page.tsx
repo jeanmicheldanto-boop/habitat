@@ -369,25 +369,25 @@ export default function EditEtablissementPage(): JSX.Element {
 
       {tab === "logements" && etab && (
         <div>
-          <LogementsModal params={{ id: String(etab.id) }} />
+          <LogementsModal params={Promise.resolve({ id: String(etab.id) })} />
         </div>
       )}
 
       {tab === "restauration" && etab && (
         <div>
-          <RestaurationModal params={{ id: String(etab.id) }} />
+          <RestaurationModal params={Promise.resolve({ id: String(etab.id) })} />
         </div>
       )}
 
       {tab === "services" && etab && (
         <div>
-          <ServicesModal params={{ id: String(etab.id) }} />
+          <ServicesModal params={Promise.resolve({ id: String(etab.id) })} />
         </div>
       )}
 
       {tab === "tarifs" && etab && (
         <div>
-          <TarifsModal params={{ id: String(etab.id) }} />
+          <TarifsModal params={Promise.resolve({ id: String(etab.id) })} />
         </div>
       )}
 

@@ -6,8 +6,8 @@ import { getHabitatImage } from "../../../lib/habitatImages";
 import Image from "next/image";
 import { AvpInfosSection, type AvpInfos } from "../../../components/AvpInfosSection";
 
-export default async function FichePage({ searchParams }: { searchParams: { id?: string } }) {
-  const etabId = searchParams.id;
+export default async function FichePage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
+  const { id: etabId } = await searchParams;
   if (!etabId) return notFound();
 
   const { data, error } = await supabase
