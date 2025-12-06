@@ -163,24 +163,63 @@ export default function Page(): JSX.Element {
 
   useEffect(() => {
     async function fetchData() {
-      const { data: rows, error: err } = await supabase.from("v_liste_publication_geoloc").select("*").limit(5000);
-      if (err) {
-        console.error("Erreur lors du chargement des données:", err);
-        setError(err.message);
-      } else {
-        console.log("Données chargées:", rows?.length || 0, "établissements");
+      // Récupérer TOUS les établissements en utilisant la pagination (max 1000 par page côté Supabase)
+      const allRows: Etablissement[] = [];
+      let page = 0;
+      const pageSize = 1000;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data: rows, error: err } = await supabase
+          .from("v_liste_publication_geoloc")
+          .select("*")
+          .range(page * pageSize, (page + 1) * pageSize - 1);
+        
+        if (err) {
+          console.error("Erreur lors du chargement des données:", err);
+          setError(err.message);
+          break;
+        }
+        
         if (rows && rows.length > 0) {
-          console.log("Premier établissement:", rows[0]);
+          allRows.push(...rows);
+          hasMore = rows.length === pageSize;
+          page++;
+        } else {
+          hasMore = false;
         }
       }
-      setData((rows as Etablissement[]) || []);
+
+      console.log("Données chargées:", allRows.length, "établissements");
+      if (allRows.length > 0) {
+        console.log("Premier établissement:", allRows[0]);
+      }
+      setData(allRows);
       setLoading(false);
     }
     async function fetchSousCategories() {
-      const { data: rows } = await supabase
-        .from("v_liste_publication_geoloc")
-        .select("services, logements_types, habitat_type")
-        .limit(5000);
+      // Récupérer tous les services et types de logements avec pagination
+      const allRows: { services?: string[]; logements_types?: LogementType[]; habitat_type?: string }[] = [];
+      let page = 0;
+      const pageSize = 1000;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data: rows } = await supabase
+          .from("v_liste_publication_geoloc")
+          .select("services, logements_types, habitat_type")
+          .range(page * pageSize, (page + 1) * pageSize - 1);
+        
+        if (rows && rows.length > 0) {
+          allRows.push(...rows);
+          hasMore = rows.length === pageSize;
+          page++;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      const rows = allRows;
       if (rows) {
         const allServ = rows.flatMap((row: { services?: string[] }) => row.services || []);
         const uniqueServices = Array.from(new Set(allServ)).sort();
