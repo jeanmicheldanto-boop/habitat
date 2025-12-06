@@ -3,11 +3,12 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
-    domains: ['minwoumfgutampcgrcbr.supabase.co'],
-  },
-  eslint: {
-    // Ne bloquer que sur les erreurs, pas les warnings
-    ignoreDuringBuilds: false,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'minwoumfgutampcgrcbr.supabase.co',
+      },
+    ],
   },
   typescript: {
     // Ne pas bloquer sur les erreurs TypeScript en production
