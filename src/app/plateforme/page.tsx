@@ -163,7 +163,7 @@ export default function Page(): JSX.Element {
 
   useEffect(() => {
     async function fetchData() {
-      const { data: rows, error: err } = await supabase.from("v_liste_publication_geoloc").select("*").limit(2000);
+      const { data: rows, error: err } = await supabase.from("v_liste_publication_geoloc").select("*").limit(5000);
       if (err) {
         console.error("Erreur lors du chargement des données:", err);
         setError(err.message);
@@ -180,7 +180,7 @@ export default function Page(): JSX.Element {
       const { data: rows } = await supabase
         .from("v_liste_publication_geoloc")
         .select("services, logements_types, habitat_type")
-        .limit(2000);
+        .limit(5000);
       if (rows) {
         const allServ = rows.flatMap((row: { services?: string[] }) => row.services || []);
         const uniqueServices = Array.from(new Set(allServ)).sort();
