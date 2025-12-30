@@ -180,6 +180,8 @@ export default function CreateEtablissement() {
   created_by: (user as { id: string }).id,
         payload: {
           ...formData,
+          // Ajouter l'ID du gestionnaire pour l'établissement
+          gestionnaire_id: (user as { id: string }).id,
           // Inclure le chemin de l'image si elle a été uploadée
           image_path: imagePath,
           // Retirer les données de la photo du payload

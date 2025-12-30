@@ -81,27 +81,64 @@ export default function PropositionModerationPage({ params }: { params: Promise<
     setActionLoading(true);
     setError(null);
 
+    console.log('🚀 handleModerate appelé, statut:', statut);
+    console.log('🚀 Proposition:', proposition);
+
     // Si approbation, appliquer les modifications sur la table cible
     if (statut === "approuvee" && proposition.type_cible === "etablissement") {
+      console.log('✅ Condition approbation + établissement validée');
       try {
         if (proposition.action === 'create') {
+          console.log('✅ Action = create, début création établissement');
           // Création d'un nouvel établissement
           console.log('🏗️ Création d\'un nouvel établissement avec payload:', proposition.payload);
           
           // Préparer les données pour l'insertion
-          const etablissementData = { ...(proposition.payload as Record<string, unknown>) };
+          const payload = proposition.payload as Record<string, unknown>;
+          const etablissementData: Record<string, unknown> = {};
           
-          // Supprimer les champs qui ne doivent pas être dans etablissements
-          delete etablissementData.proposeur;
-          delete etablissementData.modifications;
+          // Liste des champs valides dans etablissements (à copier depuis le payload)
+          const validFields = [
+            'nom', 'presentation', 'adresse_l1', 'adresse_l2', 'code_postal', 
+            'commune', 'code_insee', 'departement', 'region', 'pays',
+            'statut_editorial', 'eligibilite_statut', 'public_cible',
+            'source', 'url_source', 'date_observation', 'date_verification',
+            'confiance_score', 'telephone', 'email', 'site_web', 
+            'gestionnaire', 'habitat_type', 'image_path'
+          ];
+          
+          // Copier uniquement les champs valides
+          for (const field of validFields) {
+            if (payload[field] !== undefined && payload[field] !== null) {
+              etablissementData[field] = payload[field];
+            }
+          }
+          
+          // Mapper description -> presentation si description existe
+          if (payload.description && !etablissementData.presentation) {
+            etablissementData.presentation = payload.description;
+          }
+          
+          // Mapper gestionnaire_id (UUID) vers gestionnaire (text pour l'instant)
+          if (payload.gestionnaire_id && !etablissementData.gestionnaire) {
+            etablissementData.gestionnaire = String(payload.gestionnaire_id);
+          }
+          
+          // Construire la géométrie PostGIS à partir de latitude/longitude
+          if (payload.latitude && payload.longitude) {
+            // Format PostGIS: POINT(longitude latitude)
+            etablissementData.geom = `POINT(${payload.longitude} ${payload.latitude})`;
+          }
           
           // Ajouter des champs par défaut si nécessaires
-          if (!etablissementData.statut_ouverture) {
-            etablissementData.statut_ouverture = 'ouvert';
+          if (!etablissementData.statut_editorial) {
+            etablissementData.statut_editorial = 'publie'; // Approuvé = publié
           }
-          if (!etablissementData.eligibilite_statut) {
-            etablissementData.eligibilite_statut = 'a-verifier';
+          if (!etablissementData.eligibilite_statut && payload.eligibilite_statut) {
+            etablissementData.eligibilite_statut = payload.eligibilite_statut;
           }
+          
+          console.log('📦 Données nettoyées pour insertion:', etablissementData);
           
           const { data: newEtab, error: createError } = await supabase
             .from("etablissements")
@@ -111,6 +148,11 @@ export default function PropositionModerationPage({ params }: { params: Promise<
             
           if (createError) {
             console.error('❌ Erreur création établissement:', createError);
+            console.error('   Message:', createError.message);
+            console.error('   Code:', createError.code);
+            console.error('   Details:', createError.details);
+            console.error('   Hint:', createError.hint);
+            console.error('   Stringified:', JSON.stringify(createError, null, 2));
             throw createError;
           }
           
@@ -285,7 +327,141 @@ export default function PropositionModerationPage({ params }: { params: Promise<
                 )}
               </div>
             </div>
-          )}      {/* Boutons d'action */}
+          )}
+
+          {/* Détails de l'établissement */}
+          {proposition.payload && (() => {
+            const payload = proposition.payload as Record<string, unknown>;
+            return (
+              <div className="space-y-4">
+                {/* Informations principales */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
+                  <h2 className="text-xl font-bold text-blue-900 mb-4">🏢 Informations principales</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {payload.nom && typeof payload.nom === 'string' ? (
+                      <div className="bg-white rounded-lg p-4">
+                        <span className="font-medium text-gray-700 block text-sm mb-1">Nom</span>
+                        <p className="text-lg font-semibold text-gray-900">{payload.nom}</p>
+                      </div>
+                    ) : null}
+                    {payload.habitat_type && typeof payload.habitat_type === 'string' ? (
+                      <div className="bg-white rounded-lg p-4">
+                        <span className="font-medium text-gray-700 block text-sm mb-1">Type d&apos;habitat</span>
+                        <p className="text-lg text-gray-900">{payload.habitat_type}</p>
+                      </div>
+                    ) : null}
+                    {(payload.presentation || payload.description) ? (
+                      <div className="bg-white rounded-lg p-4 md:col-span-2">
+                        <span className="font-medium text-gray-700 block text-sm mb-1">Présentation</span>
+                        <p className="text-gray-900">{String(payload.presentation || payload.description)}</p>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+
+                {/* Adresse */}
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 border border-purple-200">
+                  <h2 className="text-xl font-bold text-purple-900 mb-4">📍 Adresse</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {payload.adresse_l1 && typeof payload.adresse_l1 === 'string' ? (
+                      <div className="bg-white rounded-lg p-4">
+                        <span className="font-medium text-gray-700 block text-sm mb-1">Adresse ligne 1</span>
+                        <p className="text-gray-900">{payload.adresse_l1}</p>
+                      </div>
+                    ) : null}
+                    {payload.adresse_l2 && typeof payload.adresse_l2 === 'string' ? (
+                      <div className="bg-white rounded-lg p-4">
+                        <span className="font-medium text-gray-700 block text-sm mb-1">Adresse ligne 2</span>
+                        <p className="text-gray-900">{payload.adresse_l2}</p>
+                      </div>
+                    ) : null}
+                    {payload.code_postal && typeof payload.code_postal === 'string' ? (
+                      <div className="bg-white rounded-lg p-4">
+                        <span className="font-medium text-gray-700 block text-sm mb-1">Code postal</span>
+                        <p className="text-gray-900">{payload.code_postal}</p>
+                      </div>
+                    ) : null}
+                    {payload.commune && typeof payload.commune === 'string' ? (
+                      <div className="bg-white rounded-lg p-4">
+                        <span className="font-medium text-gray-700 block text-sm mb-1">Commune</span>
+                        <p className="text-gray-900">{payload.commune}</p>
+                      </div>
+                    ) : null}
+                    {payload.departement && typeof payload.departement === 'string' ? (
+                      <div className="bg-white rounded-lg p-4">
+                        <span className="font-medium text-gray-700 block text-sm mb-1">Département</span>
+                        <p className="text-gray-900">{payload.departement}</p>
+                      </div>
+                    ) : null}
+                    {payload.region && typeof payload.region === 'string' ? (
+                      <div className="bg-white rounded-lg p-4">
+                        <span className="font-medium text-gray-700 block text-sm mb-1">Région</span>
+                        <p className="text-gray-900">{payload.region}</p>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+
+                {/* Contact */}
+                {(payload.telephone || payload.email || payload.site_web) ? (
+                  <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg p-6 border border-orange-200">
+                    <h2 className="text-xl font-bold text-orange-900 mb-4">📞 Contact</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {payload.telephone && typeof payload.telephone === 'string' ? (
+                        <div className="bg-white rounded-lg p-4">
+                          <span className="font-medium text-gray-700 block text-sm mb-1">Téléphone</span>
+                          <p className="text-gray-900">{payload.telephone}</p>
+                        </div>
+                      ) : null}
+                      {payload.email && typeof payload.email === 'string' ? (
+                        <div className="bg-white rounded-lg p-4">
+                          <span className="font-medium text-gray-700 block text-sm mb-1">Email</span>
+                          <p className="text-gray-900">{payload.email}</p>
+                        </div>
+                      ) : null}
+                      {payload.site_web && typeof payload.site_web === 'string' ? (
+                        <div className="bg-white rounded-lg p-4">
+                          <span className="font-medium text-gray-700 block text-sm mb-1">Site web</span>
+                          <a href={payload.site_web} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                            {payload.site_web}
+                          </a>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Autres informations */}
+                {(payload.gestionnaire || payload.public_cible || payload.eligibilite_statut) ? (
+                  <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg p-6 border border-teal-200">
+                    <h2 className="text-xl font-bold text-teal-900 mb-4">ℹ️ Autres informations</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {payload.gestionnaire && typeof payload.gestionnaire === 'string' ? (
+                        <div className="bg-white rounded-lg p-4">
+                          <span className="font-medium text-gray-700 block text-sm mb-1">Gestionnaire</span>
+                          <p className="text-gray-900">{payload.gestionnaire}</p>
+                        </div>
+                      ) : null}
+                      {payload.public_cible && typeof payload.public_cible === 'string' ? (
+                        <div className="bg-white rounded-lg p-4">
+                          <span className="font-medium text-gray-700 block text-sm mb-1">Public cible</span>
+                          <p className="text-gray-900">{payload.public_cible}</p>
+                        </div>
+                      ) : null}
+                      {payload.eligibilite_statut && typeof payload.eligibilite_statut === 'string' ? (
+                        <div className="bg-white rounded-lg p-4">
+                          <span className="font-medium text-gray-700 block text-sm mb-1">Éligibilité</span>
+                          <p className="text-gray-900">{payload.eligibilite_statut}</p>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            );
+          })()}
+
+      {/* Boutons d'action */}
       {proposition.statut === 'en_attente' && (
         <div className="bg-white border rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Actions</h2>

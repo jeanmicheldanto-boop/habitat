@@ -40,6 +40,7 @@ export default function PropositionsModerationPage() {
   const [propositions, setPropositions] = useState<Proposition[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const handleLogout = async () => {
     try {
@@ -49,6 +50,86 @@ export default function PropositionsModerationPage() {
       console.error('Erreur lors de la déconnexion:', error);
     }
   };
+
+  async function handleQuickModerate(propositionId: string, statut: 'approuvee' | 'rejetee') {
+    setActionLoading(propositionId);
+    try {
+      // Récupérer la proposition
+      const proposition = propositions.find(p => p.id === propositionId);
+      if (!proposition) throw new Error('Proposition non trouvée');
+
+      // Si approbation, créer l'établissement
+      if (statut === 'approuvee' && proposition.type_cible === 'etablissement' && proposition.action === 'create') {
+        const payload = proposition.payload as Record<string, unknown>;
+        const etablissementData: Record<string, unknown> = {};
+        
+        const validFields = [
+          'nom', 'presentation', 'adresse_l1', 'adresse_l2', 'code_postal', 
+          'commune', 'code_insee', 'departement', 'region', 'pays',
+          'statut_editorial', 'eligibilite_statut', 'public_cible',
+          'source', 'url_source', 'date_observation', 'date_verification',
+          'confiance_score', 'telephone', 'email', 'site_web', 
+          'gestionnaire', 'habitat_type', 'image_path'
+        ];
+        
+        for (const field of validFields) {
+          if (payload[field] !== undefined && payload[field] !== null) {
+            etablissementData[field] = payload[field];
+          }
+        }
+        
+        if (payload.description && !etablissementData.presentation) {
+          etablissementData.presentation = payload.description;
+        }
+        
+        // Mapper gestionnaire_id (UUID) vers gestionnaire (text pour l'instant)
+        if (payload.gestionnaire_id && !etablissementData.gestionnaire) {
+          etablissementData.gestionnaire = String(payload.gestionnaire_id);
+        }
+        
+        if (payload.latitude && payload.longitude) {
+          etablissementData.geom = `POINT(${payload.longitude} ${payload.latitude})`;
+        }
+        
+        if (!etablissementData.statut_editorial) {
+          etablissementData.statut_editorial = 'publie';
+        }
+        
+        const { data: newEtab, error: createError } = await supabase
+          .from("etablissements")
+          .insert([etablissementData])
+          .select()
+          .single();
+          
+        if (createError) {
+          console.error('Erreur création établissement:', createError);
+          throw createError;
+        }
+        
+        // Mettre à jour la proposition avec l'ID
+        await supabase
+          .from("propositions")
+          .update({ etablissement_id: newEtab.id })
+          .eq("id", propositionId);
+      }
+
+      // Mettre à jour le statut
+      const { error } = await supabase
+        .from('propositions')
+        .update({ statut })
+        .eq('id', propositionId);
+      
+      if (error) throw error;
+      
+      // Retirer la proposition de la liste
+      setPropositions(prev => prev.filter(p => p.id !== propositionId));
+    } catch (err) {
+      console.error('Erreur lors de la modération:', err);
+      alert(`Erreur lors de la modération: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
+    } finally {
+      setActionLoading(null);
+    }
+  }
 
   useEffect(() => {
     async function fetchPropositions() {
@@ -279,11 +360,19 @@ export default function PropositionsModerationPage() {
                 <div className="flex space-x-2">
                   {p.statut === 'en_attente' && (
                     <>
-                      <button className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition-colors">
-                        Approuver
+                      <button 
+                        onClick={() => handleQuickModerate(p.id, 'approuvee')}
+                        disabled={actionLoading === p.id}
+                        className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {actionLoading === p.id ? '...' : 'Approuver'}
                       </button>
-                      <button className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors">
-                        Rejeter
+                      <button 
+                        onClick={() => handleQuickModerate(p.id, 'rejetee')}
+                        disabled={actionLoading === p.id}
+                        className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {actionLoading === p.id ? '...' : 'Rejeter'}
                       </button>
                     </>
                   )}
