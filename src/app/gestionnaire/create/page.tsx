@@ -51,6 +51,7 @@ export default function CreateEtablissement() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [user, setUser] = useState<unknown>(null);
+  const [userOrganisation, setUserOrganisation] = useState<string>('');
   // Removed unused state variables: sousCategories, equipementsList, servicesList
   const router = useRouter();
 
@@ -63,10 +64,10 @@ export default function CreateEtablissement() {
         return;
       }
 
-      // Vérifier le rôle
+      // Vérifier le rôle et récupérer l'organisation
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, organisation')
         .eq('id', user.id)
         .single();
 
@@ -102,6 +103,7 @@ export default function CreateEtablissement() {
       }
 
       setUser(user);
+      setUserOrganisation(profile?.organisation || '');
     };
 
     checkAuth();
@@ -177,11 +179,14 @@ export default function CreateEtablissement() {
         action: 'create',
         statut: 'en_attente',
         source: 'gestionnaire',
-  created_by: (user as { id: string }).id,
+        created_by: (user as { id: string }).id,
         payload: {
           ...formData,
-          // Ajouter l'ID du gestionnaire pour l'établissement
-          gestionnaire_id: (user as { id: string }).id,
+          // Mapper les champs pour la base de données
+          commune: formData.ville,  // ville -> commune
+          adresse_l1: formData.adresse,  // adresse -> adresse_l1
+          // Passer le nom de l'organisation (pas l'UUID) pour le champ gestionnaire
+          gestionnaire: userOrganisation,
           // Inclure le chemin de l'image si elle a été uploadée
           image_path: imagePath,
           // Retirer les données de la photo du payload

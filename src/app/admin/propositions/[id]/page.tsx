@@ -119,9 +119,20 @@ export default function PropositionModerationPage({ params }: { params: Promise<
             etablissementData.presentation = payload.description;
           }
           
-          // Mapper gestionnaire_id (UUID) vers gestionnaire (text pour l'instant)
-          if (payload.gestionnaire_id && !etablissementData.gestionnaire) {
-            etablissementData.gestionnaire = String(payload.gestionnaire_id);
+          // Mapper ville -> commune si ville existe mais pas commune
+          if (payload.ville && !etablissementData.commune) {
+            etablissementData.commune = payload.ville;
+          }
+          
+          // Mapper adresse -> adresse_l1 si adresse existe mais pas adresse_l1
+          if (payload.adresse && !etablissementData.adresse_l1) {
+            etablissementData.adresse_l1 = payload.adresse;
+          }
+          
+          // Mapper le nom de l'organisation vers gestionnaire (text)
+          // Le payload contient maintenant directement le nom de l'organisation
+          if (!etablissementData.gestionnaire && payload.gestionnaire) {
+            etablissementData.gestionnaire = String(payload.gestionnaire);
           }
           
           // Construire la géométrie PostGIS à partir de latitude/longitude
@@ -157,6 +168,69 @@ export default function PropositionModerationPage({ params }: { params: Promise<
           }
           
           console.log('✅ Nouvel établissement créé:', newEtab);
+          
+          // Traiter les sous-catégories si présentes dans le payload
+          if (Array.isArray(payload.sous_categories) && payload.sous_categories.length > 0) {
+            console.log('🏷️ Traitement des sous-catégories:', payload.sous_categories);
+            
+            // Récupérer toutes les sous-catégories de la base pour normaliser
+            const { data: allSousCategories, error: scError } = await supabase
+              .from('sous_categories')
+              .select('id, libelle, slug')
+              .not('slug', 'is', null); // Uniquement celles avec un slug
+            
+            if (scError) {
+              console.error('❌ Erreur récupération sous-catégories:', scError);
+            } else if (allSousCategories) {
+              // Fonction de normalisation pour comparer les strings
+              const normalize = (str: string): string => {
+                return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/[_\s-]+/g, '_');
+              };
+              
+              // Mapper les clés front-end vers les UUIDs de la base
+              const sousCategoriesData: { etablissement_id: string; sous_categorie_id: string }[] = [];
+              
+              for (const scKey of payload.sous_categories as string[]) {
+                const normalizedKey = normalize(scKey);
+                
+                // Rechercher d'abord par slug (méthode préférée)
+                let matchingSc = allSousCategories.find(sc => normalize(sc.slug || '') === normalizedKey);
+                
+                // Si pas trouvé par slug, essayer par libellé
+                if (!matchingSc) {
+                  matchingSc = allSousCategories.find(sc => {
+                    const normalizedLibelle = normalize(sc.libelle);
+                    return normalizedLibelle === normalizedKey || 
+                           normalizedLibelle.includes(normalizedKey) ||
+                           normalizedKey.includes(normalizedLibelle);
+                  });
+                }
+                
+                if (matchingSc) {
+                  sousCategoriesData.push({
+                    etablissement_id: newEtab.id,
+                    sous_categorie_id: matchingSc.id
+                  });
+                  console.log(`  ✅ Mappé "${scKey}" → "${matchingSc.libelle}" [slug: ${matchingSc.slug}] (${matchingSc.id})`);
+                } else {
+                  console.warn(`  ⚠️ Sous-catégorie non trouvée: "${scKey}"`);
+                }
+              }
+              
+              // Insérer les liens dans etablissement_sous_categorie
+              if (sousCategoriesData.length > 0) {
+                const { error: linkError } = await supabase
+                  .from('etablissement_sous_categorie')
+                  .insert(sousCategoriesData);
+                
+                if (linkError) {
+                  console.error('❌ Erreur création liens sous-catégories:', linkError);
+                } else {
+                  console.log(`✅ ${sousCategoriesData.length} sous-catégorie(s) liée(s) à l'établissement`);
+                }
+              }
+            }
+          }
           
           // Mettre à jour la proposition avec l'ID du nouvel établissement
           await supabase
