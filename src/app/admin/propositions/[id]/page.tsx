@@ -232,6 +232,71 @@ export default function PropositionModerationPage({ params }: { params: Promise<
             }
           }
           
+          // Traiter la photo si elle existe dans un dossier temporaire
+          if (payload.temp_etablissement_id && payload.image_path) {
+            console.log('📸 Déplacement de la photo depuis le dossier temporaire');
+            const tempId = payload.temp_etablissement_id as string;
+            
+            try {
+              // Lister les fichiers dans le dossier temporaire
+              const { data: tempFiles, error: listError } = await supabase.storage
+                .from('etablissements')
+                .list(tempId);
+              
+              if (!listError && tempFiles && tempFiles.length > 0) {
+                console.log(`   Trouvé ${tempFiles.length} fichier(s) dans le dossier temporaire`);
+                
+                // Trouver le fichier principal
+                const mainFile = tempFiles.find(f => f.name.startsWith('main.'));
+                
+                if (mainFile) {
+                  const oldPath = `${tempId}/${mainFile.name}`;
+                  const newPath = `${newEtab.id}/${mainFile.name}`;
+                  
+                  console.log(`   Déplacement: ${oldPath} → ${newPath}`);
+                  
+                  // Télécharger le fichier depuis le temp
+                  const { data: fileData, error: downloadError } = await supabase.storage
+                    .from('etablissements')
+                    .download(oldPath);
+                  
+                  if (!downloadError && fileData) {
+                    // Uploader dans le nouveau dossier
+                    const { error: uploadError } = await supabase.storage
+                      .from('etablissements')
+                      .upload(newPath, fileData, { upsert: true });
+                    
+                    if (!uploadError) {
+                      // Mettre à jour image_path dans l'établissement
+                      await supabase
+                        .from('etablissements')
+                        .update({ image_path: newPath })
+                        .eq('id', newEtab.id);
+                      
+                      console.log(`   ✅ Photo déplacée et image_path mis à jour`);
+                      
+                      // Supprimer l'ancien fichier
+                      await supabase.storage
+                        .from('etablissements')
+                        .remove([oldPath]);
+                      
+                      console.log(`   🗑️ Ancien fichier supprimé`);
+                    } else {
+                      console.error('   ❌ Erreur upload:', uploadError);
+                    }
+                  } else {
+                    console.error('   ❌ Erreur téléchargement:', downloadError);
+                  }
+                }
+              } else {
+                console.log('   ℹ️ Aucun fichier trouvé dans le dossier temporaire');
+              }
+            } catch (photoError) {
+              console.error('   ⚠️ Erreur lors du traitement de la photo:', photoError);
+              // Ne pas bloquer l'approbation si la photo échoue
+            }
+          }
+          
           // Mettre à jour la proposition avec l'ID du nouvel établissement
           await supabase
             .from("propositions")

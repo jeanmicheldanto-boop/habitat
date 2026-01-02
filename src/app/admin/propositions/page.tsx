@@ -180,6 +180,58 @@ export default function PropositionsModerationPage() {
           }
         }
         
+        // Traiter la photo si elle existe dans un dossier temporaire
+        if (payload.temp_etablissement_id && payload.image_path) {
+          console.log('📸 Déplacement de la photo depuis le dossier temporaire');
+          const tempId = payload.temp_etablissement_id as string;
+          
+          try {
+            // Lister les fichiers dans le dossier temporaire
+            const { data: tempFiles, error: listError } = await supabase.storage
+              .from('etablissements')
+              .list(tempId);
+            
+            if (!listError && tempFiles && tempFiles.length > 0) {
+              const mainFile = tempFiles.find(f => f.name.startsWith('main.'));
+              
+              if (mainFile) {
+                const oldPath = `${tempId}/${mainFile.name}`;
+                const newPath = `${newEtab.id}/${mainFile.name}`;
+                
+                // Télécharger le fichier depuis le temp
+                const { data: fileData, error: downloadError } = await supabase.storage
+                  .from('etablissements')
+                  .download(oldPath);
+                
+                if (!downloadError && fileData) {
+                  // Uploader dans le nouveau dossier
+                  const { error: uploadError } = await supabase.storage
+                    .from('etablissements')
+                    .upload(newPath, fileData, { upsert: true });
+                  
+                  if (!uploadError) {
+                    // Mettre à jour image_path dans l'établissement
+                    await supabase
+                      .from('etablissements')
+                      .update({ image_path: newPath })
+                      .eq('id', newEtab.id);
+                    
+                    // Supprimer l'ancien fichier
+                    await supabase.storage
+                      .from('etablissements')
+                      .remove([oldPath]);
+                    
+                    console.log('✅ Photo déplacée avec succès');
+                  }
+                }
+              }
+            }
+          } catch (photoError) {
+            console.error('⚠️ Erreur traitement photo:', photoError);
+            // Ne pas bloquer l'approbation
+          }
+        }
+        
         // Mettre à jour la proposition avec l'ID
         await supabase
           .from("propositions")
