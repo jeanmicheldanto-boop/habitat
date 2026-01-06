@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { createEtablissementFromProposition as helperCreateEtablissement } from '@/lib/create-etablissement-helper';
 
 interface Proposition {
   id: string;
@@ -420,89 +421,34 @@ export default function ModerationDashboard() {
 
   const createEtablissementFromProposition = async (proposition: Proposition) => {
     try {
-      const payload = proposition.payload as {
-        nom?: string;
-        description?: string;
-        adresse?: string;
-        ville?: string;
-        code_postal?: string;
-        latitude?: number;
-        longitude?: number;
-        telephone?: string;
-        email?: string;
-        site_web?: string;
-        habitat_type?: string;
-        capacite_totale?: number;
-        prix_min?: number;
-        prix_max?: number;
-        sous_categories?: string[];
-        equipements?: string[];
-        services?: string[];
-      };
-      
-      // Créer l'établissement
-      const etablissementData = {
-        nom: payload.nom,
-        description: payload.description,
-        adresse: payload.adresse,
-        ville: payload.ville,
-        code_postal: payload.code_postal,
-        latitude: payload.latitude,
-        longitude: payload.longitude,
-        telephone: payload.telephone,
-        email: payload.email,
-        site_web: payload.site_web,
-        habitat_type: payload.habitat_type,
-        capacite_totale: payload.capacite_totale,
-        prix_min: payload.prix_min,
-        prix_max: payload.prix_max,
-        statut: 'publie',
-        created_by: proposition.created_by
-      };
+      // ✅ Utiliser le helper centralisé qui gère:
+      // - image_path (photo principale)
+      // - Création automatique dans medias
+      // - Sous-catégories avec UUIDs
+      // - Géolocalisation PostGIS
+      // - Tous les champs normalisés
+      const result = await helperCreateEtablissement(
+        proposition.payload as Record<string, unknown>,
+        proposition.created_by,
+        supabase
+      );
 
-      const { data: etablissement, error: etablissementError } = await supabase
-        .from('etablissements')
-        .insert([etablissementData])
-        .select()
-        .single();
-
-      if (etablissementError) throw etablissementError;
-
-      // Créer les liaisons avec les sous-catégories
-      if (Array.isArray(payload.sous_categories) && payload.sous_categories.length > 0) {
-        const sousCategoriesData = payload.sous_categories.map((scId: string) => ({
-          etablissement_id: etablissement.id,
-          sous_categorie_id: parseInt(scId)
-        }));
-        await supabase
-          .from('etablissement_sous_categories')
-          .insert(sousCategoriesData);
+      if (!result.success) {
+        throw new Error(result.error || 'Erreur création établissement');
       }
 
-      // Créer les liaisons avec les équipements
-      if (Array.isArray(payload.equipements) && payload.equipements.length > 0) {
-        const equipementsData = payload.equipements.map((eqId: string) => ({
-          etablissement_id: etablissement.id,
-          equipement_id: parseInt(eqId)
-        }));
-        await supabase
-          .from('etablissement_equipements')
-          .insert(equipementsData);
-      }
+      console.log('✅ Établissement créé:', result.etablissement_id);
+      console.log('📊 Détails:', result.details);
 
-      // Créer les liaisons avec les services
-      if (Array.isArray(payload.services) && payload.services.length > 0) {
-        const servicesData = payload.services.map((sId: string) => ({
-          etablissement_id: etablissement.id,
-          service_id: parseInt(sId)
-        }));
-        await supabase
-          .from('etablissement_services')
-          .insert(servicesData);
-      }
+      // Mettre à jour la proposition avec l'ID de l'établissement créé
+      await supabase
+        .from('propositions')
+        .update({ etablissement_id: result.etablissement_id })
+        .eq('id', proposition.id);
 
     } catch (error) {
-      console.error('Erreur création établissement:', error);
+      console.error('❌ Erreur création établissement:', error);
+      throw error;
     }
   };
 
