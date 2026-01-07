@@ -22,8 +22,8 @@ export function getSupabaseImageUrl(storagePath: string): string {
     return `${SUPABASE_URL}/storage/v1/object/public/${storagePath}`;
   }
   
-  // Par défaut, on assume que c'est un path relatif dans le bucket etablissements (nouveau défaut)
-  return `${SUPABASE_URL}/storage/v1/object/public/etablissements/${storagePath}`;
+  // Par défaut, on assume que c'est un path relatif dans le bucket medias (nouveau défaut depuis migration)
+  return `${SUPABASE_URL}/storage/v1/object/public/medias/${storagePath}`;
 }
 
 /**
