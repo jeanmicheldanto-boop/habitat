@@ -69,9 +69,12 @@ export async function convertSousCategoriesToUUIDs(
   }
 
   // Créer un map clé → UUID (utilise slug au lieu de libelle)
-  const keyToUuidMap = new Map<string, string>(
-    (allSousCategories as Array<{ id: string; slug: string }>).map(sc => [sc.slug.toLowerCase().trim(), sc.id])
-  );
+  const keyToUuidMap = new Map<string, string>();
+  (allSousCategories as Array<{ id: string; slug: string | null }>).forEach(sc => {
+    if (sc.slug) {
+      keyToUuidMap.set(sc.slug.toLowerCase().trim(), sc.id);
+    }
+  });
 
   // Convertir les clés en UUIDs
   const uuids: string[] = [];
