@@ -54,7 +54,10 @@ export async function convertSousCategoriesToUUIDs(
 ): Promise<string[]> {
   const supabase = supabaseClient || createClient(supabaseUrl, supabaseKey);
   
+  console.log('🏷️ convertSousCategoriesToUUIDs - Input:', sousCategories);
+  
   if (!sousCategories || sousCategories.length === 0) {
+    console.log('⚠️ Sous-catégories vides ou non définies');
     return [];
   }
 
@@ -68,6 +71,8 @@ export async function convertSousCategoriesToUUIDs(
     return [];
   }
 
+  console.log(`📚 ${allSousCategories.length} sous-catégories récupérées de la DB`);
+
   // Créer un map clé → UUID (utilise slug au lieu de libelle)
   const keyToUuidMap = new Map<string, string>();
   (allSousCategories as Array<{ id: string; slug: string | null }>).forEach(sc => {
@@ -76,6 +81,8 @@ export async function convertSousCategoriesToUUIDs(
     }
   });
 
+  console.log('🗺️ Map créée avec', keyToUuidMap.size, 'entrées');
+
   // Convertir les clés en UUIDs
   const uuids: string[] = [];
   const notFound: string[] = [];
@@ -83,6 +90,8 @@ export async function convertSousCategoriesToUUIDs(
   for (const key of sousCategories) {
     const normalizedKey = key.toLowerCase().trim();
     const uuid = keyToUuidMap.get(normalizedKey);
+    
+    console.log(`🔍 Recherche "${key}" → "${normalizedKey}" → ${uuid ? '✅ Trouvé' : '❌ Non trouvé'}`);
     
     if (uuid) {
       uuids.push(uuid);
@@ -95,6 +104,7 @@ export async function convertSousCategoriesToUUIDs(
     console.warn('⚠️ Sous-catégories non trouvées:', notFound);
   }
 
+  console.log(`✅ Conversion terminée: ${uuids.length} UUID(s) trouvé(s)`);
   return uuids;
 }
 
@@ -182,11 +192,15 @@ export async function createEtablissementFromProposition(
     }
 
     // 4. Traiter les sous-catégories
+    console.log('🔍 Payload sous_categories:', payload.sous_categories);
     if (Array.isArray(payload.sous_categories) && payload.sous_categories.length > 0) {
+      console.log('🏷️ Début traitement sous-catégories...');
       const sousCategoriesUUIDs = await convertSousCategoriesToUUIDs(
         payload.sous_categories,
         supabase
       );
+
+      console.log('🆔 UUIDs obtenus:', sousCategoriesUUIDs);
 
       if (sousCategoriesUUIDs.length > 0) {
         const links = sousCategoriesUUIDs.map(uuid => ({
@@ -194,14 +208,23 @@ export async function createEtablissementFromProposition(
           sous_categorie_id: uuid
         }));
 
+        console.log('🔗 Tentative insertion liaisons:', links);
+
         const { error: linkError } = await (supabase as any)
           .from('etablissement_sous_categorie')
           .insert(links);
 
-        if (!linkError) {
+        if (linkError) {
+          console.error('❌ Erreur insertion liaisons:', linkError);
+        } else {
+          console.log('✅ Liaisons créées:', links.length);
           result.details!.sous_categories_created = links.length;
         }
+      } else {
+        console.warn('⚠️ Aucun UUID trouvé pour les sous-catégories');
       }
+    } else {
+      console.warn('⚠️ Pas de sous-catégories dans le payload ou non array');
     }
 
     // 4. TODO: Traiter les services et équipements si nécessaire
