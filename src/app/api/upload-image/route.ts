@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
 
     // Upload avec service_role key (bypass RLS)
     const { error: uploadError } = await supabaseAdmin.storage
-      .from('etablissements')
+      .from('medias')
       .upload(filePath, buffer, {
         contentType: file.type,
         upsert: true
