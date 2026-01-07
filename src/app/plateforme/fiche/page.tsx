@@ -36,7 +36,11 @@ export default async function FichePage({ searchParams }: { searchParams: Promis
   return (
     <main style={{ maxWidth: 900, margin: "2rem auto", background: "#fff", borderRadius: 18, boxShadow: "0 2px 8px 0 rgba(0,0,0,0.08)", padding: "2.5rem 2.5rem" }}>
       <h1 style={{ fontSize: "2rem", color: "#a85b2b", marginBottom: 8 }}>{data.nom}</h1>
-      <div style={{ color: "#888", fontSize: "1.1rem", marginBottom: 18 }}>{data.commune} ({data.departement}, {data.region}) {data.code_postal}</div>
+      <div style={{ color: "#888", fontSize: "1.1rem", marginBottom: 8 }}>
+        {data.adresse_l1 && <div>{data.adresse_l1}</div>}
+        {data.adresse_l2 && <div>{data.adresse_l2}</div>}
+        <div>{data.code_postal} {data.commune} ({data.departement}{data.region ? `, ${data.region}` : ''})</div>
+      </div>
       <div style={{ display: "flex", gap: 32, flexWrap: "wrap", marginBottom: 24 }}>
         <Image
           src={data.image_path ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${data.image_path}` : getHabitatImage(data.sous_categories)}
