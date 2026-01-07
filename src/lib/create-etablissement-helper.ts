@@ -70,7 +70,7 @@ export async function convertSousCategoriesToUUIDs(
 
   // Créer un map clé → UUID
   const keyToUuidMap = new Map<string, string>(
-    allSousCategories.map((sc: { id: string; libelle: string }) => [sc.libelle.toLowerCase().trim(), sc.id])
+    (allSousCategories as Array<{ id: string; libelle: string }>).map(sc => [sc.libelle.toLowerCase().trim(), sc.id])
   );
 
   // Convertir les clés en UUIDs
