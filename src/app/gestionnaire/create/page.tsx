@@ -12,7 +12,7 @@ import { HABITAT_TAXONOMY } from '@/lib/habitatTaxonomy';
 
 interface FormData {
   nom: string;
-  description: string;
+  presentation: string;
   adresse: string;
   ville: string;
   code_postal: string;
@@ -37,7 +37,7 @@ interface FormData {
 export default function CreateEtablissement() {
   const [formData, setFormData] = useState<FormData>({
     nom: '',
-    description: '',
+    presentation: '',
     adresse: '',
     ville: '',
     code_postal: '',
@@ -120,10 +120,21 @@ export default function CreateEtablissement() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    // Si on change le type d'habitat, réinitialiser les sous-catégories
+    // pour garantir la cohérence (une sous-catégorie ne peut appartenir qu'à un seul habitat_type)
+    if (name === 'habitat_type') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value as FormData['habitat_type'],
+        sous_categories: [] // Réinitialisation automatique
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleAddressChange = (field: string, value: string | number) => {
@@ -134,11 +145,20 @@ export default function CreateEtablissement() {
   };
 
   const uploadPhotoIfExists = async (etablissementId: string): Promise<string | null> => {
-    if (!formData.photo_file) return null;
+    if (!formData.photo_file) {
+      console.log('❌ uploadPhotoIfExists: pas de photo_file');
+      return null;
+    }
     
     try {
       const fileExt = formData.photo_file.name.split('.').pop();
-      const filePath = `etablissements/${etablissementId}/main.${fileExt}`;
+      const filePath = `${etablissementId}/main.${fileExt}`;
+      
+      console.log('📤 Tentative upload vers Storage...');
+      console.log('   Bucket: etablissements');
+      console.log('   Path:', filePath);
+      console.log('   Fichier:', formData.photo_file.name);
+      console.log('   Type MIME:', formData.photo_file.type);
       
       const { error: uploadError } = await supabase.storage
         .from('etablissements')
@@ -147,13 +167,16 @@ export default function CreateEtablissement() {
         });
 
       if (uploadError) {
-        console.error('Erreur upload photo:', uploadError);
+        console.error('❌ Erreur upload photo:', uploadError);
+        console.error('   Message:', uploadError.message);
+        console.error('   Détails:', JSON.stringify(uploadError, null, 2));
         return null;
       }
 
+      console.log('✅ Upload réussi:', filePath);
       return filePath;
     } catch (error) {
-      console.error('Erreur lors de l\'upload de la photo:', error);
+      console.error('❌ Exception lors de l\'upload de la photo:', error);
       return null;
     }
   };
@@ -164,13 +187,38 @@ export default function CreateEtablissement() {
     setError('');
 
     try {
+      // ✅ VALIDATION : Vérifier que les coordonnées GPS sont présentes
+      if (!formData.latitude || !formData.longitude) {
+        setError('⚠️ Veuillez sélectionner une adresse dans la liste d\'autocomplétion pour obtenir la géolocalisation. Tapez votre adresse et choisissez-la dans la liste qui apparaît.');
+        setLoading(false);
+        return;
+      }
+
       // Générer un ID temporaire pour l'établissement (pour l'upload photo)
       const tempId = crypto.randomUUID();
       
       // Uploader la photo si elle existe
       let imagePath = null;
+      console.log('🔍 Vérification photo_file:', !!formData.photo_file);
       if (formData.photo_file) {
+        console.log('📸 Nom fichier:', formData.photo_file.name);
+        console.log('📸 Taille:', formData.photo_file.size, 'bytes');
+        console.log('📸 Type:', formData.photo_file.type);
+        console.log('📸 Début upload vers:', tempId);
         imagePath = await uploadPhotoIfExists(tempId);
+        
+        if (!imagePath) {
+          // Avertir l'utilisateur mais continuer la soumission
+          console.warn('⚠️ L\'image n\'a pas pu être uploadée, mais la proposition sera créée sans image');
+          setError('⚠️ Attention: L\'image n\'a pas pu être uploadée. La proposition sera créée sans image.');
+          // Attendre 3 secondes pour que l'utilisateur voie le message
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          setError(''); // Effacer l'erreur pour continuer
+        } else {
+          console.log('✅ Photo uploadée:', imagePath);
+        }
+      } else {
+        console.log('ℹ️ Aucune photo sélectionnée (facultatif)');
       }
 
       // Préparer les données pour la proposition
@@ -187,9 +235,9 @@ export default function CreateEtablissement() {
           adresse_l1: formData.adresse,  // adresse -> adresse_l1
           // Passer le nom de l'organisation (pas l'UUID) pour le champ gestionnaire
           gestionnaire: userOrganisation,
-          // Inclure le chemin de l'image si elle a été uploadée
+          // ✅ NOUVEAU : Inclure le chemin de l'image pour établissements.image_path
           image_path: imagePath,
-          // Retirer les données de la photo du payload
+          // Retirer les données de la photo du payload (fichier binaire)
           photo_file: undefined,
           photo_url: undefined,
           // Ajouter l'ID temporaire pour le référencement
@@ -335,15 +383,15 @@ export default function CreateEtablissement() {
               </div>
 
               <div className="mt-6">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                  Description *
+                <label htmlFor="presentation" className="block text-sm font-medium text-gray-700">
+                  Présentation *
                 </label>
                 <textarea
-                  name="description"
-                  id="description"
+                  name="presentation"
+                  id="presentation"
                   rows={4}
                   required
-                  value={formData.description}
+                  value={formData.presentation}
                   onChange={handleInputChange}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Décrivez votre établissement, ses spécificités, son environnement..."

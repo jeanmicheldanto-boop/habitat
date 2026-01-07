@@ -95,7 +95,6 @@ export default function PropositionModerationPage({ params }: { params: Promise<
           
           // Préparer les données pour l'insertion
           const payload = proposition.payload as Record<string, unknown>;
-          const etablissementData: Record<string, unknown> = {};
           
           // Liste des champs valides dans etablissements (à copier depuis le payload)
           const validFields = [
@@ -107,9 +106,10 @@ export default function PropositionModerationPage({ params }: { params: Promise<
             'gestionnaire', 'habitat_type', 'image_path'
           ];
           
-          // Copier uniquement les champs valides
+          // Copier uniquement les champs valides depuis le payload
+          const etablissementData: Record<string, unknown> = {};
           for (const field of validFields) {
-            if (payload[field] !== undefined && payload[field] !== null) {
+            if (payload[field] !== undefined && payload[field] !== null && payload[field] !== '') {
               etablissementData[field] = payload[field];
             }
           }

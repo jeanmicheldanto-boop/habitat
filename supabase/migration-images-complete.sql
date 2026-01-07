@@ -81,6 +81,7 @@ SELECT
   e.code_postal,
   e.pays,
   e.gestionnaire,
+  e.geom,
   ST_Y(e.geom::geometry) AS latitude,
   ST_X(e.geom::geometry) AS longitude,
   e.geocode_precision,
@@ -116,8 +117,12 @@ SELECT
   (SELECT r.resto_collectif FROM restaurations r WHERE r.etablissement_id = e.id LIMIT 1) AS resto_collectif,
   (SELECT r.portage_repas FROM restaurations r WHERE r.etablissement_id = e.id LIMIT 1) AS portage_repas,
   (SELECT COALESCE(json_agg(json_build_object('libelle', lt.libelle, 'surface_min', lt.surface_min, 'surface_max', lt.surface_max, 'meuble', lt.meuble, 'pmr', lt.pmr, 'domotique', lt.domotique, 'nb_unites', lt.nb_unites)) FILTER (WHERE lt.id IS NOT NULL), '[]'::json)
-   FROM logements_types lt WHERE lt.etablissement_id = e.id) AS logements_types
+   FROM logements_types lt WHERE lt.etablissement_id = e.id) AS logements_types,
+  avi.statut AS avp_statut,
+  avi.date_ouverture AS avp_date_ouverture,
+  (COALESCE(NULLIF(TRIM(BOTH FROM (avi.pvsp_fondamentaux ->> 'animation_vie_sociale')), ''), NULL) IS NOT NULL) AS avp_pvsp_present
 FROM etablissements e
+LEFT JOIN avp_infos avi ON avi.etablissement_id = e.id
 WHERE e.statut_editorial = 'publie'
   AND e.geom IS NOT NULL;
 
