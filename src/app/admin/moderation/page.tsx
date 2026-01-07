@@ -430,7 +430,7 @@ export default function ModerationDashboard() {
       const result = await helperCreateEtablissement(
         proposition.payload as Record<string, unknown>,
         proposition.created_by,
-        supabase
+        supabase as any
       );
 
       if (!result.success) {

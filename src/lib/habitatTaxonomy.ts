@@ -170,6 +170,9 @@ export const findSousCategorieWithTolerance = (search: string): SousCategorie | 
   const normalizedSearch = normalizeString(search);
   
   return getAllSousCategories().find(sc => {
+    // Vérifier d'abord par key exact (le plus fiable)
+    if (sc.key === search || normalizeString(sc.key) === normalizedSearch) return true;
+    
     // Vérifier le label principal
     if (normalizeString(sc.label).includes(normalizedSearch) || normalizedSearch.includes(normalizeString(sc.label))) return true;
     

@@ -55,6 +55,7 @@ export default function GestionnaireRegister() {
         email: formData.email,
         password: formData.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/gestionnaire/dashboard`,
           data: {
             nom: formData.nom,
             prenom: formData.prenom,
@@ -276,7 +277,7 @@ export default function GestionnaireRegister() {
                       Inscription en cours...
                     </div>
                   ) : (
-                    'S&#39;inscrire'
+                    "S'inscrire"
                   )}
                 </button>
               </div>

@@ -22,7 +22,7 @@ interface FormData {
   telephone?: string;
   email?: string;
   site_web?: string;
-  habitat_type: 'habitat_individuel' | 'habitat_partage' | 'logement_individuel_en_residence';
+  habitat_type: string; // Utilise les clés de HABITAT_TAXONOMY
   sous_categories: string[];
   capacite_totale?: number;
   prix_min?: number;
@@ -42,7 +42,7 @@ export default function CreateEtablissement() {
     ville: '',
     code_postal: '',
     departement: '',
-    habitat_type: 'habitat_individuel',
+    habitat_type: HABITAT_TAXONOMY[0].key,
     sous_categories: [],
     equipements: [],
     services: []
@@ -126,7 +126,7 @@ export default function CreateEtablissement() {
     if (name === 'habitat_type') {
       setFormData(prev => ({
         ...prev,
-        [name]: value as FormData['habitat_type'],
+        [name]: value,
         sous_categories: [] // Réinitialisation automatique
       }));
     } else {
@@ -146,37 +146,39 @@ export default function CreateEtablissement() {
 
   const uploadPhotoIfExists = async (etablissementId: string): Promise<string | null> => {
     if (!formData.photo_file) {
-      console.log('❌ uploadPhotoIfExists: pas de photo_file');
+      console.log('ℹ️ Aucune photo à uploader');
       return null;
     }
     
     try {
-      const fileExt = formData.photo_file.name.split('.').pop();
-      const filePath = `${etablissementId}/main.${fileExt}`;
-      
-      console.log('📤 Tentative upload vers Storage...');
-      console.log('   Bucket: etablissements');
-      console.log('   Path:', filePath);
+      console.log('📤 Upload de la photo via API...');
       console.log('   Fichier:', formData.photo_file.name);
-      console.log('   Type MIME:', formData.photo_file.type);
-      
-      const { error: uploadError } = await supabase.storage
-        .from('etablissements')
-        .upload(filePath, formData.photo_file, { 
-          upsert: true 
-        });
+      console.log('   Taille:', (formData.photo_file.size / 1024).toFixed(2), 'KB');
+      console.log('   Type:', formData.photo_file.type);
 
-      if (uploadError) {
-        console.error('❌ Erreur upload photo:', uploadError);
-        console.error('   Message:', uploadError.message);
-        console.error('   Détails:', JSON.stringify(uploadError, null, 2));
+      // Créer FormData pour l'API
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', formData.photo_file);
+      uploadFormData.append('tempId', etablissementId);
+
+      // Upload via route API (qui utilise service_role key)
+      const response = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: uploadFormData
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        console.error('❌ Erreur upload:', result.error);
         return null;
       }
 
-      console.log('✅ Upload réussi:', filePath);
-      return filePath;
+      console.log('✅ Photo uploadée avec succès:', result.path);
+      return result.path;
+      
     } catch (error) {
-      console.error('❌ Exception lors de l\'upload de la photo:', error);
+      console.error('❌ Exception lors de l\'upload:', error);
       return null;
     }
   };

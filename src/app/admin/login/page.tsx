@@ -13,26 +13,18 @@ export default function AdminLoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Vérifier si l'utilisateur est déjà connecté
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        // Vérifier le rôle
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-        
-        if (profile?.role === 'admin' || profile?.role === 'gestionnaire') {
-          // Rediriger vers le dashboard admin
-          router.push('/admin');
-        } else {
-          setError('Vous n\'avez pas les permissions nécessaires.');
-        }
+    // TEMPORAIREMENT DÉSACTIVÉ pour déboguer le problème de token
+    // L'erreur "Database error querying schema" empêche le chargement de la page
+    console.log('🔧 useEffect désactivé temporairement');
+    
+    // Nettoyer immédiatement le localStorage au chargement
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.includes('supabase') || key.includes('sb-')) {
+        console.log('🧹 Suppression de:', key);
+        localStorage.removeItem(key);
       }
-    };
-    checkUser();
+    });
   }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -47,7 +39,18 @@ export default function AdminLoginPage() {
         password,
       });
 
-      if (signInError) throw signInError;
+      if (signInError) {
+        console.error('❌ Erreur signInWithPassword:', {
+          message: signInError.message,
+          status: signInError.status,
+          code: (signInError as any).code,
+          name: signInError.name,
+          full: signInError
+        });
+        throw signInError;
+      }
+
+      console.log('✅ Connexion réussie, user:', data.user?.email);
 
       if (data.user) {
         // Vérifier le rôle dans la table profiles
