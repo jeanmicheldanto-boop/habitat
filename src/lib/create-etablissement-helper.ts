@@ -61,16 +61,16 @@ export async function convertSousCategoriesToUUIDs(
   // Récupérer toutes les sous-catégories de la base
   const { data: allSousCategories, error } = await supabase
     .from('sous_categories')
-    .select('id, libelle');
+    .select('id, slug');
 
   if (error || !allSousCategories) {
     console.error('❌ Erreur récupération sous-catégories:', error);
     return [];
   }
 
-  // Créer un map clé → UUID
+  // Créer un map clé → UUID (utilise slug au lieu de libelle)
   const keyToUuidMap = new Map<string, string>(
-    (allSousCategories as Array<{ id: string; libelle: string }>).map(sc => [sc.libelle.toLowerCase().trim(), sc.id])
+    (allSousCategories as Array<{ id: string; slug: string }>).map(sc => [sc.slug.toLowerCase().trim(), sc.id])
   );
 
   // Convertir les clés en UUIDs

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirmez votre inscription - Habitat Intermédiaire</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f3f4f6;">
+    <tr>
+      <td style="padding: 40px 20px;">
+        <table role="presentation" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+          <!-- Header avec emoji -->
+          <tr>
+            <td style="padding: 40px 40px 30px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px 8px 0 0;">
+              <div style="font-size: 48px; margin-bottom: 10px;">👋</div>
+              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Bienvenue sur Habitat Intermédiaire</h1>
+            </td>
+          </tr>
+          
+          <!-- Corps du message -->
+          <tr>
+            <td style="padding: 40px;">
+              <p style="margin: 0 0 20px; color: #374151; font-size: 16px; line-height: 1.6;">
+                Bonjour,
+              </p>
+              
+              <p style="margin: 0 0 20px; color: #374151; font-size: 16px; line-height: 1.6;">
+                Merci de vous être inscrit(e) en tant que gestionnaire sur <strong>Habitat Intermédiaire</strong>.
+              </p>
+              
+              <p style="margin: 0 0 30px; color: #374151; font-size: 16px; line-height: 1.6;">
+                Pour confirmer votre adresse email et activer votre compte, veuillez cliquer sur le bouton ci-dessous :
+              </p>
+              
+              <!-- Bouton CTA -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="text-align: center; padding: 20px 0;">
+                    <a href="{{ .ConfirmationURL }}" style="display: inline-block; padding: 14px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.4);">
+                      Confirmer mon inscription
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Lien alternatif -->
+              <p style="margin: 30px 0 20px; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :
+              </p>
+              
+              <div style="background-color: #f9fafb; padding: 15px; border-radius: 6px; word-break: break-all;">
+                <a href="{{ .ConfirmationURL }}" style="color: #667eea; text-decoration: none; font-size: 13px;">{{ .ConfirmationURL }}</a>
+              </div>
+              
+              <!-- Expiration -->
+              <p style="margin: 20px 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                ⏱️ Ce lien expire dans <strong>24 heures</strong>.
+              </p>
+            </td>
+          </tr>
+          
+          <!-- Separator -->
+          <tr>
+            <td style="padding: 0 40px;">
+              <div style="border-top: 1px solid #e5e7eb;"></div>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 30px 40px; text-align: center;">
+              <p style="margin: 0 0 15px; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                Si vous n'avez pas créé de compte, vous pouvez ignorer cet email en toute sécurité.
+              </p>
+              
+              <p style="margin: 0; color: #9ca3af; font-size: 13px;">
+                © 2025 Habitat Intermédiaire - Tous droits réservés<br>
+                <a href="https://habitat-intermediaire.fr" style="color: #667eea; text-decoration: none;">habitat-intermediaire.fr</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+        
+        <!-- Footer externe -->
+        <table role="presentation" style="max-width: 600px; margin: 20px auto 0;">
+          <tr>
+            <td style="text-align: center; color: #9ca3af; font-size: 12px;">
+              <p style="margin: 0;">
+                Cet email a été envoyé à <a href="mailto:{{ .Email }}" style="color: #667eea; text-decoration: none;">{{ .Email }}</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

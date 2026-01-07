@@ -17,13 +17,13 @@ export function getSupabaseImageUrl(storagePath: string): string {
     return `${SUPABASE_URL}/${storagePath}`;
   }
   
-  // Si le path commence par 'medias/' ou un autre bucket, on construit l'URL complète
-  if (storagePath.startsWith('medias/')) {
+  // Si le path commence par 'medias/', 'etablissements/' ou un autre bucket, on construit l'URL complète
+  if (storagePath.startsWith('medias/') || storagePath.startsWith('etablissements/')) {
     return `${SUPABASE_URL}/storage/v1/object/public/${storagePath}`;
   }
   
-  // Par défaut, on assume que c'est un path relatif dans le bucket public
-  return `${SUPABASE_URL}/storage/v1/object/public/medias/${storagePath}`;
+  // Par défaut, on assume que c'est un path relatif dans le bucket etablissements (nouveau défaut)
+  return `${SUPABASE_URL}/storage/v1/object/public/etablissements/${storagePath}`;
 }
 
 /**
