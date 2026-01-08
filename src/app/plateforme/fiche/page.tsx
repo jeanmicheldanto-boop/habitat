@@ -46,7 +46,7 @@ export default async function FichePage({ searchParams }: { searchParams: Promis
       </div>
       <div style={{ display: "flex", gap: 32, flexWrap: "wrap", marginBottom: 24 }}>
         <Image
-          src={data.image_path ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${data.image_path}` : getHabitatImage(data.sous_categories)}
+          src={data.image_path ? `${process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()}/storage/v1/object/public/${data.image_path}` : getHabitatImage(data.sous_categories)}
           alt={data.nom}
           width={260}
           height={180}
