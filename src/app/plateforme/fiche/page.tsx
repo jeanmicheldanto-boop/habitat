@@ -6,6 +6,9 @@ import { getHabitatImage } from "../../../lib/habitatImages";
 import Image from "next/image";
 import { AvpInfosSection, type AvpInfos } from "../../../components/AvpInfosSection";
 
+// Force le revalidate pour avoir les données à jour
+export const revalidate = 0;
+
 export default async function FichePage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
   const { id: etabId } = await searchParams;
   if (!etabId) return notFound();

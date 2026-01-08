@@ -134,7 +134,7 @@ export async function createEtablissementFromProposition(
       habitat_type: payload.habitat_type,
       statut_editorial: 'publie',
       eligibilite_statut: 'a_verifier',
-      image_path: payload.image_path || null  // ✅ NOUVEAU : Photo principale
+      image_path: null  // ✅ CORRIGÉ: Toujours NULL, utiliser la table medias
     };
 
     // Géolocalisation
@@ -142,17 +142,9 @@ export async function createEtablissementFromProposition(
       etablissementData.geom = `POINT(${payload.longitude} ${payload.latitude})`;
     }
 
-    // Gestionnaire
+    // Gestionnaire - C'est un champ TEXT, pas un UUID
     if (payload.gestionnaire) {
-      const { data: gestionnaires } = await supabase
-        .from('gestionnaires')
-        .select('id, nom')
-        .ilike('nom', payload.gestionnaire)
-        .limit(1);
-      
-      if (gestionnaires && gestionnaires.length > 0) {
-        etablissementData.gestionnaire = (gestionnaires[0] as { id: string; nom: string }).id;
-      }
+      etablissementData.gestionnaire = payload.gestionnaire;  // ✅ CORRIGÉ: Utiliser directement le texte
     }
 
     // 2. Créer l'établissement
@@ -181,7 +173,7 @@ export async function createEtablissementFromProposition(
         .from('medias')
         .insert([{
           etablissement_id: (newEtab as { id: string }).id,
-          storage_path: payload.image_path,
+          storage_path: payload.image_path,  // ✅ Déjà avec préfixe depuis l'API corrigée
           priority: 1000, // Haute priorité = photo principale
           alt_text: `Photo de ${payload.nom}`
         }]);

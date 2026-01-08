@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
 
     // Upload avec service_role key (bypass RLS)
     const { error: uploadError } = await supabaseAdmin.storage
-      .from('medias')
+      .from('etablissements')  // ✅ CORRIGÉ: Upload dans le bon bucket
       .upload(filePath, buffer, {
         contentType: file.type,
         upsert: true
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      path: filePath
+      path: `etablissements/${filePath}`  // ✅ CORRIGÉ: Retourne avec le préfixe du bucket
     });
 
   } catch (error) {
