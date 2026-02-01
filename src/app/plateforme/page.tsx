@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import type { JSX } from "react";
 import nextDynamic from "next/dynamic";
 import HeaderSubnavGate from "@/components/HeaderSubnavGate";
@@ -15,7 +15,7 @@ import BadgeIcon from "@/components/BadgeIcon";
 import AvpBadge from "@/components/AvpBadge";
 import "./plateforme.css";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // Labels des habitat_type selon le nouveau mapping centralisé
 const HABITAT_TYPE_LABELS: Record<string, string> = {
@@ -63,11 +63,15 @@ interface Etablissement {
   portage_repas?: boolean;
 }
 
-export default function Page(): JSX.Element {
+function PlateformeContent(): JSX.Element {
   // --- HOOKS ET LOGIQUE ---
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Détection du paramètre ?view=map pour ouvrir la carte par défaut
+  const searchParams = useSearchParams();
+  const viewMode = searchParams.get('view');
 
   useEffect(() => {
     setMounted(true);
@@ -77,7 +81,7 @@ export default function Page(): JSX.Element {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const [tab, setTab] = useState<"liste" | "carte">("liste");
+  const [tab, setTab] = useState<"liste" | "carte">(viewMode === "map" ? "carte" : "liste");
   const [data, setData] = useState<Etablissement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1847,5 +1851,13 @@ export default function Page(): JSX.Element {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function Page(): JSX.Element {
+  return (
+    <Suspense fallback={<div>Chargement...</div>}>
+      <PlateformeContent />
+    </Suspense>
   );
 }

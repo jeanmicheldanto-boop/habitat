@@ -100,7 +100,7 @@ a{color:inherit;text-decoration:none}
 /* Desktop - moins d'espace */
 @media (min-width: 769px) {
   .hero__title {
-    margin-top: 4rem !important; /* Moins d'espace sur desktop */
+    margin-top: 2rem !important; /* Moins d'espace sur desktop */
   }
 }
 
@@ -164,7 +164,7 @@ a{color:inherit;text-decoration:none}
   font-size: clamp(1.8rem, 3.4vw, 3rem);
   font-weight: 700;
   letter-spacing: .2px;
-  margin: 0 0 18px 0;
+  margin: 2rem 0 18px 0;
 }
 .hero__actions{
   display: flex; gap: 14px;

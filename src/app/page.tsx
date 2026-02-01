@@ -29,9 +29,9 @@ export default function HomePage() {
       </div>
 
       <div className="hero__content">
-    <h1 className="hero__title" style={{ marginTop: "6rem" }}>Plateforme experte du logement inclusif pour séniors [test]</h1>
+    <h1 className="hero__title" style={{ marginTop: "4rem" }}>Trouvez votre habitat intermédiaire senior en France</h1>
 
-        {/* Barre de recherche centrale avec autocomplétion et chatbot */}
+        {/* Barre de recherche centrale avec boutons carte et chatbot */}
         <div style={{ 
           position: "relative", 
           display: "flex", 
@@ -42,6 +42,87 @@ export default function HomePage() {
           margin: "0 auto",
           padding: "0 1rem"
         }}>
+          {/* Bouton Carte de France */}
+          <Link
+            href="/plateforme?view=map"
+            className="map-btn"
+            style={{
+              position: "relative",
+              width: "60px",
+              height: "60px",
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+              border: "2px solid rgba(217, 135, 106, 0.3)",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 24px rgba(217, 135, 106, 0.3)",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              animation: "mapPulse 3s ease-in-out infinite",
+              flexShrink: 0,
+              textDecoration: "none"
+            }}
+            aria-label="Accéder à la carte"
+            title="Accéder à la carte"
+          >
+            {/* Icône Carte avec marqueurs élégante */}
+            <svg 
+              width="32" 
+              height="32" 
+              viewBox="0 0 32 32" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {/* Carte stylisée avec lignes et points */}
+              <rect 
+                x="4" 
+                y="6" 
+                width="24" 
+                height="20" 
+                rx="2" 
+                fill="url(#mapGradient)"
+                stroke="#d9876a"
+                strokeWidth="1.5"
+              />
+              
+              {/* Lignes de carte horizontales */}
+              <line x1="6" y1="11" x2="26" y2="11" stroke="#c1694a" strokeWidth="0.8" opacity="0.4"/>
+              <line x1="6" y1="16" x2="26" y2="16" stroke="#c1694a" strokeWidth="0.8" opacity="0.4"/>
+              <line x1="6" y1="21" x2="26" y2="21" stroke="#c1694a" strokeWidth="0.8" opacity="0.4"/>
+              
+              {/* Lignes verticales */}
+              <line x1="11" y1="8" x2="11" y2="24" stroke="#c1694a" strokeWidth="0.8" opacity="0.4"/>
+              <line x1="16" y1="8" x2="16" y2="24" stroke="#c1694a" strokeWidth="0.8" opacity="0.4"/>
+              <line x1="21" y1="8" x2="21" y2="24" stroke="#c1694a" strokeWidth="0.8" opacity="0.4"/>
+              
+              {/* Marqueurs de localisation */}
+              <g>
+                {/* Pin principal */}
+                <path 
+                  d="M16 10 C14 10 12.5 11.5 12.5 13.5 C12.5 15.5 16 20 16 20 C16 20 19.5 15.5 19.5 13.5 C19.5 11.5 18 10 16 10 Z" 
+                  fill="#c1694a"
+                  stroke="#d9876a"
+                  strokeWidth="0.8"
+                />
+                <circle cx="16" cy="13.5" r="1" fill="white"/>
+                
+                {/* Petits marqueurs secondaires */}
+                <circle cx="10" cy="13" r="2" fill="#d9876a" opacity="0.7"/>
+                <circle cx="22" cy="18" r="2" fill="#d9876a" opacity="0.7"/>
+                <circle cx="12" cy="20" r="1.5" fill="#e8a87c" opacity="0.6"/>
+              </g>
+              
+              {/* Définition du gradient */}
+              <defs>
+                <linearGradient id="mapGradient" x1="16" y1="6" x2="16" y2="26">
+                  <stop offset="0%" stopColor="#ffffff"/>
+                  <stop offset="100%" stopColor="#f8f9fa"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </Link>
+          
           <div style={{ flex: 1, maxWidth: "100%" }}>
             <SearchAutocomplete />
           </div>
@@ -121,6 +202,35 @@ export default function HomePage() {
             }
           }
           
+          @keyframes mapPulse {
+            0%, 100% { 
+              transform: scale(1);
+              box-shadow: 0 4px 24px rgba(217, 135, 106, 0.3);
+            }
+            50% { 
+              transform: scale(1.08);
+              box-shadow: 0 6px 32px rgba(217, 135, 106, 0.5), 
+                          0 0 0 4px rgba(217, 135, 106, 0.1);
+            }
+          }
+          
+          .map-btn:hover {
+            transform: scale(1.15) !important;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
+            box-shadow: 0 8px 36px rgba(217, 135, 106, 0.6), 
+                        0 0 0 6px rgba(217, 135, 106, 0.15) !important;
+            border-color: rgba(217, 135, 106, 0.5) !important;
+            animation: none !important;
+          }
+          
+          .map-btn:hover svg {
+            filter: brightness(1.1) drop-shadow(0 0 8px rgba(217, 135, 106, 0.4));
+          }
+          
+          .map-btn:active {
+            transform: scale(1.05) !important;
+          }
+          
           .chatbot-btn:hover {
             transform: scale(1.15) !important;
             background: linear-gradient(135deg, #34495e 0%, #3d5568 50%, #2c3e50 100%) !important;
@@ -140,6 +250,14 @@ export default function HomePage() {
           }
           
           @media (max-width: 768px) {
+            .map-btn {
+              width: 52px !important;
+              height: 52px !important;
+            }
+            .map-btn svg {
+              width: 28px !important;
+              height: 28px !important;
+            }
             .chatbot-btn {
               width: 52px !important;
               height: 52px !important;
