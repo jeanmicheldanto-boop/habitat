@@ -1,6 +1,10 @@
 import { MapContainer, TileLayer, Marker, Popup, Tooltip } from 'react-leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import './EtabMap.css';
 import React from 'react';
 import { getHabitatImage } from '@/lib/habitatImages';
 
@@ -67,24 +71,70 @@ function getMarkerIcon(habitat_type?: string) {
   });
 }
 
+// Fonction pour créer des icônes de cluster personnalisées
+function createClusterCustomIcon(cluster: any) {
+  const count = cluster.getChildCount();
+  let size = 'small';
+  let fontSize = 14;
+  let diameter = 40;
+  
+  if (count >= 100) {
+    size = 'large';
+    fontSize = 16;
+    diameter = 60;
+  } else if (count >= 30) {
+    size = 'medium';
+    fontSize = 15;
+    diameter = 50;
+  }
+  
+  // Gradient terracotta élégant
+  return L.divIcon({
+    html: `<div style="
+      width: ${diameter}px;
+      height: ${diameter}px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #d9876a 0%, #c1694a 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: ${fontSize}px;
+      box-shadow: 0 4px 12px rgba(217, 135, 106, 0.4);
+      border: 3px solid white;
+      transition: all 0.2s ease;
+    ">${count}</div>`,
+    className: `marker-cluster marker-cluster-${size}`,
+    iconSize: L.point(diameter, diameter),
+  });
+}
+
 export default function EtabMap({ etablissements }: EtabMapProps) {
+  const [isExpanded, setIsExpanded] = React.useState(false);
+
   // Filtre les établissements avec coordonnées valides
   const markers = etablissements.filter(e => typeof e.latitude === 'number' && typeof e.longitude === 'number');
-  return (
-    <div style={{ width: '100%', height: 420, borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 8px 0 rgba(0,0,0,0.08)', marginBottom: 24 }}>
-      <MapContainer
-        // @ts-expect-error center prop is valid for MapContainer but TS types may be outdated
-        center={DEFAULT_CENTER as [number, number]}
-        zoom={6}
-        style={{ height: '100%', width: '100%' }}
-        scrollWheelZoom={true}
-        attributionControl={true}
+  
+  const MapContent = () => (
+    <>
+      <TileLayer
+        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+        // @ts-expect-error attribution prop is valid but not typed
+        attribution="© OpenStreetMap © CartoDB"
+      />
+      
+      <MarkerClusterGroup
+        chunkedLoading
+        maxClusterRadius={60}
+        spiderfyOnMaxZoom={true}
+        showCoverageOnHover={false}
+        zoomToBoundsOnClick={true}
+        disableClusteringAtZoom={14}
+        iconCreateFunction={createClusterCustomIcon}
+        animate={true}
+        animateAddingMarkers={true}
       >
-        <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-          // @ts-expect-error attribution prop is valid but not typed
-          attribution="© OpenStreetMap © CartoDB"
-        />
         {markers.map(etab => (
           <Marker
             key={etab.etab_id}
@@ -146,7 +196,154 @@ export default function EtabMap({ etablissements }: EtabMapProps) {
             </Popup>
           </Marker>
         ))}
-      </MapContainer>
-    </div>
+      </MarkerClusterGroup>
+    </>
+  );
+  
+  return (
+    <>
+      {/* Carte normale */}
+      <div style={{ 
+        width: '100%', 
+        height: 420, 
+        borderRadius: 16, 
+        overflow: 'hidden', 
+        boxShadow: '0 2px 8px 0 rgba(0,0,0,0.08)', 
+        marginBottom: 24,
+        position: 'relative'
+      }}>
+        {/* Bouton agrandir */}
+        <button
+          onClick={() => setIsExpanded(true)}
+          style={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            zIndex: 1000,
+            background: 'white',
+            border: '2px solid rgba(0,0,0,0.2)',
+            borderRadius: 8,
+            padding: '8px 12px',
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            fontSize: '13px',
+            fontWeight: 600,
+            color: '#333',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#f7f7f7';
+            e.currentTarget.style.transform = 'scale(1.05)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'white';
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+          title="Agrandir la carte"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>
+          </svg>
+          Agrandir
+        </button>
+
+        <MapContainer
+          // @ts-expect-error center prop is valid for MapContainer but TS types may be outdated
+          center={DEFAULT_CENTER as [number, number]}
+          zoom={6}
+          style={{ height: '100%', width: '100%' }}
+          scrollWheelZoom={true}
+          attributionControl={true}
+        >
+          <MapContent />
+        </MapContainer>
+      </div>
+
+      {/* Modal carte agrandie */}
+      {isExpanded && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.75)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            backdropFilter: 'blur(4px)',
+            animation: 'fadeIn 0.2s ease'
+          }}
+          onClick={() => setIsExpanded(false)}
+        >
+          <div
+            style={{
+              width: '95%',
+              height: '90%',
+              background: 'white',
+              borderRadius: 16,
+              overflow: 'hidden',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+              position: 'relative',
+              animation: 'scaleIn 0.3s ease'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Bouton fermer */}
+            <button
+              onClick={() => setIsExpanded(false)}
+              style={{
+                position: 'absolute',
+                top: 15,
+                right: 15,
+                zIndex: 10000,
+                background: 'white',
+                border: 'none',
+                borderRadius: '50%',
+                width: 40,
+                height: 40,
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#f7f7f7';
+                e.currentTarget.style.transform = 'scale(1.1) rotate(90deg)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'white';
+                e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+              }}
+              title="Fermer"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            <MapContainer
+              // @ts-expect-error center prop is valid for MapContainer but TS types may be outdated
+              center={DEFAULT_CENTER as [number, number]}
+              zoom={6}
+              style={{ height: '100%', width: '100%' }}
+              scrollWheelZoom={true}
+              attributionControl={true}
+            >
+              <MapContent />
+            </MapContainer>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

@@ -3,6 +3,36 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
+// Composant de bouton de menu avec effet hover
+function MenuButton({ href, children }: { href: string; children: React.ReactNode }) {
+  const [isHovered, setIsHovered] = React.useState(false);
+
+  return (
+    <Link
+      href={href}
+      style={{
+        display: "inline-block",
+        padding: "0.32rem 0.9rem",
+        borderRadius: "32px",
+        background: isHovered ? "#fff" : "rgba(255,255,255,0)",
+        color: isHovered ? "#8b4513" : "#fff",
+        border: "1px solid #fff",
+        fontWeight: 500,
+        fontSize: "0.92rem",
+        boxShadow: isHovered ? "0 3px 12px 0 rgba(0,0,0,0.12)" : "0 2px 8px 0 rgba(0,0,0,0.04)",
+        transition: "all 0.25s ease",
+        textDecoration: "none",
+        whiteSpace: "nowrap",
+        cursor: "pointer"
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {children}
+    </Link>
+  );
+}
+
 export default function SecondaryMenu() {
   const [isMobile, setIsMobile] = React.useState(false);
 
@@ -144,31 +174,15 @@ export default function SecondaryMenu() {
           habitat-intermediaire.fr
         </Link>
         <div style={{ display: "flex", gap: 12, marginLeft: 10 }}>
-          <Link href="/plateforme" style={menuBtnStyle}>Plateforme Habitat Intermédiaire</Link>
-          <Link href="/aides" style={menuBtnStyle}>Faire le point sur les aides</Link>
-          <Link href="/solutions" style={menuBtnStyle}>Choisir sa solution logement</Link>
-          <Link href="/contact" style={menuBtnStyle}>Qui sommes-nous</Link>
+          <MenuButton href="/plateforme">Plateforme Habitat Intermédiaire</MenuButton>
+          <MenuButton href="/aides">Faire le point sur les aides</MenuButton>
+          <MenuButton href="/solutions">Choisir sa solution logement</MenuButton>
+          <MenuButton href="/contact">Qui sommes-nous</MenuButton>
         </div>
       </nav>
     </header>
   );
 }
-
-const menuBtnStyle: React.CSSProperties = {
-  display: "inline-block",
-  padding: "0.32rem 0.9rem",
-  borderRadius: "32px",
-  background: "rgba(255,255,255,0)",
-  color: "#fff",
-  border: "1px solid #fff",
-  fontWeight: 500,
-  fontSize: "0.92rem",
-  boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
-  transition: "background 0.2s, color 0.2s",
-  textDecoration: "none",
-  whiteSpace: "nowrap",
-  cursor: "pointer"
-};
 
 const mobileMenuBtnStyle: React.CSSProperties = {
   display: "inline-block",

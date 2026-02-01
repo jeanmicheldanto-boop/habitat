@@ -1,0 +1,115 @@
+/* Styles personnalisés pour les clusters de markers */
+
+/* Animation au hover sur les clusters */
+.marker-cluster div {
+  transition: all 0.2s ease !important;
+}
+
+.marker-cluster:hover div {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(217, 135, 106, 0.5) !important;
+}
+
+/* Animation de pulsation subtile pour attirer l'attention */
+@keyframes pulse-cluster {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.marker-cluster-small div {
+  animation: pulse-cluster 2s ease-in-out infinite;
+}
+
+/* Styles pour les différentes tailles de clusters */
+.marker-cluster-small div {
+  background: linear-gradient(135deg, #d9876a 0%, #c1694a 100%) !important;
+}
+
+.marker-cluster-medium div {
+  background: linear-gradient(135deg, #c1694a 0%, #a85b2b 100%) !important;
+}
+
+.marker-cluster-large div {
+  background: linear-gradient(135deg, #a85b2b 0%, #8b4513 100%) !important;
+}
+
+/* Amélioration des tooltips */
+.leaflet-tooltip {
+  background-color: rgba(34, 34, 34, 0.95);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  font-size: 13px;
+  padding: 6px 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+}
+
+.leaflet-tooltip-top:before {
+  border-top-color: rgba(34, 34, 34, 0.95);
+}
+
+/* Amélioration des popups */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e5e7eb;
+}
+
+.leaflet-popup-tip {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Animation d'ouverture du cluster (spiderfy) */
+.marker-cluster-anim {
+  animation: cluster-expand 0.3s ease-out;
+}
+
+@keyframes cluster-expand {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Curseur pointeur sur les clusters */
+.marker-cluster {
+  cursor: pointer;
+}
+
+/* Style pour les markers individuels au hover */
+.leaflet-marker-icon:hover {
+  filter: brightness(1.1);
+  transform: scale(1.05);
+  transition: all 0.2s ease;
+}
+
+/* Animations pour la modal */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

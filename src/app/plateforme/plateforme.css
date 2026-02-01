@@ -1,4 +1,511 @@
-/* Styles professionnels pour la sidebar de filtres et les boutons */
+/* ============================================================================
+   STYLES AIRBNB-STYLE POUR LA PLATEFORME DE RECHERCHE
+   ============================================================================ */
+
+/* Reset button pour effacer tous les critères */
+.reset-filters-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid #d9876a;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  color: #d9876a;
+}
+.reset-filters-btn:hover {
+  background: #fff8f5;
+  border-color: #c1694a;
+  color: #c1694a;
+  transform: rotate(90deg);
+  box-shadow: 0 2px 8px rgba(217, 135, 106, 0.2);
+}
+.reset-filters-btn:active {
+  transform: rotate(180deg) scale(0.95);
+}
+
+/* Icônes SVG élégantes */
+.section-icon-svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Section de filtre collapsible - Style Airbnb */
+.filter-section {
+  border-bottom: 1px solid #ebebeb;
+  padding: 20px 0;
+}
+.filter-section:last-child {
+  border-bottom: none;
+}
+.filter-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 4px 0;
+  user-select: none;
+}
+.filter-section-header:hover .filter-section-title {
+  color: #000;
+}
+.filter-section-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #222;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: color 0.2s;
+}
+.filter-section-title .section-icon {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+.filter-section-chevron {
+  width: 16px;
+  height: 16px;
+  color: #717171;
+  transition: transform 0.3s ease;
+}
+.filter-section-chevron.open {
+  transform: rotate(180deg);
+}
+.filter-section-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  padding-top: 0;
+}
+.filter-section-content.open {
+  max-height: 500px;
+  padding-top: 16px;
+}
+.filter-section-content.always-open {
+  max-height: none;
+  overflow: visible;
+  padding-top: 16px;
+}
+
+/* Pills/Tags sélectionnables - Style Airbnb moderne */
+.pill-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pill-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 30px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #222;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.pill-item:hover {
+  border-color: #222;
+}
+.pill-item.selected {
+  background: #222;
+  border-color: #222;
+  color: #fff;
+}
+.pill-item.selected:hover {
+  background: #000;
+}
+.pill-item .pill-icon {
+  font-size: 1rem;
+}
+
+/* Catégories d'habitat - Style large avec icônes */
+.habitat-category-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #222;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+.habitat-category-btn:hover {
+  border-color: #222;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.habitat-category-btn.selected {
+  border-color: #d9876a;
+  border-width: 2px;
+  background: linear-gradient(135deg, #fff8f5 0%, #fef5f0 100%);
+  box-shadow: 0 3px 10px rgba(217, 135, 106, 0.15);
+}
+.habitat-category-btn .category-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.habitat-category-btn .category-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: #666;
+  transition: stroke 0.2s;
+}
+.habitat-category-btn.selected .category-icon svg {
+  stroke: #d9876a;
+}
+.habitat-category-btn .category-label {
+  flex: 1;
+}
+.habitat-category-btn .category-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.habitat-category-btn.selected .category-check {
+  background: #d9876a;
+  border-color: #d9876a;
+  color: #fff;
+}
+
+/* Sous-catégories - Style compact et élégant */
+.sous-cat-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 0;
+  margin-top: 4px;
+}
+.sous-cat-container::-webkit-scrollbar {
+  width: 5px;
+}
+.sous-cat-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sous-cat-container::-webkit-scrollbar-thumb {
+  background: #e5baa6;
+  border-radius: 4px;
+}
+.sous-cat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #f8dcd1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.sous-cat-item:hover {
+  border-color: #e5baa6;
+  box-shadow: 0 2px 4px rgba(217, 135, 106, 0.08);
+  transform: translateX(2px);
+}
+.sous-cat-item.selected {
+  background: #fff;
+  border-color: #d9876a;
+  box-shadow: 0 2px 6px rgba(217, 135, 106, 0.18);
+}
+.sous-cat-checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid #e5baa6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.sous-cat-item.selected .sous-cat-checkbox {
+  background: #d9876a;
+  border-color: #d9876a;
+}
+.sous-cat-label {
+  font-size: 0.88rem;
+  color: #5a3e2b;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sous-cat-label .parent-icon {
+  opacity: 0.7;
+  font-size: 0.9rem;
+}
+.sous-cat-label .parent-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: #8b6953;
+}
+
+/* Tarifs - Style boutons épurés */
+.tarif-container {
+  display: flex;
+  gap: 10px;
+}
+.tarif-btn {
+  flex: 1;
+  padding: 14px 8px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #717171;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+.tarif-btn:hover {
+  border-color: #222;
+}
+.tarif-btn.selected {
+  background: #222;
+  border-color: #222;
+  color: #fff;
+}
+
+/* Caractéristiques des logements */
+.carac-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.carac-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 0.85rem;
+  color: #222;
+}
+.carac-item:hover {
+  border-color: #222;
+}
+.carac-item.selected {
+  background: #f7f7f7;
+  border-color: #222;
+}
+.carac-checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.carac-item.selected .carac-checkbox {
+  background: #222;
+  border-color: #222;
+}
+.surface-inputs {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.surface-input-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.surface-input-group label {
+  font-size: 0.75rem;
+  color: #717171;
+  font-weight: 500;
+}
+.surface-input-group input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+.surface-input-group input:focus {
+  outline: none;
+  border-color: #222;
+}
+
+/* Services - Style liste moderne */
+.services-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.service-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 0.82rem;
+  color: #222;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.service-pill:hover {
+  border-color: #717171;
+}
+.service-pill.selected {
+  background: #222;
+  border-color: #222;
+  color: #fff;
+}
+
+/* Restauration avec icônes */
+.resto-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.resto-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.resto-item:hover {
+  background: #f7f7f7;
+}
+.resto-item.selected {
+  background: #f7f7f7;
+  border-color: #222;
+}
+.resto-icon {
+  font-size: 1.2rem;
+}
+.resto-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 2px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  margin-left: auto;
+}
+.resto-item.selected .resto-checkbox {
+  background: #222;
+  border-color: #222;
+}
+.resto-label {
+  font-size: 0.88rem;
+  color: #222;
+}
+
+/* Animation de compteur de filtres actifs */
+.active-filters-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #d9876a 0%, #c1694a 100%);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-left: 8px;
+  box-shadow: 0 2px 4px rgba(193, 105, 74, 0.2);
+}
+
+/* Filtre AVP moderne */
+.avp-filter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.avp-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: #fff;
+}
+.avp-option:hover {
+  background: #f7f7f7;
+  border-color: #ddd;
+}
+.avp-option.selected {
+  background: #fff8f5;
+  border-color: #d9876a;
+}
+.avp-radio {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.avp-option.selected .avp-radio {
+  border-color: #d9876a;
+  background: #d9876a;
+}
+.avp-radio-inner {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+}
+.avp-label {
+  font-size: 0.88rem;
+  color: #222;
+  flex: 1;
+}
+
+/* Ancien styles - gardés pour compatibilité */
 .filtre-label {
   font-weight: 600;
   color: #a85b2b;

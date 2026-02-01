@@ -1,7 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import OblongButtonLink from "../components/OblongButtonLink";
 import SearchAutocomplete from "../components/SearchAutocomplete";
+import ChatbotIcon from "../components/ChatbotIcon";
 
 export default function HomePage() {
   return (
@@ -28,8 +31,125 @@ export default function HomePage() {
       <div className="hero__content">
     <h1 className="hero__title" style={{ marginTop: "6rem" }}>Plateforme experte du logement inclusif pour séniors [test]</h1>
 
-        {/* Barre de recherche centrale avec autocomplétion */}
-        <SearchAutocomplete />
+        {/* Barre de recherche centrale avec autocomplétion et chatbot */}
+        <div style={{ 
+          position: "relative", 
+          display: "flex", 
+          alignItems: "flex-start", 
+          justifyContent: "center", 
+          gap: "1rem",
+          maxWidth: "800px",
+          margin: "0 auto",
+          padding: "0 1rem"
+        }}>
+          <div style={{ flex: 1, maxWidth: "100%" }}>
+            <SearchAutocomplete />
+          </div>
+          
+          {/* Icône Chatbot IA avec bulle élégante */}
+          <button
+            onClick={() => {
+              const event = new CustomEvent('openChatbot');
+              window.dispatchEvent(event);
+            }}
+            className="chatbot-btn"
+            style={{
+              position: "relative",
+              width: "60px",
+              height: "60px",
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #3d5568 100%)",
+              border: "2px solid rgba(217, 135, 106, 0.2)",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 24px rgba(44, 62, 80, 0.4), inset 0 1px 0 rgba(217, 135, 106, 0.1)",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              animation: "chatbotPulse 3s ease-in-out infinite",
+              flexShrink: 0
+            }}
+            aria-label="Assistant IA"
+            title="Assistant IA - Posez-moi vos questions !"
+          >
+            {/* Bulle de chat avec trois points */}
+            <svg 
+              width="32" 
+              height="32" 
+              viewBox="0 0 32 32" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {/* Bulle de chat élégante */}
+              <path 
+                d="M24 8c0-2.2-3.6-4-8-4s-8 1.8-8 4v8c0 2.2 3.6 4 8 4 1.2 0 2.3-0.1 3.3-0.4l4.7 3.4v-5c0 0 0 0 0-0.2V16C24 16 24 8 24 8z" 
+                fill="url(#bubbleGradient)"
+                stroke="#f4a460"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              
+              {/* Trois points élégants à l'intérieur */}
+              <circle cx="12" cy="12" r="1.5" fill="#2c3e50" opacity="0.8"/>
+              <circle cx="16" cy="12" r="1.5" fill="#2c3e50" opacity="0.8"/>
+              <circle cx="20" cy="12" r="1.5" fill="#2c3e50" opacity="0.8"/>
+              
+              {/* Définition du gradient cuivré */}
+              <defs>
+                <linearGradient id="bubbleGradient" x1="16" y1="4" x2="16" y2="20">
+                  <stop offset="0%" stopColor="#f4a460"/>
+                  <stop offset="50%" stopColor="#e8a87c"/>
+                  <stop offset="100%" stopColor="#d9876a"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </button>
+        </div>
+        
+        <style jsx>{`
+          @keyframes chatbotPulse {
+            0%, 100% { 
+              transform: scale(1);
+              box-shadow: 0 4px 24px rgba(44, 62, 80, 0.4), inset 0 1px 0 rgba(217, 135, 106, 0.1);
+            }
+            50% { 
+              transform: scale(1.08);
+              box-shadow: 0 6px 32px rgba(217, 135, 106, 0.5), 
+                          0 0 0 4px rgba(217, 135, 106, 0.1),
+                          inset 0 1px 0 rgba(217, 135, 106, 0.2);
+            }
+          }
+          
+          .chatbot-btn:hover {
+            transform: scale(1.15) !important;
+            background: linear-gradient(135deg, #34495e 0%, #3d5568 50%, #2c3e50 100%) !important;
+            box-shadow: 0 8px 36px rgba(217, 135, 106, 0.6), 
+                        0 0 0 6px rgba(217, 135, 106, 0.15),
+                        inset 0 1px 0 rgba(217, 135, 106, 0.3) !important;
+            border-color: rgba(217, 135, 106, 0.4) !important;
+            animation: none !important;
+          }
+          
+          .chatbot-btn:hover svg {
+            filter: brightness(1.2) drop-shadow(0 0 8px rgba(244, 164, 96, 0.6));
+          }
+          
+          .chatbot-btn:active {
+            transform: scale(1.05) !important;
+          }
+          
+          @media (max-width: 768px) {
+            .chatbot-btn {
+              width: 52px !important;
+              height: 52px !important;
+            }
+            .chatbot-btn svg {
+              width: 28px !important;
+              height: 28px !important;
+            }
+          }
+        `}</style>
 
         {/* Boutons oblong pour aides, qui sommes-nous et solutions */}
         <div style={{ 
@@ -183,6 +303,9 @@ export default function HomePage() {
           <Link href="/mentions-legales" className="home-footer__legal">Mentions légales</Link>
         </div>
       </div>
+
+      {/* Modal Chatbot (caché par défaut, s'ouvre via l'icône) */}
+      <ChatbotIcon />
     </section>
   );
 }
