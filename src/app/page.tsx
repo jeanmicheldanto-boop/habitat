@@ -39,8 +39,10 @@ export default function HomePage() {
           justifyContent: "center", 
           gap: "1rem",
           maxWidth: "800px",
+          width: "100%",
           margin: "0 auto",
-          padding: "0 1rem"
+          padding: "0 1rem",
+          boxSizing: "border-box"
         }}>
           {/* Bouton Carte de France */}
           <Link
@@ -140,15 +142,16 @@ export default function HomePage() {
               height: "60px",
               borderRadius: "50%",
               background: "linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #3d5568 100%)",
-              border: "2px solid rgba(217, 135, 106, 0.2)",
+              border: "2px solid rgba(217, 135, 106, 0.3)",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 4px 24px rgba(44, 62, 80, 0.4), inset 0 1px 0 rgba(217, 135, 106, 0.1)",
+              boxShadow: "0 4px 24px rgba(44, 62, 80, 0.4)",
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
               animation: "chatbotPulse 3s ease-in-out infinite",
-              flexShrink: 0
+              flexShrink: 0,
+              boxSizing: "border-box"
             }}
             aria-label="Assistant IA"
             title="Assistant IA - Posez-moi vos questions !"
