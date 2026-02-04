@@ -982,12 +982,37 @@ function PlateformeContent(): JSX.Element {
 
           {/* Types d'habitat - Toujours visible */}
           <div className="filter-section">
-            <div className="filter-section-title" style={{ marginBottom: 16 }}>
+            <div className="filter-section-title" style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
               <svg className="section-icon-svg" viewBox="0 0 24 24" fill="none" stroke="#d9876a">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                 <polyline points="9 22 9 12 15 12 15 22"/>
               </svg>
               <span style={{ color: "#222" }}>Types d&apos;habitat</span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  alert('Types d\'habitat\n\n• Résidence : Logements avec services collectifs (résidence autonomie, services seniors, MARPA)\n\n• Habitat partagé : Colocation, habitat inclusif, accueil familial\n\n• Logement indépendant : Béguinage, village seniors, habitat regroupé\n\nPour un guide personnalisé, utilisez notre simulateur.');
+                }}
+                title="En savoir plus sur les types d'habitat"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 4,
+                  display: 'flex',
+                  alignItems: 'center',
+                  opacity: 0.5,
+                  transition: 'opacity 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666">
+                  <circle cx="12" cy="12" r="10" strokeWidth="2"/>
+                  <path d="M12 16v-4" strokeWidth="2" strokeLinecap="round"/>
+                  <circle cx="12" cy="8" r="1" fill="#666"/>
+                </svg>
+              </button>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {HABITAT_TAXONOMY.map((category) => (
@@ -1127,6 +1152,32 @@ function PlateformeContent(): JSX.Element {
                   <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                 </svg>
                 <span style={{ color: "#222" }}>Tarifs</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    alert('Fourchettes de prix\n\n€ = Moins de 750€/mois\n€€ = Entre 750€ et 1500€/mois\n€€€ = Plus de 1500€/mois\n\n⚠️ Ces informations sont issues de sources publiques via un processus d\'ingénierie de la donnée. Malgré nos efforts, veuillez vérifier les tarifs exacts auprès des établissements.');
+                  }}
+                  title="Détails des fourchettes de prix"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: 4,
+                    display: 'flex',
+                    alignItems: 'center',
+                    opacity: 0.5,
+                    transition: 'opacity 0.2s',
+                    marginLeft: 4
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666">
+                    <circle cx="12" cy="12" r="10" strokeWidth="2"/>
+                    <path d="M12 16v-4" strokeWidth="2" strokeLinecap="round"/>
+                    <circle cx="12" cy="8" r="1" fill="#666"/>
+                  </svg>
+                </button>
                 {selectedPrices.length > 0 && (
                   <span className="active-filters-badge">{selectedPrices.length}</span>
                 )}
@@ -1540,6 +1591,48 @@ function PlateformeContent(): JSX.Element {
                 )}
               </form>
 
+              {/* Bouton IA Chatbot */}
+              <button
+                onClick={() => {
+                  const event = new CustomEvent('openChatbot');
+                  window.dispatchEvent(event);
+                }}
+                className="ai-chatbot-btn"
+                title="Lancer l'assistant IA"
+                style={{
+                  flexShrink: 0,
+                  background: 'linear-gradient(135deg, #d9876a 0%, #c67659 100%)',
+                  border: 'none',
+                  borderRadius: '10px',
+                  padding: '10px 16px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  color: 'white',
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  boxShadow: '0 2px 8px rgba(217, 135, 106, 0.3)',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(217, 135, 106, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(217, 135, 106, 0.3)';
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="2"/>
+                  <circle cx="9" cy="10" r="1.5" fill="white"/>
+                  <circle cx="15" cy="10" r="1.5" fill="white"/>
+                  <path d="M8 15c1 1.5 3 2 4 2s3-0.5 4-2" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                <span>IA</span>
+              </button>
+
               {/* Bouton Reset à droite de la barre de recherche */}
               {activeFiltersCount > 0 && (
                 <button
@@ -1841,6 +1934,32 @@ function PlateformeContent(): JSX.Element {
                       +25
                     </span>
                   </button>
+                </div>
+              )}
+
+              {/* Disclaimer en bas de liste */}
+              {!loading && !error && tab === "liste" && filteredData.length > 0 && (
+                <div style={{
+                  marginTop: "3rem",
+                  padding: "16px 20px",
+                  background: "#f9f9f9",
+                  borderRadius: "8px",
+                  border: "1px solid #e5e5e5",
+                  fontSize: "0.85rem",
+                  color: "#666",
+                  textAlign: "center",
+                  lineHeight: 1.6
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" style={{ verticalAlign: 'middle', marginRight: 6 }}>
+                    <circle cx="12" cy="12" r="10" strokeWidth="2"/>
+                    <path d="M12 16v-4" strokeWidth="2" strokeLinecap="round"/>
+                    <circle cx="12" cy="8" r="1" fill="#888"/>
+                  </svg>
+                  Les données affichées (tarifs, services, descriptions) proviennent de <strong>sources publiques</strong> et sont enrichies par ingénierie de la donnée.
+                  <br />
+                  Malgré nos efforts pour garantir leur fiabilité, nous vous recommandons de <strong>vérifier les informations directement auprès des établissements</strong>.
+                  <br />
+                  <a href="/contact" style={{ color: "#d9876a", textDecoration: "none", fontWeight: 600, marginLeft: 4 }}>Nous contacter</a>
                 </div>
               )}
               </div>

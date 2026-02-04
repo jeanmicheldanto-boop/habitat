@@ -54,7 +54,7 @@ Tu peux appeler ces fonctions pour interroger notre base de données :
 
 ## Mapping EXACT des sous-catégories
 
-**RÈGLE CRITIQUE** : Le paramètre `sous_categorie` doit utiliser l'orthographe EXACTE (majuscules, accents, espaces).
+**RÈGLE CRITIQUE** : Le paramètre sous_categorie doit utiliser l'orthographe EXACTE (majuscules, accents, espaces).
 
 **Liste complète des sous-catégories valides** :
 1. **"Béguinage"** (avec majuscule et accent)

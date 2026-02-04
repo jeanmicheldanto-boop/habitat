@@ -224,30 +224,6 @@ function ContactForm() {
 }
 
 export default function ContactPage() {
-  title: "Qui sommes-nous ? · Habitat Intermédiaire",
-  description: "habitat-intermédiaire.fr : un projet R&D ConfidensIA. Découvrez notre mission, nos valeurs et comment nous utilisons l'IA pour rendre l'information accessible à tous.",
-  keywords: [
-    "qui sommes nous",
-    "ConfidensIA",
-    "projet R&D",
-    "intelligence artificielle",
-    "habitat intermédiaire",
-    "API établissements",
-    "données publiques FINESS",
-    "assistant conversationnel",
-    "innovation sociale"
-  ],
-  openGraph: {
-    title: "Qui sommes-nous ? - Habitat Intermédiaire",
-    description: "Un projet R&D ConfidensIA : la technologie au service de l'humain dans le secteur social et médico-social.",
-  },
-  alternates: {
-    canonical: 'https://habitat-intermediaire.fr/contact',
-  }
-};
-
-
-export default function ContactPage() {
   return (
     <div className="qui-sommes-nous-page">
       <SecondaryMenu />
