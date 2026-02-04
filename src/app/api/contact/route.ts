@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     // Formater l'email pour Elastic Email
     const emailData = {
       recipients: {
-        to: ['contact@confidensia.fr']
+        to: ['patrick.danto@confidensia.fr']
       },
       content: {
         from: 'patrick.danto@habitat-intermediaire.fr',
