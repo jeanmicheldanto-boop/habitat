@@ -59,12 +59,10 @@ export default async function FichePage({ searchParams }: { searchParams: Promis
           <div style={{ marginBottom: 8 }}><b>Services :</b> {Array.isArray(data.services) ? data.services.join(", ") : "-"}</div>
           <div style={{ marginBottom: 8 }}><b>Tarif :</b> {data.fourchette_prix === 'euro' ? '€' : data.fourchette_prix === 'deux_euros' ? '€€' : data.fourchette_prix === 'trois_euros' ? '€€€' : '-'} ({data.prix_min || "-"}€ - {data.prix_max || "-"}€)</div>
           <div style={{ marginBottom: 8 }}><b>Disponibilité :</b> {data.statut_disponibilite || "-"} ({data.nb_unites_dispo || "-"} unités)</div>
-          {/* Informations de contact */}
-          {(data.telephone || data.email || data.site_web) && (
+          {/* Informations de contact - MASQUÉES temporairement pour RGPD */}
+          {(data.site_web) && (
             <div style={{ marginTop: 18, marginBottom: 8, background: "#f6f6f6", borderRadius: 8, padding: "0.7em 1em" }}>
               <div style={{ fontWeight: 600, color: "#a85b2b", marginBottom: 6 }}>Contact</div>
-              {data.telephone && <div><b>Téléphone :</b> {data.telephone}</div>}
-              {data.email && <div><b>Email :</b> <a href={`mailto:${data.email}`} style={{ color: "#2b7fa8" }}>{data.email}</a></div>}
               {data.site_web && <div><b>Site web :</b> <a href={data.site_web} target="_blank" rel="noopener noreferrer" style={{ color: "#2b7fa8" }}>{data.site_web}</a></div>}
             </div>
           )}

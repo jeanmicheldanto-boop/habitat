@@ -10,18 +10,33 @@
 
 ### APA (Allocation Personnalisée d'Autonomie)
 - **Pour qui ?** Personnes âgées de 60 ans et + en perte d'autonomie (GIR 1 à 4)
+  - GIR 1 : Perte d'autonomie totale, confinement au lit/fauteuil
+  - GIR 2 : Dépendance importante, aide nécessaire pour la plupart des activités
+  - GIR 3 : Autonomie mentale conservée mais aide quotidienne nécessaire
+  - GIR 4 : Besoin d'aide pour certaines activités (toilette, habillage)
+  - ⚠️ GIR 5 et 6 : NON éligibles à l'APA
 - **Montant** : Jusqu'à 1 742€/mois (GIR 1), variable selon GIR et revenus
 - **Organisme** : Conseil départemental
+- **Processus** :
+  1. Évaluation à domicile par équipe médico-sociale
+  2. Établissement d'un **plan d'aide** personnalisé
+  3. Versement selon le plan défini
+- **Utilisation** : Finance l'aide humaine (auxiliaire de vie, aide-ménagère, etc.)
 - **À savoir** : Peut financer une partie des services en résidence (aide à domicile, etc.)
+- **💡 IMPORTANT** : L'APA est disponible dans TOUS les types d'habitat (domicile, résidence autonomie, habitat inclusif, etc.)
 - **Lien** : [Simulateur APA service-public.fr](https://www.service-public.fr/particuliers/vosdroits/F10009)
 
-### AVP (Allocation Vie Partagée) ⭐
-- **Pour qui ?** Habitants d'**habitats inclusifs** reconnus (projet de vie sociale et partagée)
-- **Conditions** :
+### AVP (Aide à la Vie Partagée) ⭐
+- **IMPORTANT** : C'est une **aide à la vie partagée**, PAS une "allocation vie partagée" !
+- **Nature** : Aide POUR LA STRUCTURE (pas pour les bénéficiaires directement), finance les interventions sociales du projet
+- **Pour qui ?** Habitats inclusifs issus d'**appels à projet départementaux**
+- **Conditions strictes** :
+  - Habitat inclusif sélectionné par appel à projet départemental
   - Au moins 3 habitants dans l'habitat inclusif
   - Projet de vie sociale formalisé (PVSP : Projet de Vie Sociale et Partagée)
-  - Âge minimum 60 ans OU handicap reconnu
-- **Montant** : Environ 200€/mois/personne (montant indicatif 2026)
+  - Âge minimum 60 ans OU handicap reconnu (pour les habitants)
+- **Temporaire** : L'aide est accordée pour une durée limitée (généralement 3-5 ans)
+- **Montant** : Environ 200€/mois/personne (montant indicatif 2026), versé à la structure
 - **Organisme** : Conseil départemental
 - **Piliers PVSP** :
   1. Animation de la vie sociale
@@ -29,7 +44,11 @@
   3. Ouverture au quartier et à la cité
   4. Prévention de l'isolement
   5. Participation des habitants
-- **💡 Conseil** : "L'AVP, c'est l'aide qui change la donne pour l'habitat inclusif ! C'est un vrai coup de pouce financier pour vivre ensemble différemment."
+- **💡 EXCLUSIONS IMPORTANTES** :
+  - Les résidences autonomie NE SONT PAS éligibles à l'AVP
+  - Les résidences services seniors NE SONT PAS éligibles à l'AVP
+  - Seuls les habitats inclusifs issus d'appels à projet peuvent bénéficier de l'AVP
+- **💡 Conseil** : "L'AVP, c'est l'aide qui change la donne pour l'habitat inclusif ! C'est un vrai coup de pouce financier versé à la structure pour financer les interventions du projet de vie sociale."
 - **Lien** : [Guide AVP CNSA](https://www.cnsa.fr/documentation/guide_allocation_vie_partagee.pdf)
 
 ### ASPA (Allocation de Solidarité aux Personnes Âgées)
@@ -43,6 +62,7 @@
   - Aide à l'adaptation du logement
   - Participation aux frais de résidence autonomie
   - Subventions pour accueil familial
+  - **Aide sociale pour résidences autonomie** : Certaines résidences autonomie ont un agrément "aide sociale" qui permet aux personnes à faibles revenus de bénéficier d'une prise en charge partielle. ATTENTION : les démarches sont lourdes (constitution de dossier important, enquête sociale) et il peut y avoir récupération sur succession.
 - **Conseil** : Contacter le CCAS (Centre Communal d'Action Sociale) de sa commune
 - **Lien** : [Annuaire CCAS](https://www.pour-les-personnes-agees.gouv.fr/)
 

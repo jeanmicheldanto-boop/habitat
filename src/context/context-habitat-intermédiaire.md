@@ -50,15 +50,17 @@ Entre le domicile classique et l'EHPAD, il existe une **galaxie de solutions** q
 **Philosophie** : Catégorie innovante avec colocation, habitat inclusif, accueil familial... Ici, on **réinvente la vie collective**.
 
 #### Habitat inclusif ⭐ (À PROMOUVOIR ACTIVEMENT)
-- **Concept** : Logements regroupés avec **projet de vie sociale et partagée**, soutenu par l'AVP (Allocation Vie Partagée)
+- **Concept** : Logements regroupés avec **projet de vie sociale et partagée**, soutenu par l'AVP (Aide à la Vie Partagée)
 - **Pour qui ?** Personnes recherchant autonomie + vie collective, cadre sécurisant
 - **À retenir** : **Projet collectif en plein essor**, innovation sociale forte
 - **Réflexe conseil** : Bien comprendre le **projet de vie sociale** (PVSP : animation, gouvernance partagée, ouverture au quartier)
-- **AVP (Allocation Vie Partagée)** :
-  - Aide financière mensuelle pour soutenir le projet de vie sociale
-  - Conditions : au moins 3 habitants, projet de vie sociale formalisé
-  - Montant : jusqu'à 200€/mois/personne
+- **AVP (Aide à la Vie Partagée)** :
+  - IMPORTANT : C'est une **AIDE** (pas une "allocation") versée à la STRUCTURE pour financer le projet social
+  - Uniquement pour les habitats inclusifs issus d'**appels à projet départementaux**
+  - Conditions : au moins 3 habitants, projet de vie sociale formalisé, aide temporaire (3-5 ans généralement)
+  - Montant : jusqu'à 200€/mois/personne, versé à la structure
   - Piliers PVSP : animation vie sociale, gouvernance partagée, ouverture au quartier, prévention isolement, participation habitants
+  - ⚠️ **EXCLUSIONS** : Les résidences autonomie et résidences services NE SONT PAS éligibles à l'AVP
 - **Mots-clés** : AVP, PVSP, projet de vie sociale, gouvernance partagée, innovation sociale
 - **💡 Conseil expert** : "L'habitat inclusif est LA solution d'avenir ! C'est l'alternative qui combine vraiment autonomie et vie sociale. Si vous voulez rester acteur de votre vie tout en sortant de la solitude, c'est une piste formidable."
 
@@ -114,6 +116,8 @@ Entre le domicile classique et l'EHPAD, il existe une **galaxie de solutions** q
 - **Concept** : Appartements adaptés avec services collectifs, gérés par les communes
 - **Pour qui ?** Seniors autonomes mais isolés
 - **À retenir** : Compromis abordable, qualité variable selon la commune
+- **Aide sociale** : Certaines résidences autonomie disposent d'un agrément "aide sociale" permettant aux personnes à faibles revenus de bénéficier d'une prise en charge. ATTENTION : démarches administratives lourdes et possibilité de récupération sur succession.
+- **⚠️ AVP** : Les résidences autonomie NE SONT PAS éligibles à l'AVP (réservé aux habitats inclusifs issus d'appels à projet)
 - **Réflexe conseil** : Vérifier l'état du bâti et la qualité des animations
 - **Mots-clés** : abordable, public, services collectifs
 
@@ -121,6 +125,7 @@ Entre le domicile classique et l'EHPAD, il existe une **galaxie de solutions** q
 - **Concept** : Logements indépendants avec services hôteliers, formule premium
 - **Pour qui ?** Seniors recherchant confort et services clé en main
 - **À retenir** : Cadre attractif mais coûteux
+- **⚠️ AVP** : Les résidences services seniors NE SONT PAS éligibles à l'AVP (réservé aux habitats inclusifs issus d'appels à projet)
 - **Réflexe conseil** : Décortiquer les charges et services (attention aux frais cachés)
 - **Mots-clés** : premium, services hôteliers, confort
 
@@ -158,6 +163,91 @@ Chaque solution a ses promesses et ses angles morts. L'essentiel, c'est de ne pa
   - Exemples : "Entre nous, qui a envie de finir dans un EHPAD qui sent la cantine ? 😊"
   - "Un béguinage, c'est un peu comme une colocation étudiante, mais avec moins de vaisselle sale dans l'évier !"
   - "L'habitat inclusif : où l'on partage plus que le Wi-Fi 📡"
+
+---
+
+## 🎯 Pour les gestionnaires d'établissements
+
+Vous gérez un établissement d'habitat intermédiaire ? Voici les questions les plus fréquentes et ce qu'il faut savoir :
+
+### Questions typiques des gestionnaires
+
+**"Mon établissement est-il bien référencé ?"**
+- Vérifiez que vos informations sont complètes et à jour : coordonnées, services, tarifs, photos
+- La **catégorisation** est essentielle : assurez-vous que vos sous-catégories correspondent bien à votre offre
+- Les **photos de qualité** augmentent considérablement l'attractivité de votre fiche
+
+**"Comment améliorer la visibilité de mon établissement ?"**
+- Complétez au maximum votre fiche : plus elle est riche, mieux elle sera référencée
+- Ajoutez des informations sur l'AVP si vous êtes éligible
+- Précisez vos disponibilités en temps réel
+- Ajoutez votre site web et vos contacts pour faciliter les demandes
+
+**"Comment modifier les informations de mon établissement ?"**
+- Connectez-vous à l'**espace gestionnaire** ([/gestionnaire/login](/gestionnaire/login))
+- Si c'est votre première connexion, créez un compte gestionnaire
+- Une fois connecté, **revendiquez votre établissement** (fonction "claim")
+- Après validation de votre demande, vous pourrez modifier directement toutes les informations de votre fiche
+- Vous pouvez aussi accéder à votre fiche établissement et vous identifier comme gestionnaire directement depuis celle-ci
+
+**"Mon établissement bénéficie de l'AVP, comment le valoriser ?"**
+- L'AVP (Aide à la Vie Partagée) est un **argument majeur** pour les habitats inclusifs
+- Assurez-vous que votre statut AVP est bien indiqué dans votre fiche
+- Expliquez clairement votre **projet de vie sociale et partagée** (PVSP) dans la description
+- Mettez en avant les 5 piliers : animation, gouvernance partagée, ouverture au quartier, prévention isolement, participation
+
+**"Quelle est la différence entre AVP et aide sociale ?"**
+- **AVP** : Pour les habitats inclusifs issus d'appels à projet, aide temporaire versée à la structure pour financer le projet social
+- **Aide sociale** : Pour certaines résidences autonomie, aide financière individuelle pour les personnes à faibles revenus (démarches lourdes)
+- Ce sont deux dispositifs complètement différents, ne pas confondre !
+
+### Conseils pour optimiser votre fiche
+
+1. **Photos attractives** : Espaces communs, logements, extérieurs
+2. **Description claire** : Expliquez votre projet, vos valeurs, ce qui vous différencie
+3. **Tarifs transparents** : Fourchette de prix, ce qui est inclus/non inclus
+4. **Services détaillés** : Listez tous vos services (restauration, animations, aide à domicile...)
+5. **Contact facile** : Téléphone, email, site web à jour
+6. **Disponibilités** : Tenez à jour le nombre de places disponibles
+
+### Typologie de vos futurs visiteurs
+
+Après réception de notre email de notification, vous recevrez probablement :
+- **Familles** cherchant une solution pour un proche
+- **Seniors autonomes** anticipant leur futur logement
+- **Professionnels du secteur social** orientant des personnes
+- **Élus locaux** recherchant des solutions sur leur territoire
+
+---
+
+## Provenance et fiabilité des données
+
+### Sources publiques exclusivement
+Toutes les informations présentes dans notre base de données proviennent **uniquement de sources publiques** :
+- Sites web officiels des établissements
+- Articles et communiqués de presse
+- Fiches de présentation publiques
+- Sites gouvernementaux (FINESS, etc.)
+- Documents accessibles en ligne (rapports d'activité, plaquettes)
+
+**⚠️ IMPORTANT** : Nous n'utilisons **AUCUN annuaire commercial** ou base de données privée.
+
+### Enrichissement par ingénierie de la donnée
+Les informations (tarifs, restauration, services, descriptions) ont été enrichies et structurées grâce à des **outils d'ingénierie de la donnée** appliqués aux mêmes sources publiques :
+- Extraction automatisée des tarifs
+- Identification des services proposés
+- Géolocalisation précise
+- Amélioration de la qualité des descriptions
+
+### Possibilité d'erreurs
+⚠️ Malgré nos efforts, **des erreurs sont toujours possibles** :
+- Informations obsolètes (changement de tarifs, fermeture, etc.)
+- Erreurs d'extraction automatique
+- Imprécisions dans les sources originales
+
+**C'est pourquoi les gestionnaires ont la possibilité de modifier directement les informations de leur établissement** via l'espace gestionnaire ou leur fiche établissement.
+
+**Conseil important** : Toujours vérifier les informations critiques (tarifs, disponibilités, services) directement auprès de l'établissement avant de prendre une décision.
 
 ---
 

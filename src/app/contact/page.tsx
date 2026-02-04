@@ -1,8 +1,229 @@
+"use client";
+
+import { useState } from "react";
 import type { Metadata } from "next";
 import SecondaryMenu from "../../components/SecondaryMenu";
 import './contact.css';
 
-export const metadata: Metadata = {
+function ContactForm() {
+  const [formData, setFormData] = useState({
+    nom: '',
+    prenom: '',
+    email: '',
+    sujet: '',
+    message: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur lors de l\'envoi');
+      }
+
+      setSuccess(data.message || 'Message envoyé avec succès !');
+      setFormData({ nom: '', prenom: '', email: '', sujet: '', message: '' });
+    } catch (err: any) {
+      setError(err.message || 'Une erreur est survenue');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="contact-form" style={{ marginTop: '30px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+        <div>
+          <label htmlFor="nom" style={{ display: 'block', marginBottom: '5px', fontWeight: 500, color: '#333' }}>
+            Nom *
+          </label>
+          <input
+            type="text"
+            id="nom"
+            required
+            value={formData.nom}
+            onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
+            style={{
+              width: '100%',
+              padding: '12px',
+              border: '1px solid #ddd',
+              borderRadius: '8px',
+              fontSize: '14px',
+              transition: 'border-color 0.2s'
+            }}
+            onFocus={(e) => e.target.style.borderColor = '#d9876a'}
+            onBlur={(e) => e.target.style.borderColor = '#ddd'}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="prenom" style={{ display: 'block', marginBottom: '5px', fontWeight: 500, color: '#333' }}>
+            Prénom
+          </label>
+          <input
+            type="text"
+            id="prenom"
+            value={formData.prenom}
+            onChange={(e) => setFormData({ ...formData, prenom: e.target.value })}
+            style={{
+              width: '100%',
+              padding: '12px',
+              border: '1px solid #ddd',
+              borderRadius: '8px',
+              fontSize: '14px',
+              transition: 'border-color 0.2s'
+            }}
+            onFocus={(e) => e.target.style.borderColor = '#d9876a'}
+            onBlur={(e) => e.target.style.borderColor = '#ddd'}
+          />
+        </div>
+      </div>
+
+      <div style={{ marginTop: '15px' }}>
+        <label htmlFor="email" style={{ display: 'block', marginBottom: '5px', fontWeight: 500, color: '#333' }}>
+          Email *
+        </label>
+        <input
+          type="email"
+          id="email"
+          required
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          style={{
+            width: '100%',
+            padding: '12px',
+            border: '1px solid #ddd',
+            borderRadius: '8px',
+            fontSize: '14px',
+            transition: 'border-color 0.2s'
+          }}
+          onFocus={(e) => e.target.style.borderColor = '#d9876a'}
+          onBlur={(e) => e.target.style.borderColor = '#ddd'}
+        />
+      </div>
+
+      <div style={{ marginTop: '15px' }}>
+        <label htmlFor="sujet" style={{ display: 'block', marginBottom: '5px', fontWeight: 500, color: '#333' }}>
+          Sujet *
+        </label>
+        <input
+          type="text"
+          id="sujet"
+          required
+          value={formData.sujet}
+          onChange={(e) => setFormData({ ...formData, sujet: e.target.value })}
+          placeholder="Ex: Demande d'accès API, Question sur un établissement..."
+          style={{
+            width: '100%',
+            padding: '12px',
+            border: '1px solid #ddd',
+            borderRadius: '8px',
+            fontSize: '14px',
+            transition: 'border-color 0.2s'
+          }}
+          onFocus={(e) => e.target.style.borderColor = '#d9876a'}
+          onBlur={(e) => e.target.style.borderColor = '#ddd'}
+        />
+      </div>
+
+      <div style={{ marginTop: '15px' }}>
+        <label htmlFor="message" style={{ display: 'block', marginBottom: '5px', fontWeight: 500, color: '#333' }}>
+          Message *
+        </label>
+        <textarea
+          id="message"
+          required
+          value={formData.message}
+          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+          rows={6}
+          placeholder="Décrivez votre demande..."
+          style={{
+            width: '100%',
+            padding: '12px',
+            border: '1px solid #ddd',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontFamily: 'inherit',
+            resize: 'vertical',
+            transition: 'border-color 0.2s'
+          }}
+          onFocus={(e) => e.target.style.borderColor = '#d9876a'}
+          onBlur={(e) => e.target.style.borderColor = '#ddd'}
+        />
+      </div>
+
+      {error && (
+        <div style={{
+          marginTop: '15px',
+          padding: '12px',
+          backgroundColor: '#fee',
+          border: '1px solid #fcc',
+          borderRadius: '8px',
+          color: '#c33'
+        }}>
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div style={{
+          marginTop: '15px',
+          padding: '12px',
+          backgroundColor: '#efe',
+          border: '1px solid #cfc',
+          borderRadius: '8px',
+          color: '#3c3'
+        }}>
+          {success}
+        </div>
+      )}
+
+      <button
+        type="submit"
+        disabled={loading}
+        style={{
+          marginTop: '20px',
+          width: '100%',
+          padding: '14px',
+          backgroundColor: loading ? '#ccc' : '#d9876a',
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          fontSize: '16px',
+          fontWeight: 600,
+          cursor: loading ? 'not-allowed' : 'pointer',
+          transition: 'all 0.2s',
+          opacity: loading ? 0.7 : 1
+        }}
+        onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#c67659')}
+        onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#d9876a')}
+      >
+        {loading ? 'Envoi en cours...' : 'Envoyer le message'}
+      </button>
+
+      <p style={{ marginTop: '15px', fontSize: '13px', color: '#888', textAlign: 'center' }}>
+        Vos données sont traitées conformément à notre <a href="/politique-confidentialite" style={{ color: '#d9876a' }}>politique de confidentialité</a>.
+      </p>
+    </form>
+  );
+}
+
+export default function ContactPage() {
   title: "Qui sommes-nous ? · Habitat Intermédiaire",
   description: "habitat-intermédiaire.fr : un projet R&D ConfidensIA. Découvrez notre mission, nos valeurs et comment nous utilisons l'IA pour rendre l'information accessible à tous.",
   keywords: [
@@ -233,10 +454,9 @@ export default function ContactPage() {
           <h2 className="qsn-section-title">Contact</h2>
           <div className="qsn-card qsn-contact-card">
             <p>Vous avez des questions, des suggestions, ou vous souhaitez accéder à l&apos;API complète ?</p>
-            <div className="qsn-contact-info">
-              📧 <a href="mailto:contact@confidensia.fr" className="qsn-contact-link">contact@confidensia.fr</a>
-            </div>
-            <p className="qsn-contact-text">Nous serions ravis d&apos;échanger avec vous.</p>
+            <p className="qsn-contact-text">Remplissez le formulaire ci-dessous, nous vous répondrons dans les plus brefs délais.</p>
+            
+            <ContactForm />
           </div>
         </section>
 
