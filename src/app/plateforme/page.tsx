@@ -13,6 +13,7 @@ import { getHabitatImage } from "@/lib/habitatImages";
 import { getSupabaseImageUrl } from "@/lib/imageUtils";
 import BadgeIcon from "@/components/BadgeIcon";
 import AvpBadge from "@/components/AvpBadge";
+import ChatbotIcon from "@/components/ChatbotIcon";
 import "./plateforme.css";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -1969,6 +1970,9 @@ function PlateformeContent(): JSX.Element {
           </section>
         </div>
       </div>
+      
+      {/* Modal Chatbot */}
+      <ChatbotIcon />
     </main>
   );
 }

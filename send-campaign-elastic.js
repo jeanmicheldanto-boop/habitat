@@ -33,7 +33,8 @@ const CAMPAIGN_CONFIG = {
   from: "Patrick Danto - confidensIA",
   fromEmail: "patrick.danto@habitat-intermediaire.fr",
   replyTo: "patrick.danto@confidensia.fr",
-  testMode: true,
+  testMode: false, // MODE PRODUCTION
+  startFrom: 1000, // Commencer à partir de quel email (0 pour tout, 1000 pour reprendre après les 1000 premiers)
 };
 
 // Template HTML
@@ -213,18 +214,40 @@ async function sendCampaign() {
     // Récupérer les établissements
     console.log('📊 Récupération des établissements...');
     
-    let query = supabase
-      .from('etablissements')
-      .select('id, email, nom, gestionnaire, commune')
-      .not('email', 'is', null)
-      .neq('email', '');
+    let etabs = [];
 
     if (CAMPAIGN_CONFIG.testMode) {
-      query = query.ilike('commune', '%ossun%');
-    }
+      // Mode test : seulement Ossun
+      const { data, error } = await supabase
+        .from('etablissements')
+        .select('id, email, nom, gestionnaire, commune')
+        .not('email', 'is', null)
+        .neq('email', '')
+        .ilike('commune', '%ossun%');
+      
+      if (error) throw error;
+      etabs = data;
+    } else {
+      // Mode production : pagination pour récupérer TOUS les établissements
+      const pageSize = 1000;
+      let from = 0;
+      let hasMore = true;
 
-    const { data: etabs, error } = await query;
-    if (error) throw error;
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('etablissements')
+          .select('id, email, nom, gestionnaire, commune')
+          .not('email', 'is', null)
+          .neq('email', '')
+          .range(from, from + pageSize - 1);
+
+        if (error) throw error;
+        
+        etabs = etabs.concat(data);
+        hasMore = data.length === pageSize;
+        from += pageSize;
+      }
+    }
 
     console.log(`✅ ${etabs.length} établissements avec email trouvés\n`);
 
@@ -247,9 +270,17 @@ async function sendCampaign() {
     let totalSent = 0;
     let errors = 0;
 
-    for (let i = 0; i < etabs.length; i++) {
-      const etab = etabs[i];
-      const progress = `[${i + 1}/${etabs.length}]`;
+    // Filtrer selon startFrom si configuré
+    const etabsToSend = CAMPAIGN_CONFIG.startFrom > 0 
+      ? etabs.slice(CAMPAIGN_CONFIG.startFrom) 
+      : etabs;
+
+    console.log(`📮 Envoi de ${etabsToSend.length} emails (à partir du #${CAMPAIGN_CONFIG.startFrom + 1})\n`);
+
+    for (let i = 0; i < etabsToSend.length; i++) {
+      const etab = etabsToSend[i];
+      const actualIndex = CAMPAIGN_CONFIG.startFrom + i + 1;
+      const progress = `[${actualIndex}/${etabs.length}]`;
 
       console.log(`📤 ${progress} Envoi à: ${etab.nom} (${etab.email})...`);
 
@@ -265,7 +296,7 @@ async function sendCampaign() {
         totalSent++;
 
         // Pause entre les emails
-        if (i < etabs.length - 1) {
+        if (i < etabsToSend.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 100));
         }
 

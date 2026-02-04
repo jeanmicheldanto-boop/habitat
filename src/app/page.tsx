@@ -253,7 +253,7 @@ export default function HomePage() {
             margin: "0 auto 40px"
           }}>
             Rejoignez notre réseau de partenaires et donnez de la visibilité à votre établissement. 
-            Gérez facilement vos annonces et connectez-vous avec les personnes recherchant des solutions d&#39;habitat adapté.
+            Gérez facilement vos fiches de présentation et tenez vos informations à jour.
           </p>
           
           <div style={{ 
