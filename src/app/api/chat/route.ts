@@ -6,6 +6,59 @@ import { recherche_etablissements, compter_etablissements, obtenir_detail_etabli
 // Initialisation Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
+// Simple rate limiter (in-memory, per IP)
+type RateRecord = { count: number; resetAt: number };
+const rateStore: Map<string, RateRecord> = (globalThis as any).__chat_rate_store__ || new Map();
+(globalThis as any).__chat_rate_store__ = rateStore;
+
+const RATE_LIMIT_WINDOW_MS = 10_000; // 10s window
+const RATE_LIMIT_MAX = 5; // max 5 req / window / IP
+
+function getClientIp(req: Request): string {
+  const xfwd = req.headers.get('x-forwarded-for');
+  if (xfwd) return xfwd.split(',')[0].trim();
+  // Next.js local dev
+  return 'local';
+}
+
+function checkRateLimit(ip: string): { ok: boolean; retryAfterMs?: number } {
+  const now = Date.now();
+  const rec = rateStore.get(ip);
+  if (!rec || now > rec.resetAt) {
+    rateStore.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return { ok: true };
+  }
+  if (rec.count < RATE_LIMIT_MAX) {
+    rec.count += 1;
+    rateStore.set(ip, rec);
+    return { ok: true };
+  }
+  return { ok: false, retryAfterMs: rec.resetAt - now };
+}
+
+// Retry helper with exponential backoff + jitter for 429/503/network
+async function withRetries<T>(fn: () => Promise<T>, opts?: { attempts?: number; baseDelayMs?: number }): Promise<T> {
+  const attempts = opts?.attempts ?? 3;
+  const base = opts?.baseDelayMs ?? 300;
+  let lastErr: any;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (err: any) {
+      lastErr = err;
+      const msg = String(err?.message || '');
+      const status = (err as any)?.status || (err as any)?.response?.status;
+      const isRetriable = status === 429 || status === 503 || msg.includes('Too Many Requests') || msg.includes('ECONNRESET') || msg.includes('ETIMEDOUT') || msg.includes('fetch failed');
+      if (!isRetriable || i === attempts - 1) break;
+      const retryAfterHeader = (err as any)?.response?.headers?.get?.('retry-after');
+      const retryAfterMs = retryAfterHeader ? Number(retryAfterHeader) * 1000 : undefined;
+      const backoff = retryAfterMs ?? Math.min(2000, base * Math.pow(2, i)) + Math.floor(Math.random() * 200);
+      await new Promise(res => setTimeout(res, backoff));
+    }
+  }
+  throw lastErr;
+}
+
 // Chargement des contextes markdown
 const contextDir = path.join(process.cwd(), 'src', 'context');
 const contextHabitat = fs.readFileSync(path.join(contextDir, 'context-habitat-intermédiaire.md'), 'utf-8');
@@ -302,6 +355,20 @@ const functionMapping: Record<string, Function> = {
 
 export async function POST(request: Request) {
   try {
+    // Rate limit early
+    const ip = getClientIp(request);
+    const rl = checkRateLimit(ip);
+    if (!rl.ok) {
+      return new Response(
+        JSON.stringify({
+          error: 'Trop de requêtes',
+          message: "Le service est momentanément saturé. Réessayez dans quelques secondes.",
+          retryAfterMs: rl.retryAfterMs,
+        }),
+        { status: 429, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     const body = await request.json();
     const { messages } = body;
 
@@ -342,10 +409,12 @@ export async function POST(request: Request) {
         parts: [{ text: msg.content }],
       }));
 
-    const chat = model.startChat({ history });
+    // Limiter l'historique pour éviter les tokens excessifs
+    const limitedHistory = history.slice(-8);
+    const chat = model.startChat({ history: limitedHistory });
 
     // Envoi du dernier message
-    let result = await chat.sendMessage(lastUserMessage);
+    let result = await withRetries(() => chat.sendMessage(lastUserMessage));
     let response = result.response;
 
     // Boucle de function calling
@@ -362,28 +431,28 @@ export async function POST(request: Request) {
         try {
           const functionResult = await functionMapping[functionName](functionArgs);
           
-          // Envoi du résultat à Gemini
-          result = await chat.sendMessage([
+          // Envoi du résultat à Gemini (avec retry)
+          result = await withRetries(() => chat.sendMessage([
             {
               functionResponse: {
                 name: functionName,
                 response: { result: functionResult },
               },
             },
-          ]);
+          ]));
           response = result.response;
           functionCalls = response.functionCalls?.() || [];
         } catch (error: any) {
           console.error(`[Chatbot] Erreur fonction ${functionName}:`, error);
           // En cas d'erreur, on retourne une réponse d'erreur à Gemini
-          result = await chat.sendMessage([
+          result = await withRetries(() => chat.sendMessage([
             {
               functionResponse: {
                 name: functionName,
                 response: { error: error.message || 'Erreur inconnue' },
               },
             },
-          ]);
+          ]));
           response = result.response;
           functionCalls = response.functionCalls?.() || [];
         }
@@ -402,7 +471,18 @@ export async function POST(request: Request) {
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {
-    console.error('[Chatbot API] Erreur:', error);
+    const status = error?.status || error?.response?.status;
+    console.error('[Chatbot API] Erreur:', status, error?.message || error);
+    // Message utilisateur plus clair selon le type d'erreur
+    if (status === 429) {
+      return new Response(
+        JSON.stringify({
+          error: 'Limite atteinte',
+          message: "Nous recevons beaucoup de demandes en ce moment. Merci de réessayer dans un instant.",
+        }),
+        { status: 429, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
     return new Response(
       JSON.stringify({ error: 'Erreur serveur', details: error.message }),
       { status: 500 }
