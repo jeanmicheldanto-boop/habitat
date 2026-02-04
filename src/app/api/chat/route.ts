@@ -137,7 +137,10 @@ Exemple : "Pyrénées-Atlantiques (64)", "Finistère (29)", "Gard (30)"
   - Solutions : [page solutions](/solutions)
   - Aides : [page aides](/aides)
   - Contact : [qui sommes-nous](/contact)
-- **Établissements** : Si tu affiches des résultats, inclus : nom, commune, sous-catégories, prix si dispo, téléphone/email si pertinent
+- **Établissements** : Si tu affiches des résultats, inclus : nom, commune, sous-catégories, prix si dispo
+  - ⚠️ **RGPD** : NE JAMAIS afficher téléphone ou email dans les listes
+  - ✅ Affiche uniquement le site web si disponible
+  - Pour plus d'infos de contact, renvoie vers la fiche détaillée de l'établissement sur la plateforme
 
 # Règles de sécurité
 
