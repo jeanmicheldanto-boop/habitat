@@ -1,7 +1,7 @@
-// Edge Function pour envoyer des notifications par email via Resend
+// Edge Function pour envoyer des notifications par email via Elastic Email
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+const ELASTICEMAIL_API_KEY = Deno.env.get('ELASTICEMAIL_API_KEY')
 
 interface NotificationPayload {
   email: string;
@@ -24,8 +24,8 @@ serve(async (req) => {
     const payload: NotificationPayload = await req.json()
     const { email, name, type, etablissement, statut, action, review_note, role, note_moderation } = payload
 
-    if (!RESEND_API_KEY) {
-      throw new Error('Resend API key missing')
+    if (!ELASTICEMAIL_API_KEY) {
+      throw new Error('Elastic Email API key missing')
     }
 
     // Templates d'email selon le type/statut
@@ -319,38 +319,33 @@ serve(async (req) => {
       throw new Error(`Unknown notification type/status: ${templateKey}`)
     }
 
-    // Envoyer via Resend
-    const response = await fetch('https://api.resend.com/emails', {
+    // Envoyer via Elastic Email
+    const response = await fetch('https://api.elasticemail.com/v2/email/send', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: JSON.stringify({
-        from: 'Habitat Intermédiaire <notifications@habitat-intermediaire.fr>',
-        to: [email],
+      body: new URLSearchParams({
+        apikey: ELASTICEMAIL_API_KEY,
+        from: 'patrick.danto@habitat-intermediaire.fr',
+        fromName: 'Habitat Intermédiaire',
+        to: email,
         subject: template.subject,
-        html: template.html,
-        tags: [
-          {
-            name: 'type',
-            value: type || statut || 'notification'
-          }
-        ]
-      })
+        bodyHtml: template.html
+      }).toString()
     })
 
     const result = await response.json()
 
     if (!response.ok) {
-      console.error('Resend error:', result)
-      throw new Error(`Resend API error: ${response.status} - ${JSON.stringify(result)}`)
+      console.error('Elastic Email error:', result)
+      throw new Error(`Elastic Email API error: ${response.status} - ${JSON.stringify(result)}`)
     }
 
     console.log('Email sent successfully:', result)
 
     return new Response(
-      JSON.stringify({ success: true, messageId: result.id }), 
+      JSON.stringify({ success: true, messageId: result.data?.messageid || result.messageid }), 
       { 
         headers: { 'Content-Type': 'application/json' },
         status: 200
