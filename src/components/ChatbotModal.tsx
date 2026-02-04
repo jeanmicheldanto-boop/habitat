@@ -25,6 +25,8 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const controllerRef = useRef<AbortController | null>(null);
+  const lastSentRef = useRef<number>(0);
 
   // Auto-scroll vers le bas
   useEffect(() => {
@@ -59,19 +61,41 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
+    // Throttle rapide pour éviter le spam (800ms)
+    const now = Date.now();
+    if (now - (lastSentRef.current || 0) < 800) return;
+    lastSentRef.current = now;
+
     const userMessage: Message = { role: 'user', content: input.trim() };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
     try {
+      // Annuler toute requête en cours avant d'en envoyer une nouvelle
+      if (controllerRef.current) {
+        controllerRef.current.abort();
+      }
+      controllerRef.current = new AbortController();
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: [...messages, userMessage] }),
+        signal: controllerRef.current.signal,
       });
 
       if (!response.ok) {
+        // Message plus précis pour 429
+        if (response.status === 429) {
+          const data = await response.json().catch(() => ({}));
+          const msg = data?.message || "Le service est momentanément saturé. Réessayez dans quelques secondes.";
+          setMessages(prev => [
+            ...prev,
+            { role: 'assistant', content: `⚠️ ${msg}` },
+          ]);
+          return;
+        }
         throw new Error('Erreur API');
       }
 
@@ -83,6 +107,10 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
+      // Ignorer les erreurs d'annulation
+      if ((error as any)?.name === 'AbortError') {
+        return;
+      }
       console.error('Erreur chatbot:', error);
       setMessages(prev => [
         ...prev,
@@ -112,6 +140,15 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
     ]);
     sessionStorage.removeItem('chatbot_history');
   };
+
+  // Abandonner la requête en cours si on ferme le modal
+  useEffect(() => {
+    return () => {
+      if (controllerRef.current) {
+        controllerRef.current.abort();
+      }
+    };
+  }, []);
 
   return (
     <div className="chatbot-backdrop" onClick={onClose}>
