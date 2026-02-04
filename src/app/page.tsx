@@ -63,66 +63,21 @@ export default function HomePage() {
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
               animation: "mapPulse 3s ease-in-out infinite",
               flexShrink: 0,
-              textDecoration: "none"
+              textDecoration: "none",
+              overflow: "hidden"
             }}
             aria-label="Accéder à la carte"
             title="Accéder à la carte"
           >
-            {/* Icône Carte avec marqueurs élégante */}
-            <svg 
-              width="32" 
-              height="32" 
-              viewBox="0 0 32 32" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              {/* Carte stylisée avec lignes et points */}
-              <rect 
-                x="4" 
-                y="6" 
-                width="24" 
-                height="20" 
-                rx="2" 
-                fill="url(#mapGradient)"
-                stroke="#d9876a"
-                strokeWidth="1.5"
-              />
-              
-              {/* Lignes de carte horizontales */}
-              <line x1="6" y1="11" x2="26" y2="11" stroke="#c1694a" strokeWidth="0.8" opacity="0.4"/>
-              <line x1="6" y1="16" x2="26" y2="16" stroke="#c1694a" strokeWidth="0.8" opacity="0.4"/>
-              <line x1="6" y1="21" x2="26" y2="21" stroke="#c1694a" strokeWidth="0.8" opacity="0.4"/>
-              
-              {/* Lignes verticales */}
-              <line x1="11" y1="8" x2="11" y2="24" stroke="#c1694a" strokeWidth="0.8" opacity="0.4"/>
-              <line x1="16" y1="8" x2="16" y2="24" stroke="#c1694a" strokeWidth="0.8" opacity="0.4"/>
-              <line x1="21" y1="8" x2="21" y2="24" stroke="#c1694a" strokeWidth="0.8" opacity="0.4"/>
-              
-              {/* Marqueurs de localisation */}
-              <g>
-                {/* Pin principal */}
-                <path 
-                  d="M16 10 C14 10 12.5 11.5 12.5 13.5 C12.5 15.5 16 20 16 20 C16 20 19.5 15.5 19.5 13.5 C19.5 11.5 18 10 16 10 Z" 
-                  fill="#c1694a"
-                  stroke="#d9876a"
-                  strokeWidth="0.8"
-                />
-                <circle cx="16" cy="13.5" r="1" fill="white"/>
-                
-                {/* Petits marqueurs secondaires */}
-                <circle cx="10" cy="13" r="2" fill="#d9876a" opacity="0.7"/>
-                <circle cx="22" cy="18" r="2" fill="#d9876a" opacity="0.7"/>
-                <circle cx="12" cy="20" r="1.5" fill="#e8a87c" opacity="0.6"/>
-              </g>
-              
-              {/* Définition du gradient */}
-              <defs>
-                <linearGradient id="mapGradient" x1="16" y1="6" x2="16" y2="26">
-                  <stop offset="0%" stopColor="#ffffff"/>
-                  <stop offset="100%" stopColor="#f8f9fa"/>
-                </linearGradient>
-              </defs>
-            </svg>
+            <img 
+              src="/carte.png" 
+              alt="Carte" 
+              style={{ 
+                width: "70px", 
+                height: "70px", 
+                objectFit: "cover" 
+              }}
+            />
           </Link>
           
           <div style={{ flex: 1, maxWidth: "100%" }}>
@@ -142,7 +97,7 @@ export default function HomePage() {
               height: "60px",
               borderRadius: "50%",
               background: "linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #3d5568 100%)",
-              border: "2px solid rgba(217, 135, 106, 0.3)",
+              border: "none",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
@@ -151,43 +106,21 @@ export default function HomePage() {
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
               animation: "chatbotPulse 3s ease-in-out infinite",
               flexShrink: 0,
-              boxSizing: "border-box"
+              boxSizing: "border-box",
+              overflow: "hidden"
             }}
             aria-label="Assistant IA"
             title="Assistant IA - Posez-moi vos questions !"
           >
-            {/* Bulle de chat avec trois points */}
-            <svg 
-              width="32" 
-              height="32" 
-              viewBox="0 0 32 32" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              {/* Bulle de chat élégante */}
-              <path 
-                d="M24 8c0-2.2-3.6-4-8-4s-8 1.8-8 4v8c0 2.2 3.6 4 8 4 1.2 0 2.3-0.1 3.3-0.4l4.7 3.4v-5c0 0 0 0 0-0.2V16C24 16 24 8 24 8z" 
-                fill="url(#bubbleGradient)"
-                stroke="#f4a460"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              
-              {/* Trois points élégants à l'intérieur */}
-              <circle cx="12" cy="12" r="1.5" fill="#2c3e50" opacity="0.8"/>
-              <circle cx="16" cy="12" r="1.5" fill="#2c3e50" opacity="0.8"/>
-              <circle cx="20" cy="12" r="1.5" fill="#2c3e50" opacity="0.8"/>
-              
-              {/* Définition du gradient cuivré */}
-              <defs>
-                <linearGradient id="bubbleGradient" x1="16" y1="4" x2="16" y2="20">
-                  <stop offset="0%" stopColor="#f4a460"/>
-                  <stop offset="50%" stopColor="#e8a87c"/>
-                  <stop offset="100%" stopColor="#d9876a"/>
-                </linearGradient>
-              </defs>
-            </svg>
+            <img 
+              src="/ia.png" 
+              alt="Assistant IA" 
+              style={{ 
+                width: "70px", 
+                height: "70px", 
+                objectFit: "cover" 
+              }}
+            />
           </button>
         </div>
         
