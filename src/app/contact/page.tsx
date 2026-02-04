@@ -327,7 +327,10 @@ export default function ContactPage() {
           </div>
 
           <div className="qsn-cta">
-            👉 <a href="mailto:contact@confidensia.fr" className="qsn-link">Contactez-nous</a> pour en savoir plus sur l&apos;API complète 
+            👉 <a href="#contact-form" className="qsn-link" onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' });
+            }}>Contactez-nous</a> pour en savoir plus sur l&apos;API complète 
             et discuter de vos besoins spécifiques.
           </div>
         </section>
@@ -426,7 +429,7 @@ export default function ContactPage() {
         </section>
 
         {/* Contact */}
-        <section className="qsn-section qsn-contact-section">
+        <section className="qsn-section qsn-contact-section" id="contact-form">
           <h2 className="qsn-section-title">Contact</h2>
           <div className="qsn-card qsn-contact-card">
             <p>Vous avez des questions, des suggestions, ou vous souhaitez accéder à l&apos;API complète ?</p>
