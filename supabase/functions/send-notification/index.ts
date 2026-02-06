@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const ELASTICEMAIL_API_KEY = Deno.env.get('ELASTICEMAIL_API_KEY')
+const INTERNAL_SECRET = Deno.env.get('INTERNAL_SECRET') || 'your-internal-secret-key'
 
 interface NotificationPayload {
   email: string;
