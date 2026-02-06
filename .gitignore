@@ -33,11 +33,20 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# Scripts de test et debug (ne pas commiter)
+check-*.js
+test-*.js
+debug-*.js
+diagnose-*.js
+fix-*.js
+temp-*.js
+temp-*.ps1
+temp-*.sql
+reset-*.ps1
+
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-.vercel
