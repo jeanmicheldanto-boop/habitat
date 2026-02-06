@@ -391,7 +391,7 @@ export default function MobileFilters({
                           textAlign: 'left'
                         }}
                       >
-                        {category.icon} {category.label}
+                        {category.label}
                       </button>
                     ))}
                   </div>
@@ -434,7 +434,7 @@ export default function MobileFilters({
                             fontSize: '0.9rem',
                             fontWeight: 500
                           }}>
-                            {parentCategory?.icon} {sousCategorie.label}
+                            {sousCategorie.label}
                           </span>
                         </label>
                       );

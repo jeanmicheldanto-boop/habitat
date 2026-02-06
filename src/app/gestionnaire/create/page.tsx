@@ -320,7 +320,7 @@ export default function CreateEtablissement() {
                   >
                     {HABITAT_TAXONOMY.map(category => (
                       <option key={category.key} value={category.key}>
-                        {category.icon} {category.label}
+                        {category.label}
                       </option>
                     ))}
                   </select>
