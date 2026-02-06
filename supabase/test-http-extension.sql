@@ -17,12 +17,14 @@ SELECT status, content FROM http_post(
 
 -- 4. Test avec Authorization: Bearer service_role_key
 SELECT '=== Test AVEC Authorization service_role ===' as test;
+-- ATTENTION: NE JAMAIS COMMITER LA SERVICE_ROLE_KEY
+-- Remplacez YOUR_SERVICE_ROLE_KEY par votre vraie clé uniquement en local
 SELECT status, content FROM http((
   'POST',
   'https://minwoumfgutampcgrcbr.supabase.co/functions/v1/send-notification',
   ARRAY[
     http_header('Content-Type', 'application/json'),
-    http_header('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pbndvdW1mZ3V0YW1wY2dyY2JyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNjA4Mzg2MSwiZXhwIjoyMDUxNjU5ODYxfQ.0Ri4t8hI4qnlnumO1C2gSe5s0FOwMlHcGNBRQK0-GEc')
+    http_header('Authorization', 'Bearer YOUR_SERVICE_ROLE_KEY')
   ],
   'application/json',
   '{"email":"patrick.genevaux@proton.me","name":"Test Direct","etablissement":"Test","statut":"approuvee"}'
