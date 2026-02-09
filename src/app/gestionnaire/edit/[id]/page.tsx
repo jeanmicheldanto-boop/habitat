@@ -461,20 +461,9 @@ export default function EditEtablissement() {
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('🔵 handleImageUpload appelé');
-    
-    if (!e.target.files || !e.target.files[0] || !etablissement) {
-      console.log('❌ Validation échouée:', {
-        hasFiles: !!e.target.files,
-        hasFile: !!e.target.files?.[0],
-        hasEtablissement: !!etablissement
-      });
-      return;
-    }
+    if (!e.target.files || !e.target.files[0] || !etablissement) return;
 
     const file = e.target.files[0];
-    console.log('📁 Fichier sélectionné:', file.name, file.type, file.size);
-    
     setUploadingImage(true);
 
     try {
@@ -482,29 +471,20 @@ export default function EditEtablissement() {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('etablissementId', etablissement.id);
-      
-      console.log('🚀 Envoi vers /api/upload-image, etablissementId:', etablissement.id);
 
       const response = await fetch('/api/upload-image', {
         method: 'POST',
         body: formData
       });
-      
-      console.log('📥 Réponse reçue:', response.status, response.statusText);
 
       const result = await response.json();
-      console.log('📦 Résultat JSON:', result);
 
       if (result.success) {
-        console.log('✅ Upload API réussi, path:', result.path);
-        
         // Supprimer toutes les anciennes photos si elles existent
         const { data: existingMedias } = await supabase
           .from('medias')
           .select('id')
           .eq('etablissement_id', etablissement.id);
-
-        console.log('🔍 Médias existants:', existingMedias?.length || 0);
 
         if (existingMedias && existingMedias.length > 0) {
           const { error: deleteError } = await supabase
@@ -513,14 +493,12 @@ export default function EditEtablissement() {
             .in('id', existingMedias.map(m => m.id));
           
           if (deleteError) {
-            console.error('❌ Erreur suppression anciennes photos:', deleteError);
+            console.error('Erreur suppression anciennes photos:', deleteError);
             throw new Error('Impossible de supprimer les anciennes photos: ' + deleteError.message);
           }
-          console.log('🗑️ Anciennes photos supprimées');
         }
 
         // Insérer la nouvelle photo
-        console.log('💾 Insertion dans table medias...');
         const { data: newMedia, error } = await supabase
           .from('medias')
           .insert({
@@ -532,27 +510,21 @@ export default function EditEtablissement() {
           .maybeSingle();
 
         if (error) {
-          console.error('❌ Erreur insertion media:', error);
+          console.error('Erreur insertion media:', error);
           throw new Error('Impossible d\'enregistrer la photo: ' + error.message);
         }
 
-        console.log('✅ Media inséré:', newMedia);
-        
         if (newMedia) {
           setMainImage(newMedia.storage_path);
         }
         alert('Photo mise à jour avec succès !');
       } else {
-        console.error('❌ API retourné error:', result.error);
         throw new Error(result.error || 'Erreur lors de l\'upload');
       }
     } catch (error) {
-      console.error('💥 ERREUR CATCH:', error);
-      console.error('💥 Type:', typeof error);
-      console.error('💥 Message:', error instanceof Error ? error.message : String(error));
+      console.error('Upload error:', error);
       alert('Erreur lors de l\'upload de l\'image');
     } finally {
-      console.log('🏁 Upload terminé, setUploadingImage(false)');
       setUploadingImage(false);
     }
   };
