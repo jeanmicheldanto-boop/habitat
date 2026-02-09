@@ -244,7 +244,7 @@ export default function EditEtablissement() {
       .eq('etablissement_id', etabId)
       .order('priority', { ascending: true })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (medias) {
       setMainImage(medias.storage_path);
@@ -313,7 +313,7 @@ export default function EditEtablissement() {
         .from('tarifications')
         .select('id')
         .eq('etablissement_id', etablissement.id)
-        .single();
+        .maybeSingle();
 
       if (existingTarif) {
         await supabase
@@ -331,7 +331,7 @@ export default function EditEtablissement() {
         .from('restaurations')
         .select('id')
         .eq('etablissement_id', etablissement.id)
-        .single();
+        .maybeSingle();
 
       if (existingResto) {
         await supabase
@@ -349,7 +349,7 @@ export default function EditEtablissement() {
         .from('avp_infos')
         .select('id')
         .eq('etablissement_id', etablissement.id)
-        .single();
+        .maybeSingle();
 
       const avpData = {
         statut: avpInfos.statut,
@@ -480,18 +480,22 @@ export default function EditEtablissement() {
       const result = await response.json();
 
       if (result.success) {
-        // Supprimer l'ancienne photo si elle existe
-        const { data: existingMedia } = await supabase
+        // Supprimer toutes les anciennes photos si elles existent
+        const { data: existingMedias } = await supabase
           .from('medias')
           .select('id')
-          .eq('etablissement_id', etablissement.id)
-          .single();
+          .eq('etablissement_id', etablissement.id);
 
-        if (existingMedia) {
-          await supabase
+        if (existingMedias && existingMedias.length > 0) {
+          const { error: deleteError } = await supabase
             .from('medias')
             .delete()
-            .eq('id', existingMedia.id);
+            .in('id', existingMedias.map(m => m.id));
+          
+          if (deleteError) {
+            console.error('Erreur suppression anciennes photos:', deleteError);
+            throw new Error('Impossible de supprimer les anciennes photos: ' + deleteError.message);
+          }
         }
 
         // Insérer la nouvelle photo
@@ -503,14 +507,19 @@ export default function EditEtablissement() {
             priority: 1
           })
           .select()
-          .single();
+          .maybeSingle();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Erreur insertion media:', error);
+          throw new Error('Impossible d\'enregistrer la photo: ' + error.message);
+        }
 
-        setMainImage(newMedia.storage_path);
+        if (newMedia) {
+          setMainImage(newMedia.storage_path);
+        }
         alert('Photo mise à jour avec succès !');
       } else {
-        throw new Error(result.error);
+        throw new Error(result.error || 'Erreur lors de l\'upload');
       }
     } catch (error) {
       console.error('Upload error:', error);
