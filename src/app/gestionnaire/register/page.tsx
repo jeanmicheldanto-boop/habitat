@@ -91,12 +91,45 @@ export default function GestionnaireRegister() {
           console.error('Erreur création profil:', profileError);
         }
 
-        setMessage('Inscription réussie ! Vérifiez votre email pour confirmer votre compte.');
-        
-        // Rediriger vers la page de connexion après 3 secondes
-        setTimeout(() => {
-          router.push('/gestionnaire/login');
-        }, 3000);
+        // Envoyer l'email de vérification
+        try {
+          const response = await fetch(
+            'https://minwoumfgutampcgrcbr.supabase.co/functions/v1/send-verification-email',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                userId: data.user.id,
+                email: formData.email,
+                userName: formData.nom,
+                userPrenom: formData.prenom
+              })
+            }
+          );
+
+          if (!response.ok) {
+            console.error('Erreur envoi email:', await response.text());
+            setError('L\'email de vérification n\'a pas pu être envoyé. Veuillez réessayer.');
+            setLoading(false);
+            return;
+          }
+
+          setMessage('Inscription réussie ! Un email de vérification a été envoyé. Veuillez cliquer sur le lien dans l\'email pour confirmer votre compte.');
+          
+          // Rediriger vers la page de connexion après 5 secondes
+          setTimeout(() => {
+            router.push('/gestionnaire/login');
+          }, 5000);
+        } catch (emailError) {
+          console.error('Erreur envoi email:', emailError);
+          setMessage('Inscription réussie ! Un email de vérification devrait être envoyé. Vérifiez votre boîte de réception.');
+          
+          setTimeout(() => {
+            router.push('/gestionnaire/login');
+          }, 5000);
+        }
       }
     } catch (err) {
   setError((err as Error)?.message || 'Une erreur inattendue s&#39;est produite');

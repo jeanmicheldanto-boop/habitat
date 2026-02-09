@@ -130,10 +130,32 @@ export default function EditEtablissement() {
       .from('etablissements')
       .select('*')
       .eq('id', etabId)
-      .eq('gestionnaire', organisation)
       .single();
 
     if (!etab) {
+      alert('Établissement non trouvé');
+      router.push('/gestionnaire/dashboard');
+      return;
+    }
+
+    // Check access: either via gestionnaire field OR via proprietaires table
+    const isOwnedByOrganisation = etab.gestionnaire === organisation;
+    
+    // Check if user is a proprietaire (via claimed property)
+    let isProprietaire = false;
+    if (user?.id) {
+      const { data: proprietaire } = await supabase
+        .from('etablissement_proprietaires')
+        .select('id')
+        .eq('etablissement_id', etabId)
+        .eq('user_id', user.id)
+        .single();
+      
+      isProprietaire = !!proprietaire;
+    }
+
+    // Grant access if either condition is met
+    if (!isOwnedByOrganisation && !isProprietaire) {
       alert('Établissement non trouvé ou accès non autorisé');
       router.push('/gestionnaire/dashboard');
       return;
