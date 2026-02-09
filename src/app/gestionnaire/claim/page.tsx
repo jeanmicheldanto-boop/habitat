@@ -10,12 +10,12 @@ import FileUpload from '@/components/FileUpload';
 interface Etablissement {
   id: string;
   nom: string;
-  description: string;
-  adresse: string;
-  ville: string;
+  presentation: string;
+  adresse_l1: string;
+  commune: string;
   code_postal: string;
   habitat_type: string;
-  statut: string;
+  statut_editorial: string;
 }
 
 interface User { id: string; email?: string; nom?: string; prenom?: string; telephone?: string; organisation?: string; }
@@ -33,8 +33,8 @@ export default function ClaimEtablissement() {
   
   // Formulaire de réclamation
   const [formData, setFormData] = useState({
-    commentaire: '',
-    justificatifsUrls: [] as string[]
+    domaine: '',
+    preuve_urls: [] as string[]
   });
 
   const router = useRouter();
@@ -95,15 +95,15 @@ export default function ClaimEtablissement() {
     
     setSearchLoading(true);
     try {
-  const { data, error } = await supabase
+      const { data, error } = await supabase
         .from('etablissements')
-        .select('id, nom, description, adresse, ville, code_postal, habitat_type, statut')
-        .or(`nom.ilike.%${searchTerm}%,ville.ilike.%${searchTerm}%,adresse.ilike.%${searchTerm}%`)
-        .eq('statut', 'publie')
+        .select('id, nom, presentation, adresse_l1, commune, code_postal, habitat_type, statut_editorial')
+        .or(`nom.ilike.%${searchTerm}%,commune.ilike.%${searchTerm}%,adresse_l1.ilike.%${searchTerm}%`)
+        .eq('statut_editorial', 'publie')
         .limit(10);
 
       if (error) throw error;
-  setEtablissements(data || []);
+      setEtablissements(data || []);
     } catch (err: unknown) {
       if (typeof err === 'object' && err !== null && 'message' in err) {
         setError('Erreur lors de la recherche : ' + (err as { message: string }).message);
@@ -121,12 +121,12 @@ export default function ClaimEtablissement() {
   };
 
   const handleFilesUploaded = (urls: string[]) => {
-    setFormData(prev => ({ ...prev, justificatifsUrls: urls }));
+    setFormData(prev => ({ ...prev, preuve_urls: urls }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedEtablissement) return;
+    if (!selectedEtablissement || !user) return;
 
     setSubmitLoading(true);
     setError('');
@@ -134,10 +134,10 @@ export default function ClaimEtablissement() {
     try {
       const reclamationData = {
         etablissement_id: selectedEtablissement.id,
-        created_by: user?.id,
+        user_id: user?.id,
         statut: 'en_attente',
-        commentaire: formData.commentaire,
-        justificatifs: formData.justificatifsUrls
+        domaine: formData.domaine,
+        preuve_path: formData.preuve_urls.length > 0 ? formData.preuve_urls[0] : null
       };
 
       const { error } = await supabase
@@ -148,7 +148,7 @@ export default function ClaimEtablissement() {
 
       setSuccess('Votre réclamation a été soumise avec succès ! Elle sera examinée par nos équipes.');
       setSelectedEtablissement(null);
-      setFormData({ commentaire: '', justificatifsUrls: [] });
+      setFormData({ domaine: '', preuve_urls: [] });
       setEtablissements([]);
       setSearchTerm('');
       
@@ -255,14 +255,14 @@ export default function ClaimEtablissement() {
                           <div className="flex-1">
                             <h5 className="font-semibold text-gray-900">{etablissement.nom}</h5>
                             <p className="text-sm text-gray-600 mt-1">
-                              {etablissement.adresse}, {etablissement.code_postal} {etablissement.ville}
+                              {etablissement.adresse_l1}, {etablissement.code_postal} {etablissement.commune}
                             </p>
                             <p className="text-sm text-gray-500 mt-1">
                               Type: {etablissement.habitat_type?.replace('_', ' ')}
                             </p>
-                            {etablissement.description && (
+                            {etablissement.presentation && (
                               <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                                {etablissement.description}
+                                {etablissement.presentation}
                               </p>
                             )}
                           </div>
@@ -307,15 +307,15 @@ export default function ClaimEtablissement() {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
-                    <label htmlFor="commentaire" className="block text-sm font-medium text-gray-700">
-                      Commentaire explicatif *
+                    <label htmlFor="domaine" className="block text-sm font-medium text-gray-700">
+                      Motif de la réclamation *
                     </label>
                     <textarea
-                      id="commentaire"
+                      id="domaine"
                       rows={4}
                       required
-                      value={formData.commentaire}
-                      onChange={(e) => setFormData(prev => ({ ...prev, commentaire: e.target.value }))}
+                      value={formData.domaine}
+                      onChange={(e) => setFormData(prev => ({ ...prev, domaine: e.target.value }))}
                       className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Expliquez pourquoi vous &ecirc;tes le propri&eacute;taire/gestionnaire l&eacute;gitime de cet &eacute;tablissement..."
                     />

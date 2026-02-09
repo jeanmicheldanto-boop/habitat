@@ -10,8 +10,8 @@ import Image from 'next/image';
 interface Etablissement {
   id: string;
   nom: string;
-  description: string;
-  adresse: string;
+  presentation: string;
+  adresse_l1: string;
   code_postal: string;
   commune: string;
   telephone?: string;
@@ -228,7 +228,7 @@ export default function MesEtablissements() {
                       </div>
                       
                       <p className="mt-1 text-sm text-gray-600">
-                        {etablissement.description}
+                        {etablissement.presentation}
                       </p>
 
                       <div className="mt-3 flex flex-wrap gap-4 text-sm text-gray-500">
@@ -237,7 +237,7 @@ export default function MesEtablissements() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                           </svg>
-                          {etablissement.adresse}, {etablissement.code_postal} {etablissement.commune}
+                          {etablissement.adresse_l1}, {etablissement.code_postal} {etablissement.commune}
                         </div>
 
                         <div className="flex items-center">
