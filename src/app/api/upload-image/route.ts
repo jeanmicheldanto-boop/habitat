@@ -2,10 +2,17 @@ import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
+  console.log('🔷 API /upload-image appelée');
+  
   try {
     // Créer le client Supabase avec service_role à l'intérieur de la fonction
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    console.log('🔑 Variables env présentes:', {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseServiceKey
+    });
 
     if (!supabaseUrl || !supabaseServiceKey) {
       console.error('❌ Variables d\'environnement manquantes');
@@ -26,13 +33,24 @@ export async function POST(request: NextRequest) {
       }
     );
 
+    console.log('📋 Lecture FormData...');
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const tempId = formData.get('tempId') as string;
     const etablissementId = formData.get('etablissementId') as string;
     
+    console.log('📦 Données reçues:', {
+      hasFile: !!file,
+      fileName: file?.name,
+      fileSize: file?.size,
+      fileType: file?.type,
+      tempId,
+      etablissementId
+    });
+    
     // Utiliser tempId (création) ou etablissementId (édition)
     const uploadId = tempId || etablissementId;
+    console.log('🎯 Upload ID choisi:', uploadId);
 
     if (!file) {
       return NextResponse.json(
@@ -70,11 +88,15 @@ export async function POST(request: NextRequest) {
     const fileExt = file.name.split('.').pop();
     const filePath = `${uploadId}/main.${fileExt}`;
 
+    console.log('📁 Chemin de stockage:', filePath);
+
     // Convertir le fichier en buffer
+    console.log('🔄 Conversion en buffer...');
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+    console.log('✅ Buffer créé, taille:', buffer.length);
 
-    console.log('📤 Upload image via API:', filePath);
+    console.log('📤 Upload vers storage bucket "etablissements"...');
 
     // Upload avec service_role key (bypass RLS)
     const { error: uploadError } = await supabaseAdmin.storage
@@ -85,18 +107,21 @@ export async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
-      console.error('❌ Erreur upload:', uploadError);
+      console.error('❌ Erreur upload storage:', uploadError);
       return NextResponse.json(
         { error: uploadError.message },
         { status: 500 }
       );
     }
 
-    console.log('✅ Upload réussi:', filePath);
+    console.log('✅ Upload storage réussi:', filePath);
+
+    const responsePath = `etablissements/${filePath}`;
+    console.log('📤 Envoi réponse SUCCESS avec path:', responsePath);
 
     return NextResponse.json({
       success: true,
-      path: `etablissements/${filePath}`  // ✅ CORRIGÉ: Retourne avec le préfixe du bucket
+      path: responsePath  // ✅ CORRIGÉ: Retourne avec le préfixe du bucket
     });
 
   } catch (error) {
