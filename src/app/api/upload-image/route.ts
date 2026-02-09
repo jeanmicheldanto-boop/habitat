@@ -29,6 +29,10 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const tempId = formData.get('tempId') as string;
+    const etablissementId = formData.get('etablissementId') as string;
+    
+    // Utiliser tempId (création) ou etablissementId (édition)
+    const uploadId = tempId || etablissementId;
 
     if (!file) {
       return NextResponse.json(
@@ -37,9 +41,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!tempId) {
+    if (!uploadId) {
       return NextResponse.json(
-        { error: 'ID temporaire manquant' },
+        { error: 'ID manquant (tempId ou etablissementId requis)' },
         { status: 400 }
       );
     }
@@ -64,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     // Extraire l'extension
     const fileExt = file.name.split('.').pop();
-    const filePath = `${tempId}/main.${fileExt}`;
+    const filePath = `${uploadId}/main.${fileExt}`;
 
     // Convertir le fichier en buffer
     const arrayBuffer = await file.arrayBuffer();

@@ -44,7 +44,8 @@ ORDER BY tablename, cmd;
 -- ======================
 
 -- 1. ETABLISSEMENTS - Permettre UPDATE aux proprietaires
-CREATE POLICY IF NOT EXISTS "Proprietaires can update etablissements"
+DROP POLICY IF EXISTS "Proprietaires can update etablissements" ON etablissements;
+CREATE POLICY "Proprietaires can update etablissements"
 ON etablissements
 FOR UPDATE
 TO authenticated
@@ -58,7 +59,8 @@ USING (
 );
 
 -- 2. ETABLISSEMENT_SERVICE - Permettre INSERT/DELETE aux proprietaires
-CREATE POLICY IF NOT EXISTS "Proprietaires can insert services"
+DROP POLICY IF EXISTS "Proprietaires can insert services" ON etablissement_service;
+CREATE POLICY "Proprietaires can insert services"
 ON etablissement_service
 FOR INSERT
 TO authenticated
@@ -71,7 +73,8 @@ WITH CHECK (
   )
 );
 
-CREATE POLICY IF NOT EXISTS "Proprietaires can delete services"
+DROP POLICY IF EXISTS "Proprietaires can delete services" ON etablissement_service;
+CREATE POLICY "Proprietaires can delete services"
 ON etablissement_service
 FOR DELETE
 TO authenticated
@@ -85,7 +88,8 @@ USING (
 );
 
 -- 3. TARIFICATIONS - Permettre INSERT/UPDATE
-CREATE POLICY IF NOT EXISTS "Proprietaires can insert tarifications"
+DROP POLICY IF EXISTS "Proprietaires can insert tarifications" ON tarifications;
+CREATE POLICY "Proprietaires can insert tarifications"
 ON tarifications
 FOR INSERT
 TO authenticated
@@ -98,7 +102,8 @@ WITH CHECK (
   )
 );
 
-CREATE POLICY IF NOT EXISTS "Proprietaires can update tarifications"
+DROP POLICY IF EXISTS "Proprietaires can update tarifications" ON tarifications;
+CREATE POLICY "Proprietaires can update tarifications"
 ON tarifications
 FOR UPDATE
 TO authenticated
@@ -112,7 +117,8 @@ USING (
 );
 
 -- 4. RESTAURATIONS - Permettre INSERT/UPDATE
-CREATE POLICY IF NOT EXISTS "Proprietaires can insert restaurations"
+DROP POLICY IF EXISTS "Proprietaires can insert restaurations" ON restaurations;
+CREATE POLICY "Proprietaires can insert restaurations"
 ON restaurations
 FOR INSERT
 TO authenticated
@@ -125,7 +131,8 @@ WITH CHECK (
   )
 );
 
-CREATE POLICY IF NOT EXISTS "Proprietaires can update restaurations"
+DROP POLICY IF EXISTS "Proprietaires can update restaurations" ON restaurations;
+CREATE POLICY "Proprietaires can update restaurations"
 ON restaurations
 FOR UPDATE
 TO authenticated
@@ -139,7 +146,8 @@ USING (
 );
 
 -- 5. AVP_INFOS - Permettre INSERT/UPDATE
-CREATE POLICY IF NOT EXISTS "Proprietaires can insert avp_infos"
+DROP POLICY IF EXISTS "Proprietaires can insert avp_infos" ON avp_infos;
+CREATE POLICY "Proprietaires can insert avp_infos"
 ON avp_infos
 FOR INSERT
 TO authenticated
@@ -152,7 +160,8 @@ WITH CHECK (
   )
 );
 
-CREATE POLICY IF NOT EXISTS "Proprietaires can update avp_infos"
+DROP POLICY IF EXISTS "Proprietaires can update avp_infos" ON avp_infos;
+CREATE POLICY "Proprietaires can update avp_infos"
 ON avp_infos
 FOR UPDATE
 TO authenticated
@@ -166,7 +175,8 @@ USING (
 );
 
 -- 6. LOGEMENTS_TYPES - Permettre INSERT/UPDATE/DELETE
-CREATE POLICY IF NOT EXISTS "Proprietaires can insert logements"
+DROP POLICY IF EXISTS "Proprietaires can insert logements" ON logements_types;
+CREATE POLICY "Proprietaires can insert logements"
 ON logements_types
 FOR INSERT
 TO authenticated
@@ -179,7 +189,8 @@ WITH CHECK (
   )
 );
 
-CREATE POLICY IF NOT EXISTS "Proprietaires can update logements"
+DROP POLICY IF EXISTS "Proprietaires can update logements" ON logements_types;
+CREATE POLICY "Proprietaires can update logements"
 ON logements_types
 FOR UPDATE
 TO authenticated
@@ -192,7 +203,8 @@ USING (
   )
 );
 
-CREATE POLICY IF NOT EXISTS "Proprietaires can delete logements"
+DROP POLICY IF EXISTS "Proprietaires can delete logements" ON logements_types;
+CREATE POLICY "Proprietaires can delete logements"
 ON logements_types
 FOR DELETE
 TO authenticated
@@ -206,7 +218,8 @@ USING (
 );
 
 -- 7. MEDIAS - Permettre INSERT/UPDATE/DELETE
-CREATE POLICY IF NOT EXISTS "Proprietaires can insert medias"
+DROP POLICY IF EXISTS "Proprietaires can insert medias" ON medias;
+CREATE POLICY "Proprietaires can insert medias"
 ON medias
 FOR INSERT
 TO authenticated
@@ -219,7 +232,8 @@ WITH CHECK (
   )
 );
 
-CREATE POLICY IF NOT EXISTS "Proprietaires can update medias"
+DROP POLICY IF EXISTS "Proprietaires can update medias" ON medias;
+CREATE POLICY "Proprietaires can update medias"
 ON medias
 FOR UPDATE
 TO authenticated
@@ -232,7 +246,8 @@ USING (
   )
 );
 
-CREATE POLICY IF NOT EXISTS "Proprietaires can delete medias"
+DROP POLICY IF EXISTS "Proprietaires can delete medias" ON medias;
+CREATE POLICY "Proprietaires can delete medias"
 ON medias
 FOR DELETE
 TO authenticated
