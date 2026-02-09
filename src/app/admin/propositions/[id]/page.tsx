@@ -315,7 +315,7 @@ export default function PropositionModerationPage({ params }: { params: Promise<
           const fieldsToUpdate = [
             'nom', 'adresse_l1', 'adresse_l2', 'code_postal', 'commune', 
             'departement', 'telephone', 'email', 'site_web', 'habitat_type',
-            'presentation', 'public_cible', 'gestionnaire', 'eligibilite_statut'
+            'presentation', 'gestionnaire', 'eligibilite_statut'
           ];
           
           fieldsToUpdate.forEach(field => {
@@ -323,6 +323,16 @@ export default function PropositionModerationPage({ params }: { params: Promise<
               etablissementUpdates[field] = modifications[field];
             }
           });
+
+          // Gérer public_cible spécialement (tableau -> chaîne séparée par virgules)
+          if (modifications.public_cible !== undefined) {
+            if (Array.isArray(modifications.public_cible)) {
+              etablissementUpdates.public_cible = modifications.public_cible.join(',');
+            } else {
+              etablissementUpdates.public_cible = modifications.public_cible;
+            }
+            console.log('📌 public_cible converti:', etablissementUpdates.public_cible);
+          }
 
           // Gérer les coordonnées GPS
           if (modifications.latitude && modifications.longitude) {
