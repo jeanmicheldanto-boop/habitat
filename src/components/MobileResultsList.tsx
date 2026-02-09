@@ -3,6 +3,7 @@ import React from 'react';
 import Image from 'next/image';
 import { getAllSousCategories, getSousCategorieColor, findSousCategorieWithTolerance } from '@/lib/habitatTaxonomy';
 import { getHabitatImage } from '@/lib/habitatImages';
+import { getSupabaseImageUrl } from '@/lib/imageUtils';
 import BadgeIcon from './BadgeIcon';
 import AvpBadge from './AvpBadge';
 
@@ -70,7 +71,7 @@ export default function MobileResultsList({ results, publicCibleOptions, restaur
             }}>
               <Image
                 src={etab.image_path 
-                  ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${etab.image_path}`
+                  ? getSupabaseImageUrl(etab.image_path)
                   : getHabitatImage(etab.sous_categories ?? null)}
                 alt={`Image de ${etab.nom}`}
                 fill

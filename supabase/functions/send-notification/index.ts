@@ -18,12 +18,23 @@ interface NotificationPayload {
   statut_editorial?: string;
   old_statut?: string;
   note_moderation?: string;
+  hasAccount?: boolean;
 }
 
 serve(async (req) => {
   try {
+    // Vérifier l'authentification
+    const authHeader = req.headers.get('authorization')
+    
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ code: 401, message: 'Missing authorization header' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
     const payload: NotificationPayload = await req.json()
-    const { email, name, type, etablissement, statut, action, review_note, role, note_moderation } = payload
+    const { email, name, type, etablissement, statut, action, review_note, role, note_moderation, hasAccount, etablissement_id } = payload
 
     if (!ELASTICEMAIL_API_KEY) {
       throw new Error('Elastic Email API key missing')
@@ -229,12 +240,21 @@ serve(async (req) => {
                 ? '<p>L\'établissement est maintenant visible sur la plateforme.</p>' 
                 : '<p>Les modifications ont été appliquées.</p>'
               }
+              ${hasAccount ? `
               <p style="margin: 30px 0;">
                 <a href="https://habitat-intermediaire.fr/gestionnaire/dashboard" 
                    style="background-color: #a85b2b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
                   Voir mon tableau de bord
                 </a>
               </p>
+              ` : (etablissement_id ? `
+              <p style="margin: 30px 0;">
+                <a href="https://habitat-intermediaire.fr/plateforme/fiche?id=${etablissement_id}" 
+                   style="background-color: #a85b2b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                  Voir l'établissement
+                </a>
+              </p>
+              ` : '')}
               <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
               <p style="font-size: 0.9em; color: #666;">
                 Cordialement,<br>
@@ -263,13 +283,25 @@ serve(async (req) => {
                   <strong>Motif :</strong> ${review_note}
                 </div>
               ` : ''}
-              <p>Vous pouvez soumettre une nouvelle demande corrigée depuis votre tableau de bord.</p>
+              ${hasAccount 
+                ? '<p>Vous pouvez soumettre une nouvelle demande corrigée depuis votre tableau de bord.</p>' 
+                : '<p>Si vous souhaitez soumettre une nouvelle demande, vous pouvez le faire depuis la page de l\'établissement.</p>'
+              }
+              ${hasAccount ? `
               <p style="margin: 30px 0;">
                 <a href="https://habitat-intermediaire.fr/gestionnaire/dashboard" 
                    style="background-color: #a85b2b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
                   Retour au tableau de bord
                 </a>
               </p>
+              ` : (etablissement_id ? `
+              <p style="margin: 30px 0;">
+                <a href="https://habitat-intermediaire.fr/plateforme/fiche?id=${etablissement_id}" 
+                   style="background-color: #a85b2b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                  Voir l'établissement
+                </a>
+              </p>
+              ` : '')}
               <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
               <p style="font-size: 0.9em; color: #666;">
                 Cordialement,<br>

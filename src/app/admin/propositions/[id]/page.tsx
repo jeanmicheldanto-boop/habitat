@@ -307,17 +307,182 @@ export default function PropositionModerationPage({ params }: { params: Promise<
           // Modification d'un établissement existant
           console.log('✏️ Modification établissement existant:', proposition.etablissement_id);
           
-          const { error: updateEtabError } = await supabase
-            .from("etablissements")
-            .update(proposition.payload)
-            .eq("id", proposition.etablissement_id);
+          const modifications = ((proposition.payload as Record<string, unknown>)?.modifications || {}) as Record<string, unknown>;
+          console.log('📝 Modifications à appliquer:', modifications);
+
+          // 1. Mettre à jour les champs simples de etablissements
+          const etablissementUpdates: Record<string, unknown> = {};
+          const fieldsToUpdate = [
+            'nom', 'adresse_l1', 'adresse_l2', 'code_postal', 'commune', 
+            'departement', 'telephone', 'email', 'site_web', 'habitat_type',
+            'presentation', 'public_cible', 'gestionnaire', 'eligibilite_statut'
+          ];
+          
+          fieldsToUpdate.forEach(field => {
+            if (modifications[field] !== undefined) {
+              etablissementUpdates[field] = modifications[field];
+            }
+          });
+
+          // Gérer les coordonnées GPS
+          if (modifications.latitude && modifications.longitude) {
+            etablissementUpdates.geom = `POINT(${modifications.longitude} ${modifications.latitude})`;
+          }
+
+          if (Object.keys(etablissementUpdates).length > 0) {
+            const { error: updateError } = await supabase
+              .from('etablissements')
+              .update(etablissementUpdates)
+              .eq('id', proposition.etablissement_id);
             
-          if (updateEtabError) {
-            console.error('❌ Erreur modification établissement:', updateEtabError);
-            throw updateEtabError;
+            if (updateError) throw updateError;
+            console.log('✅ Champs de base mis à jour');
+          }
+
+          // 2. Gérer la photo
+          if (modifications.nouvelle_photo_base64 || modifications.nouvelle_photo_data) {
+            try {
+              const photoData = modifications.nouvelle_photo_base64 || modifications.nouvelle_photo_data;
+              const filename = (modifications.nouvelle_photo_filename as string) || 'main.jpg';
+              
+              let base64Data = photoData as string;
+              if (typeof photoData === 'string' && photoData.includes('base64,')) {
+                base64Data = photoData.split('base64,')[1];
+              }
+
+              const imageBuffer = Buffer.from(base64Data, 'base64');
+              const storagePath = `${proposition.etablissement_id}/${filename}`;
+              
+              const { error: uploadError } = await supabase.storage
+                .from('etablissements')
+                .upload(storagePath, imageBuffer, {
+                  contentType: 'image/jpeg',
+                  upsert: true
+                });
+
+              if (!uploadError) {
+                const fullPath = `etablissements/${storagePath}`;
+                await supabase
+                  .from('etablissements')
+                  .update({ image_path: fullPath })
+                  .eq('id', proposition.etablissement_id);
+                console.log('✅ Photo uploadée');
+              }
+            } catch (photoError) {
+              console.error('⚠️ Erreur photo:', photoError);
+            }
+          }
+
+          // 3. Gérer les sous-catégories
+          if (Array.isArray(modifications.sous_categories)) {
+            await supabase
+              .from('etablissement_sous_categorie')
+              .delete()
+              .eq('etablissement_id', proposition.etablissement_id);
+
+            if (modifications.sous_categories.length > 0) {
+              const inserts = modifications.sous_categories.map((scId: string) => ({
+                etablissement_id: proposition.etablissement_id,
+                sous_categorie_id: scId
+              }));
+              await supabase.from('etablissement_sous_categorie').insert(inserts);
+            }
+            console.log('✅ Sous-catégories mises à jour');
+          }
+
+          // 4. Gérer les services
+          if (Array.isArray(modifications.services)) {
+            await supabase
+              .from('etablissement_service')
+              .delete()
+              .eq('etablissement_id', proposition.etablissement_id);
+
+            if (modifications.services.length > 0) {
+              const inserts = modifications.services.map((sId: string) => ({
+                etablissement_id: proposition.etablissement_id,
+                service_id: sId
+              }));
+              await supabase.from('etablissement_service').insert(inserts);
+            }
+            console.log('✅ Services mis à jour');
+          }
+
+          // 5. Gérer les logements_types
+          if (Array.isArray(modifications.logements_types)) {
+            await supabase
+              .from('logements_types')
+              .delete()
+              .eq('etablissement_id', proposition.etablissement_id);
+
+            if (modifications.logements_types.length > 0) {
+              const inserts = (modifications.logements_types as Array<Record<string, unknown>>).map(logement => ({
+                etablissement_id: proposition.etablissement_id,
+                libelle: logement.libelle || null,
+                surface_min: logement.surface_min || null,
+                surface_max: logement.surface_max || null,
+                meuble: logement.meuble || false,
+                pmr: logement.pmr || false,
+                domotique: logement.domotique || false,
+                nb_unites: logement.nb_unites || null,
+                plain_pied: logement.plain_pied || false
+              }));
+              await supabase.from('logements_types').insert(inserts);
+            }
+            console.log('✅ Logements mis à jour');
+          }
+
+          // 6. Gérer les tarifications
+          if (Array.isArray(modifications.tarifications)) {
+            await supabase
+              .from('tarifications')
+              .delete()
+              .eq('etablissement_id', proposition.etablissement_id);
+
+            if (modifications.tarifications.length > 0) {
+              const inserts = (modifications.tarifications as Array<Record<string, unknown>>).map(tarif => ({
+                etablissement_id: proposition.etablissement_id,
+                periode: tarif.periode || null,
+                fourchette_prix: tarif.fourchette_prix || null,
+                prix_min: tarif.prix_min || null,
+                prix_max: tarif.prix_max || null,
+                loyer_base: tarif.loyer_base || null,
+                charges: tarif.charges || null,
+                devise: tarif.devise || 'EUR'
+              }));
+              await supabase.from('tarifications').insert(inserts);
+            }
+            console.log('✅ Tarifications mises à jour');
+          }
+
+          // 7. Gérer la restauration
+          if (modifications.restauration && typeof modifications.restauration === 'object') {
+            const resto = modifications.restauration as Record<string, unknown>;
+            const restaurationData = {
+              etablissement_id: proposition.etablissement_id,
+              resto_collectif: resto.resto_collectif || false,
+              resto_collectif_midi: resto.resto_collectif_midi || false,
+              kitchenette: resto.kitchenette || false,
+              portage_repas: resto.portage_repas || false
+            };
+
+            const { data: existing } = await supabase
+              .from('restaurations')
+              .select('id')
+              .eq('etablissement_id', proposition.etablissement_id)
+              .single();
+
+            if (existing) {
+              await supabase
+                .from('restaurations')
+                .update(restaurationData)
+                .eq('etablissement_id', proposition.etablissement_id);
+            } else {
+              await supabase.from('restaurations').insert([restaurationData]);
+            }
+            console.log('✅ Restauration mise à jour');
           }
           
-          console.log('✅ Établissement modifié avec succès');
+          console.log('✅ Toutes les modifications ont été appliquées');
         }
       } catch (error) {
         console.error('❌ Erreur lors de l\'application:', error);

@@ -7,11 +7,12 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import './EtabMap.css';
 import React from 'react';
 import { getHabitatImage } from '@/lib/habitatImages';
+import { getSupabaseImageUrl } from '@/lib/imageUtils';
 
 // Utilitaire pour générer l'URL publique Supabase Storage
 function getPublicUrl(path?: string | null, sous_categories?: string[] | null): string {
   if (!path) return getHabitatImage(sous_categories || null);
-  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${path}`;
+  return getSupabaseImageUrl(path);
 }
 
 // Correction du bug d'icône par défaut de Leaflet sous Webpack/Next.js
