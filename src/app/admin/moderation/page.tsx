@@ -402,6 +402,36 @@ export default function ModerationDashboard() {
           .eq('id', itemId);
 
         if (error) throw error;
+
+        // Si la réclamation est approuvée, créer l'entrée dans etablissement_proprietaires
+        if (statusValue === 'verifiee') {
+          const reclamation = reclamations.find(r => r.id === itemId);
+          if (reclamation) {
+            // Vérifier si l'entrée existe déjà
+            const { data: existingProprietaire } = await supabase
+              .from('etablissement_proprietaires')
+              .select('id')
+              .eq('etablissement_id', reclamation.etablissement_id)
+              .eq('user_id', reclamation.user_id)
+              .single();
+
+            // Créer si elle n'existe pas
+            if (!existingProprietaire) {
+              const { error: proprietaireError } = await supabase
+                .from('etablissement_proprietaires')
+                .insert([{
+                  etablissement_id: reclamation.etablissement_id,
+                  user_id: reclamation.user_id,
+                  active: true
+                }]);
+
+              if (proprietaireError) {
+                console.warn('⚠️ Avertissement création proprietaire:', proprietaireError);
+                // Ne pas bloquer le flux si ça échoue
+              }
+            }
+          }
+        }
       }
 
       // Recharger les données

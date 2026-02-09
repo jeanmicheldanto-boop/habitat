@@ -146,7 +146,7 @@ export default function EditEtablissement() {
     if (user?.id) {
       const { data: proprietaire } = await supabase
         .from('etablissement_proprietaires')
-        .select('id')
+        .select('user_id')
         .eq('etablissement_id', etabId)
         .eq('user_id', user.id)
         .single();

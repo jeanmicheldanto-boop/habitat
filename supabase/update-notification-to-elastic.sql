@@ -147,7 +147,7 @@ BEGIN
     notification_type,
     notification_title,
     notification_message,
-    jsonb_build_object('reclamation_id', NEW.id, 'etablissement_id', NEW.etablissement_id, 'review_note', NEW.review_note)
+    jsonb_build_object('reclamation_id', NEW.id, 'etablissement_id', NEW.etablissement_id, 'note_moderation', NEW.note_moderation)
   );
 
   function_url := 'https://minwoumfgutampcgrcbr.supabase.co/functions/v1/send-notification';
@@ -157,7 +157,7 @@ BEGIN
     'type', 'reclamation_status_change',
     'etablissement', etab_name,
     'statut', NEW.statut,
-    'note_moderation', NEW.review_note
+    'note_moderation', NEW.note_moderation
   )::text;
 
   BEGIN
