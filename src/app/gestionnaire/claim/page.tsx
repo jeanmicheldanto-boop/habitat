@@ -98,8 +98,7 @@ export default function ClaimEtablissement() {
       const { data, error } = await supabase
         .from('etablissements')
         .select('id, nom, presentation, adresse_l1, commune, code_postal, habitat_type, statut_editorial')
-        .or(`nom.ilike.%${searchTerm}%,commune.ilike.%${searchTerm}%,adresse_l1.ilike.%${searchTerm}%`)
-        .eq('statut_editorial', 'publie')
+        .or(`and(nom.ilike.%${searchTerm}%,statut_editorial.eq.publie),and(commune.ilike.%${searchTerm}%,statut_editorial.eq.publie),and(adresse_l1.ilike.%${searchTerm}%,statut_editorial.eq.publie)`)
         .limit(10);
 
       if (error) throw error;
