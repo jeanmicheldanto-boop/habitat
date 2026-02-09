@@ -14,6 +14,7 @@ type ModificationDataType = {
   departement: string;
   habitat_type: string;
   sous_categories: string[];
+  public_cible: string[];
   nouvelle_photo_data: { url: string; file: File } | null;
   logements_types: LogementType[];
   restauration: {
@@ -85,6 +86,7 @@ interface EtablissementData {
   code_postal?: string;
   commune?: string;
   departement?: string;
+  public_cible?: string;
   geom?: { coordinates: [number, number] };
   logements_types?: LogementType[];
   restaurations?: unknown[];
@@ -138,6 +140,7 @@ function ModifierEtablissementPageContent() {
     departement: '',
     habitat_type: '',
     sous_categories: [],
+    public_cible: [],
     nouvelle_photo_data: null,
     logements_types: [],
     restauration: {
@@ -308,6 +311,7 @@ function ModifierEtablissementPageContent() {
         departement: etab.departement || '',
         habitat_type: etab.habitat_type || '',
         sous_categories: sousCategoriesLiees,
+        public_cible: etab.public_cible ? etab.public_cible.split(',').map((p: string) => p.trim()) : [],
         nouvelle_photo_data: null, // Pas de pré-remplissage pour les nouvelles photos
         logements_types: etab.logements_types || [],
         restauration: etab.restaurations?.[0] || {
@@ -475,6 +479,7 @@ function ModifierEtablissementPageContent() {
     { id: 'adresse', label: 'Adresse', icon: '📍' },
     { id: 'photo', label: 'Photo', icon: '📷' },
     { id: 'type', label: 'Type & Catégorie', icon: '🏠' },
+    { id: 'public-cible', label: 'Public cible', icon: '👥' },
     { id: 'logements', label: 'Logements', icon: '🛏️' },
     { id: 'restauration', label: 'Restauration', icon: '🍽️' },
     { id: 'services', label: 'Services', icon: '🔧' },
@@ -853,6 +858,59 @@ function ModifierEtablissementPageContent() {
                       </div>
                       <p className="text-sm text-gray-500 mt-1">
                         {modificationData.sous_categories.length} catégorie(s) sélectionnée(s)
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Section Public cible */}
+              {activeSection === 'public-cible' && (
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">👥 Public cible</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Sélectionnez le ou les publics auxquels s&#39;adresse cet établissement.
+                      </p>
+                      {etablissement?.public_cible && (
+                        <p className="text-sm text-gray-500 mb-3">
+                          Actuellement : {etablissement.public_cible}
+                        </p>
+                      )}
+                      <div className="space-y-2">
+                        {[
+                          { key: 'personnes_agees', label: 'Personnes âgées' },
+                          { key: 'personnes_handicapees', label: 'Handicap' },
+                          { key: 'mixtes', label: 'Mixte' },
+                          { key: 'intergenerationnel', label: 'Intergénérationnel' },
+                          { key: 'alzheimer_accessible', label: 'Alzheimer' }
+                        ].map(option => (
+                          <label key={option.key} className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              checked={modificationData.public_cible.includes(option.key)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setModificationData({
+                                    ...modificationData,
+                                    public_cible: [...modificationData.public_cible, option.key]
+                                  });
+                                } else {
+                                  setModificationData({
+                                    ...modificationData,
+                                    public_cible: modificationData.public_cible.filter(k => k !== option.key)
+                                  });
+                                }
+                              }}
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            <span className="text-sm">{option.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <p className="text-sm text-gray-500 mt-3">
+                        {modificationData.public_cible.length} public(s) cible(s) sélectionné(s)
                       </p>
                     </div>
                   </div>
