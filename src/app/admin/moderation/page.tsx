@@ -38,7 +38,7 @@ interface ReclamationPropriete {
   statut: 'en_attente' | 'approuvee' | 'rejetee';
   justificatifs?: string[];
   commentaire?: string;
-  review_note?: string;
+  note_moderation?: string;
   created_at: string;
   created_by?: string;
   etablissement?: {
@@ -383,9 +383,15 @@ export default function ModerationDashboard() {
           }
         }
       } else {
+        // Pour les réclamations, utiliser les colonnes correctes
+        const reclamationUpdateData = {
+          statut: action,
+          note_moderation: reviewNote || null
+        };
+        
         const { error } = await supabase
           .from('reclamations_propriete')
-          .update(updateData)
+          .update(reclamationUpdateData)
           .eq('id', itemId);
 
         if (error) throw error;
@@ -1025,10 +1031,10 @@ export default function ModerationDashboard() {
                             Réclamé le {formatDate(reclamation.created_at)}
                           </p>
 
-                          {reclamation.review_note && (
+                          {reclamation.note_moderation && (
                             <div className="mb-4 p-3 bg-gray-50 rounded-md border">
                               <p className="text-sm text-gray-700">
-                                <strong>Note de révision:</strong> {reclamation.review_note}
+                                <strong>Note de modération:</strong> {reclamation.note_moderation}
                               </p>
                             </div>
                           )}
