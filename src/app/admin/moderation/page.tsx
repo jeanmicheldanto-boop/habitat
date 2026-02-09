@@ -35,7 +35,7 @@ interface ReclamationPropriete {
   id: string;
   etablissement_id: string;
   user_id?: string;
-  statut: 'en_attente' | 'approuvee' | 'rejetee';
+  statut: 'en_attente' | 'verifiee' | 'rejetee';
   justificatifs?: string[];
   commentaire?: string;
   note_moderation?: string;
@@ -350,14 +350,21 @@ export default function ModerationDashboard() {
     }
   };
 
-  const handleAction = async (itemId: string, action: 'approuvee' | 'rejetee', type: 'proposition' | 'reclamation') => {
+  const handleAction = async (itemId: string, action: 'approuvee' | 'rejetee' | 'verifiee', type: 'proposition' | 'reclamation') => {
     setActionLoading(true);
     try {
       console.log('🔍 Action reçue:', action);
       console.log('🔍 Type:', typeof action);
       
+      // Pour les propositions: 'approuvee' | 'rejetee'
+      // Pour les réclamations: 'verifiee' | 'rejetee'
+      let statusValue = action;
+      if (type === 'reclamation' && action === 'approuvee') {
+        statusValue = 'verifiee' as any;
+      }
+      
       const updateData = {
-        statut: action,
+        statut: statusValue,
         review_note: reviewNote || null,
         reviewed_at: new Date().toISOString(),
         reviewed_by: user?.id || null
@@ -383,9 +390,9 @@ export default function ModerationDashboard() {
           }
         }
       } else {
-        // Pour les réclamations, utiliser les colonnes correctes
+        // Pour les réclamations, utiliser les colonnes et statuts corrects
         const reclamationUpdateData = {
-          statut: action,
+          statut: statusValue,
           note_moderation: reviewNote || null
         };
         
