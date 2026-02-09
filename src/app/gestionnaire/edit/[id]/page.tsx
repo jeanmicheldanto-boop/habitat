@@ -114,8 +114,8 @@ export default function EditEtablissement() {
         return;
       }
 
-      // Load etablissement
-      await loadEtablissement(id, profile.organisation || '');
+      // Load etablissement - passer authUser.id car setUser est asynchrone
+      await loadEtablissement(id, profile.organisation || '', authUser.id);
       await loadServices();
       
       setLoading(false);
@@ -124,7 +124,7 @@ export default function EditEtablissement() {
     init();
   }, [id, router]);
 
-  const loadEtablissement = async (etabId: string, organisation: string) => {
+  const loadEtablissement = async (etabId: string, organisation: string, userId: string) => {
     // Load basic info
     const { data: etab } = await supabase
       .from('etablissements')
@@ -143,12 +143,12 @@ export default function EditEtablissement() {
     
     // Check if user is a proprietaire (via claimed property)
     let isProprietaire = false;
-    if (user?.id) {
+    if (userId) {
       const { data: proprietaire } = await supabase
         .from('etablissement_proprietaires')
         .select('user_id')
         .eq('etablissement_id', etabId)
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .single();
       
       isProprietaire = !!proprietaire;

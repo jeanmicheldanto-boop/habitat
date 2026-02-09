@@ -1,0 +1,41 @@
+-- Créer un établissement fictif à Ossun pour tester la réclamation de propriété
+
+INSERT INTO public.etablissements (
+  nom,
+  commune,
+  code_postal,
+  departement,
+  adresse_l1,
+  adresse_l2,
+  presentation,
+  email,
+  telephone,
+  site_web,
+  habitat_type,
+  public_cible,
+  gestionnaire,
+  statut_editorial,
+  eligibilite_statut,
+  geom,
+  created_at,
+  updated_at
+) VALUES (
+  'La Maison Ossunaise',
+  'Ossun',
+  '65380',
+  '65 - Hautes-Pyrénées',
+  '42 rue de Gavarnie',
+  '',
+  'Charmante maison d''accueil pour seniors en montagne. Accès facile, proximité des commerces et services. Cadre naturel paisible.',
+  'contact@maissonossunaise.fr',
+  '+33 5 62 XX XX XX',
+  'https://www.maissonossunaise.fr',
+  'maison_accueil',
+  'seniors,retraites',
+  'Admin Test',
+  'publie',
+  'eligible',
+  ST_GeomFromText('POINT(0.071 43.082)', 4326),
+  NOW(),
+  NOW()
+) RETURNING id, nom, commune, code_postal;
