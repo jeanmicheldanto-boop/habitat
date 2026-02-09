@@ -29,13 +29,12 @@ interface Proposition {
   created_at: string;
 }
 
-export default function GestionnaireDashboardV2() {
+export default function GestionnaireDashboardRefonte() {
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [userOrganisation, setUserOrganisation] = useState('');
   const [etablissements, setEtablissements] = useState<Etablissement[]>([]);
   const [propositions, setPropositions] = useState<Proposition[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'etablissements' | 'propositions'>('etablissements');
   const router = useRouter();
 
   useEffect(() => {
@@ -62,7 +61,7 @@ export default function GestionnaireDashboardV2() {
       setUserOrganisation(profile.organisation || '');
 
       // Charger les données
-      await loadEtablissements(profile.organisation || '');
+      await loadEtablissements(profile.organisation || '', authUser.id);
       await loadPropositions(authUser.id);
       
       setLoading(false);
@@ -71,29 +70,53 @@ export default function GestionnaireDashboardV2() {
     checkAuth();
   }, [router]);
 
-  const loadEtablissements = async (organisation: string) => {
-    if (!organisation) return;
+  const loadEtablissements = async (organisation: string, userId: string) => {
+    if (!organisation && !userId) return;
 
-    // Charger les établissements de base
+    // Charger les établissements de l'organisation
     const { data: etabs, error } = await supabase
       .from('etablissements')
       .select('id, nom, commune, departement, statut_editorial, habitat_type, created_at')
       .eq('gestionnaire', organisation)
       .order('created_at', { ascending: false });
 
-    if (error) {
+    // Charger les établissements dont l'utilisateur est proprietaire
+    const { data: proprietaireEtabs } = await supabase
+      .from('etablissement_proprietaires')
+      .select('etablissement_id, active')
+      .eq('user_id', userId)
+      .eq('active', true);
+
+    // Récupérer les détails des établissements proprietaires
+    const proprietaireEtabIds = proprietaireEtabs?.map(p => p.etablissement_id) || [];
+    const { data: proprietaireEtabDetails } = proprietaireEtabIds.length > 0 ? await supabase
+      .from('etablissements')
+      .select('id, nom, commune, departement, statut_editorial, habitat_type, created_at')
+      .in('id', proprietaireEtabIds)
+      .order('created_at', { ascending: false })
+      : { data: [] };
+
+    // Combiner les deux listes (sans doublons)
+    const allEtabs = etabs || [];
+    const proprietaireDetails = proprietaireEtabDetails || [];
+    const combined = [
+      ...allEtabs,
+      ...proprietaireDetails.filter(p => !allEtabs.some(o => o.id === p.id))
+    ];
+
+    if (error && !proprietaireEtabDetails) {
       console.error('Error loading etablissements:', error);
       return;
     }
 
-    if (!etabs || etabs.length === 0) {
+    if (!combined || combined.length === 0) {
       setEtablissements([]);
       return;
     }
 
     // Charger les images pour chaque établissement
     const etabsWithImages = await Promise.all(
-      etabs.map(async (etab) => {
+      combined.map(async (etab) => {
         const { data: medias } = await supabase
           .from('medias')
           .select('storage_path')
@@ -151,344 +174,496 @@ export default function GestionnaireDashboardV2() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f7fa' }}>
-      {/* Header */}
+    <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
+      {/* ======================== HERO HEADER ======================== */}
       <header style={{
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         color: '#fff',
-        padding: '1.5rem 2rem',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+        padding: '2.5rem 2rem',
+        boxShadow: '0 10px 40px rgba(102, 126, 234, 0.2)',
+        position: 'relative'
       }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: '1.8rem', fontWeight: 600 }}>
-              Tableau de bord gestionnaire
-            </h1>
-            <p style={{ margin: '0.5rem 0 0', opacity: 0.9, fontSize: '1rem' }}>
-              {userOrganisation || user?.email}
-            </p>
+        <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <h1 style={{ margin: 0, fontSize: '2.5rem', fontWeight: 700, letterSpacing: '-0.5px' }}>
+                Bienvenue, {userOrganisation || user?.email?.split('@')[0]}
+              </h1>
+              <p style={{ margin: '0.75rem 0 0', opacity: 0.95, fontSize: '1.05rem', fontWeight: 300 }}>
+                Gérez vos établissements et vos demandes facilement
+              </p>
+            </div>
+            <button
+              onClick={async () => {
+                await supabase.auth.signOut();
+                router.push('/');
+              }}
+              style={{
+                background: 'rgba(255,255,255,0.2)',
+                border: '1px solid rgba(255,255,255,0.4)',
+                color: '#fff',
+                padding: '0.875rem 1.75rem',
+                borderRadius: 8,
+                cursor: 'pointer',
+                fontSize: '0.95rem',
+                fontWeight: 500,
+                transition: 'all 0.3s ease',
+                backdropFilter: 'blur(10px)'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
+              onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+            >
+              Déconnexion
+            </button>
           </div>
-          <button
-            onClick={handleLogout}
-            style={{
-              background: 'rgba(255,255,255,0.2)',
-              border: '1px solid rgba(255,255,255,0.3)',
-              color: '#fff',
-              padding: '0.75rem 1.5rem',
-              borderRadius: 8,
-              cursor: 'pointer',
-              fontSize: '0.95rem',
-              fontWeight: 500,
-              transition: 'all 0.3s ease'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
-            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
-          >
-            Déconnexion
-          </button>
+
+          {/* Stats row */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '1rem',
+            marginTop: '2.5rem'
+          }}>
+            <div style={{ 
+              background: 'rgba(255,255,255,0.15)',
+              padding: '1rem 1.5rem',
+              borderRadius: 12,
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.2)'
+            }}>
+              <div style={{ fontSize: '2rem', fontWeight: 700 }}>{etablissements.length}</div>
+              <div style={{ fontSize: '0.9rem', opacity: 0.9, marginTop: '0.25rem' }}>Établissements</div>
+            </div>
+            <div style={{ 
+              background: 'rgba(255,255,255,0.15)',
+              padding: '1rem 1.5rem',
+              borderRadius: 12,
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.2)'
+            }}>
+              <div style={{ fontSize: '2rem', fontWeight: 700 }}>{propositions.length}</div>
+              <div style={{ fontSize: '0.9rem', opacity: 0.9, marginTop: '0.25rem' }}>Demandes</div>
+            </div>
+            <div style={{ 
+              background: 'rgba(255,255,255,0.15)',
+              padding: '1rem 1.5rem',
+              borderRadius: 12,
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.2)'
+            }}>
+              <div style={{ fontSize: '2rem', fontWeight: 700 }}>{propositions.filter(p => p.statut === 'approuvee').length}</div>
+              <div style={{ fontSize: '0.9rem', opacity: 0.9, marginTop: '0.25rem' }}>Approuvées</div>
+            </div>
+          </div>
         </div>
       </header>
 
-      {/* Content */}
-      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '2rem' }}>
-        {/* Tabs */}
-        <div style={{ 
-          background: '#fff', 
-          borderRadius: '12px 12px 0 0',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-          display: 'flex',
-          borderBottom: '1px solid #e5e7eb'
-        }}>
-          <button
-            onClick={() => setActiveTab('etablissements')}
-            style={{
-              flex: 1,
-              padding: '1.25rem 2rem',
-              border: 'none',
-              background: activeTab === 'etablissements' ? '#fff' : 'transparent',
-              borderBottom: activeTab === 'etablissements' ? '3px solid #667eea' : '3px solid transparent',
-              color: activeTab === 'etablissements' ? '#667eea' : '#6b7280',
-              fontSize: '1rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            Mes établissements ({etablissements.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('propositions')}
-            style={{
-              flex: 1,
-              padding: '1.25rem 2rem',
-              border: 'none',
-              background: activeTab === 'propositions' ? '#fff' : 'transparent',
-              borderBottom: activeTab === 'propositions' ? '3px solid #667eea' : '3px solid transparent',
-              color: activeTab === 'propositions' ? '#667eea' : '#6b7280',
-              fontSize: '1rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            Mes demandes ({propositions.length})
-          </button>
-        </div>
-
-        {/* Tab Content */}
-        <div style={{ 
-          background: '#fff', 
-          borderRadius: '0 0 12px 12px',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-          padding: '2rem',
-          minHeight: 500
-        }}>
-          {activeTab === 'etablissements' && (
-            <div>
-              {/* Action Button */}
-              <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2 style={{ margin: 0, fontSize: '1.5rem', color: '#1f2937' }}>
-                  Mes établissements publiés
-                </h2>
-                <Link
-                  href="/gestionnaire/create"
-                  style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    color: '#fff',
-                    padding: '0.75rem 1.5rem',
-                    borderRadius: 8,
-                    textDecoration: 'none',
-                    fontWeight: 500,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
-                    transition: 'transform 0.2s ease'
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                  onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                >
-                  <span style={{ fontSize: '1.2rem' }}>+</span>
-                  Nouvel établissement
-                </Link>
+      {/* ======================== MAIN CONTENT ======================== */}
+      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '3rem 2rem' }}>
+        {/* ======================== SECTION 1: ACTIONS RAPIDES ======================== */}
+        <section style={{ marginBottom: '3rem' }}>
+          <h2 style={{ 
+            fontSize: '1.5rem', 
+            fontWeight: 600, 
+            color: '#1f2937',
+            marginBottom: '1.5rem'
+          }}>
+            🚀 Actions rapides
+          </h2>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: '1.5rem'
+          }}>
+            {/* CREATE Card*/}
+            <Link href="/gestionnaire/create" style={{ textDecoration: 'none' }}>
+              <div style={{
+                background: '#fff',
+                borderRadius: 16,
+                padding: '2rem',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                border: '2px solid #e5e7eb',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+                textAlign: 'center'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.boxShadow = '0 12px 35px rgba(102, 126, 234, 0.2)';
+                e.currentTarget.style.borderColor = '#667eea';
+                e.currentTarget.style.transform = 'translateY(-4px)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.05)';
+                e.currentTarget.style.borderColor = '#e5e7eb';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+              >
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>📝</div>
+                <h3 style={{ 
+                  margin: '0 0 0.5rem', 
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  color: '#1f2937'
+                }}>
+                  Créer un établissement
+                </h3>
+                <p style={{ 
+                  margin: 0, 
+                  fontSize: '0.9rem',
+                  color: '#6b7280'
+                }}>
+                  Ajouter une nouvelle fiche établissement
+                </p>
               </div>
+            </Link>
 
-              {/* Etablissements Grid */}
-              {etablissements.length === 0 ? (
-                <div style={{
-                  textAlign: 'center',
-                  padding: '4rem 2rem',
+            {/* CLAIM Card */}
+            <Link href="/gestionnaire/claim" style={{ textDecoration: 'none' }}>
+              <div style={{
+                background: '#fff',
+                borderRadius: 16,
+                padding: '2rem',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                border: '2px solid #e5e7eb',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+                textAlign: 'center'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.boxShadow = '0 12px 35px rgba(34, 197, 94, 0.2)';
+                e.currentTarget.style.borderColor = '#22c55e';
+                e.currentTarget.style.transform = 'translateY(-4px)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.05)';
+                e.currentTarget.style.borderColor = '#e5e7eb';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+              >
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🔐</div>
+                <h3 style={{ 
+                  margin: '0 0 0.5rem', 
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  color: '#1f2937'
+                }}>
+                  Réclamer une propriété
+                </h3>
+                <p style={{ 
+                  margin: 0, 
+                  fontSize: '0.9rem',
                   color: '#6b7280'
                 }}>
-                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏠</div>
-                  <h3 style={{ margin: '0 0 0.5rem', color: '#374151' }}>
-                    Aucun établissement pour le moment
-                  </h3>
-                  <p style={{ margin: 0 }}>
-                    Créez votre premier établissement pour commencer
-                  </p>
-                </div>
-              ) : (
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                  gap: '1.5rem'
-                }}>
-                  {etablissements.map(etab => (
-                    <div
-                      key={etab.id}
-                      style={{
-                        border: '1px solid #e5e7eb',
-                        borderRadius: 12,
-                        overflow: 'hidden',
-                        transition: 'all 0.3s ease',
-                        cursor: 'pointer',
-                        background: '#fff'
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
-                        e.currentTarget.style.transform = 'translateY(-4px)';
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.boxShadow = 'none';
-                        e.currentTarget.style.transform = 'translateY(0)';
-                      }}
-                    >
-                      {/* Image */}
-                      <div style={{ position: 'relative', height: 200, overflow: 'hidden', background: '#f3f4f6' }}>
-                        <Image
-                          src={etab.image_path ? getSupabaseImageUrl(etab.image_path) : getHabitatImage(etab.sous_categories || null)}
-                          alt={etab.nom}
-                          fill
-                          style={{ objectFit: 'cover' }}
-                        />
-                      </div>
+                  Revendiquer la propriété d'un établissement
+                </p>
+              </div>
+            </Link>
 
-                      {/* Content */}
-                      <div style={{ padding: '1.25rem' }}>
-                        <h3 style={{ 
-                          margin: '0 0 0.5rem', 
-                          fontSize: '1.1rem',
-                          color: '#1f2937',
-                          fontWeight: 600
-                        }}>
-                          {etab.nom}
-                        </h3>
+            {/* MANAGE Card */}
+            <div style={{
+              background: '#fff',
+              borderRadius: 16,
+              padding: '2rem',
+              cursor: 'not-allowed',
+              opacity: etablissements.length === 0 ? 0.6 : 1,
+              transition: 'all 0.3s ease',
+              border: '2px solid #e5e7eb',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>⚙️</div>
+              <h3 style={{ 
+                margin: '0 0 0.5rem', 
+                fontSize: '1.1rem',
+                fontWeight: 600,
+                color: '#1f2937'
+              }}>
+                Gérer les établissements
+              </h3>
+              <p style={{ 
+                margin: 0, 
+                fontSize: '0.9rem',
+                color: '#6b7280'
+              }}>
+                {etablissements.length === 0 
+                  ? 'Aucun établissement à gérer' 
+                  : 'Modifier vos établissements'}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ======================== SECTION 2: MES ÉTABLISSEMENTS ======================== */}
+        <section style={{ marginBottom: '3rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h2 style={{ 
+              fontSize: '1.5rem', 
+              fontWeight: 600, 
+              color: '#1f2937',
+              margin: 0
+            }}>
+              📍 Mes établissements ({etablissements.length})
+            </h2>
+          </div>
+
+          {etablissements.length === 0 ? (
+            <div style={{
+              background: '#fff',
+              borderRadius: 16,
+              padding: '4rem 2rem',
+              textAlign: 'center',
+              color: '#6b7280',
+              border: '2px dashed #e5e7eb'
+            }}>
+              <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>🏗️</div>
+              <h3 style={{ margin: '0 0 0.5rem', color: '#374151', fontSize: '1.1rem' }}>
+                Aucun établissement pour le moment
+              </h3>
+              <p style={{ margin: 0 }}>
+                Créez votre premier établissement ou réclamez la propriété d'un établissement existant
+              </p>
+            </div>
+          ) : (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '1.5rem'
+            }}>
+              {etablissements.map(etab => (
+                <div
+                  key={etab.id}
+                  style={{
+                    border: '1px solid #e5e7eb',
+                    borderRadius: 16,
+                    overflow: 'hidden',
+                    transition: 'all 0.3s ease',
+                    cursor: 'default',
+                    background: '#fff',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.boxShadow = '0 12px 35px rgba(0,0,0,0.1)';
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.05)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  {/* Image */}
+                  <div style={{ position: 'relative', height: 220, overflow: 'hidden', background: '#f3f4f6' }}>
+                    <Image
+                      src={etab.image_path ? getSupabaseImageUrl(etab.image_path) : getHabitatImage(etab.sous_categories || null)}
+                      alt={etab.nom}
+                      fill
+                      style={{ objectFit: 'cover' }}
+                    />
+                  </div>
+
+                  {/* Content */}
+                  <div style={{ padding: '1.5rem' }}>
+                    <h3 style={{ 
+                      margin: '0 0 0.5rem', 
+                      fontSize: '1.1rem',
+                      color: '#1f2937',
+                      fontWeight: 600
+                    }}>
+                      {etab.nom}
+                    </h3>
+                    <div style={{ 
+                      margin: '0.5rem 0 1rem',
+                      fontSize: '0.9rem',
+                      color: '#6b7280'
+                    }}>
+                      <p style={{ margin: '0 0 0.25rem' }}>📍 {etab.commune}</p>
+                      <p style={{ margin: 0 }}>📞 {etab.departement}</p>
+                    </div>
+
+                    {/* Status Badge */}
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                      <span style={{
+                        padding: '0.35rem 0.75rem',
+                        background: etab.statut_editorial === 'publie' ? '#d1fae5' : '#fee2e2',
+                        color: etab.statut_editorial === 'publie' ? '#065f46' : '#991b1b',
+                        borderRadius: 20,
+                        fontSize: '0.8rem',
+                        fontWeight: 500
+                      }}>
+                        {etab.statut_editorial === 'publie' ? '✓ Publié' : '⏱️ Brouillon'}
+                      </span>
+                    </div>
+
+                    {/* Actions */}
+                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                      <Link
+                        href={`/gestionnaire/edit/${etab.id}`}
+                        style={{
+                          flex: 1,
+                          textAlign: 'center',
+                          padding: '0.75rem 1rem',
+                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          color: '#fff',
+                          borderRadius: 8,
+                          textDecoration: 'none',
+                          fontSize: '0.9rem',
+                          fontWeight: 500,
+                          transition: 'all 0.2s ease',
+                          border: 'none',
+                          cursor: 'pointer'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                        onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                      >
+                        ✏️ Modifier
+                      </Link>
+                      <Link
+                        href={`/plateforme/fiche?id=${etab.id}`}
+                        target="_blank"
+                        style={{
+                          flex: 1,
+                          textAlign: 'center',
+                          padding: '0.75rem 1rem',
+                          background: '#f3f4f6',
+                          color: '#374151',
+                          borderRadius: 8,
+                          textDecoration: 'none',
+                          fontSize: '0.9rem',
+                          fontWeight: 500,
+                          transition: 'all 0.2s ease',
+                          border: '1px solid #e5e7eb'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                        onMouseOut={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                      >
+                        👁️ Voir
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* ======================== SECTION 3: HISTORIQUE DE DEMANDES ======================== */}
+        <section>
+          <h2 style={{ 
+            fontSize: '1.5rem', 
+            fontWeight: 600, 
+            color: '#1f2937',
+            marginBottom: '1.5rem'
+          }}>
+            📋 Historique de vos demandes
+          </h2>
+
+          {propositions.length === 0 ? (
+            <div style={{
+              background: '#fff',
+              borderRadius: 16,
+              padding: '4rem 2rem',
+              textAlign: 'center',
+              color: '#6b7280',
+              border: '2px dashed #e5e7eb'
+            }}>
+              <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>✅</div>
+              <h3 style={{ margin: '0 0 0.5rem', color: '#374151', fontSize: '1.1rem' }}>
+                Aucune demande en attente
+              </h3>
+              <p style={{ margin: 0 }}>
+                Tous vos établissements sont en ordre
+              </p>
+            </div>
+          ) : (
+            <div style={{ 
+              background: '#fff',
+              borderRadius: 16,
+              overflow: 'hidden',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+              border: '1px solid #e5e7eb'
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {propositions.map((prop, idx) => (
+                  <div
+                    key={prop.id}
+                    style={{
+                      borderBottom: idx < propositions.length - 1 ? '1px solid #e5e7eb' : 'none',
+                      padding: '1.5rem',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      transition: 'background 0.2s ease'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.background = '#f9fafb'}
+                    onMouseOut={(e) => e.currentTarget.style.background = '#fff'}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.05rem', color: '#1f2937', fontWeight: 600 }}>
+                        {(prop.payload as { nom?: string }).nom || 'Sans nom'}
+                      </h3>
+                      <p style={{ margin: 0, fontSize: '0.9rem', color: '#6b7280' }}>
+                        Demandé le {new Date(prop.created_at).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      </p>
+                      {prop.review_note && (
                         <p style={{ 
-                          margin: '0 0 1rem', 
-                          color: '#6b7280',
-                          fontSize: '0.9rem'
+                          margin: '0.5rem 0 0', 
+                          fontSize: '0.85rem', 
+                          color: '#dc2626',
+                          fontStyle: 'italic'
                         }}>
-                          {etab.commune}, {etab.departement}
+                          💬 {prop.review_note}
                         </p>
-
-                        {/* Actions */}
-                        <div style={{ display: 'flex', gap: '0.75rem' }}>
-                          <Link
-                            href={`/gestionnaire/edit/${etab.id}`}
-                            style={{
-                              flex: 1,
-                              textAlign: 'center',
-                              padding: '0.625rem',
-                              background: '#667eea',
-                              color: '#fff',
-                              borderRadius: 6,
-                              textDecoration: 'none',
-                              fontSize: '0.9rem',
-                              fontWeight: 500,
-                              transition: 'background 0.2s ease'
-                            }}
-                            onMouseOver={(e) => e.currentTarget.style.background = '#5568d3'}
-                            onMouseOut={(e) => e.currentTarget.style.background = '#667eea'}
-                          >
-                            Modifier
-                          </Link>
-                          <Link
-                            href={`/plateforme/fiche?id=${etab.id}`}
-                            target="_blank"
-                            style={{
-                              flex: 1,
-                              textAlign: 'center',
-                              padding: '0.625rem',
-                              background: '#f3f4f6',
-                              color: '#374151',
-                              borderRadius: 6,
-                              textDecoration: 'none',
-                              fontSize: '0.9rem',
-                              fontWeight: 500,
-                              transition: 'background 0.2s ease'
-                            }}
-                            onMouseOver={(e) => e.currentTarget.style.background = '#e5e7eb'}
-                            onMouseOut={(e) => e.currentTarget.style.background = '#f3f4f6'}
-                          >
-                            Voir
-                          </Link>
-                        </div>
-                      </div>
+                      )}
                     </div>
-                  ))}
-                </div>
-              )}
+                    <div style={{ marginLeft: '1rem' }}>
+                      {prop.statut === 'en_attente' && (
+                        <span style={{
+                          padding: '0.5rem 1rem',
+                          background: '#fef3c7',
+                          color: '#92400e',
+                          borderRadius: 20,
+                          fontSize: '0.85rem',
+                          fontWeight: 600,
+                          display: 'inline-block',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          ⏱️ En attente
+                        </span>
+                      )}
+                      {prop.statut === 'approuvee' && (
+                        <span style={{
+                          padding: '0.5rem 1rem',
+                          background: '#d1fae5',
+                          color: '#065f46',
+                          borderRadius: 20,
+                          fontSize: '0.85rem',
+                          fontWeight: 600,
+                          display: 'inline-block',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          ✅ Approuvée
+                        </span>
+                      )}
+                      {prop.statut === 'rejetee' && (
+                        <span style={{
+                          padding: '0.5rem 1rem',
+                          background: '#fee2e2',
+                          color: '#991b1b',
+                          borderRadius: 20,
+                          fontSize: '0.85rem',
+                          fontWeight: 600,
+                          display: 'inline-block',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          ❌ Rejetée
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
-
-          {activeTab === 'propositions' && (
-            <div>
-              <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', color: '#1f2937' }}>
-                Historique de mes demandes
-              </h2>
-
-              {propositions.length === 0 ? (
-                <div style={{
-                  textAlign: 'center',
-                  padding: '4rem 2rem',
-                  color: '#6b7280'
-                }}>
-                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📝</div>
-                  <h3 style={{ margin: '0 0 0.5rem', color: '#374151' }}>
-                    Aucune demande
-                  </h3>
-                  <p style={{ margin: 0 }}>
-                    Vos demandes de création apparaîtront ici
-                  </p>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {propositions.map(prop => (
-                    <div
-                      key={prop.id}
-                      style={{
-                        border: '1px solid #e5e7eb',
-                        borderRadius: 8,
-                        padding: '1.25rem',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                      }}
-                    >
-                      <div style={{ flex: 1 }}>
-                        <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.05rem', color: '#1f2937' }}>
-                          {(prop.payload as { nom?: string }).nom || 'Sans nom'}
-                        </h3>
-                        <p style={{ margin: 0, fontSize: '0.9rem', color: '#6b7280' }}>
-                          Demandé le {new Date(prop.created_at).toLocaleDateString('fr-FR')}
-                        </p>
-                        {prop.review_note && (
-                          <p style={{ 
-                            margin: '0.5rem 0 0', 
-                            fontSize: '0.85rem', 
-                            color: '#ef4444',
-                            fontStyle: 'italic'
-                          }}>
-                            Note : {prop.review_note}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        {prop.statut === 'en_attente' && (
-                          <span style={{
-                            padding: '0.5rem 1rem',
-                            background: '#fef3c7',
-                            color: '#92400e',
-                            borderRadius: 20,
-                            fontSize: '0.85rem',
-                            fontWeight: 500
-                          }}>
-                            En attente
-                          </span>
-                        )}
-                        {prop.statut === 'approuvee' && (
-                          <span style={{
-                            padding: '0.5rem 1rem',
-                            background: '#d1fae5',
-                            color: '#065f46',
-                            borderRadius: 20,
-                            fontSize: '0.85rem',
-                            fontWeight: 500
-                          }}>
-                            Approuvée
-                          </span>
-                        )}
-                        {prop.statut === 'rejetee' && (
-                          <span style={{
-                            padding: '0.5rem 1rem',
-                            background: '#fee2e2',
-                            color: '#991b1b',
-                            borderRadius: 20,
-                            fontSize: '0.85rem',
-                            fontWeight: 500
-                          }}>
-                            Rejetée
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        </section>
       </div>
     </div>
   );

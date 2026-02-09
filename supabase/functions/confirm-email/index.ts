@@ -4,7 +4,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+const SUPABASE_SECRET_KEY = Deno.env.get('SUPABASE_SECRET_KEY')
 
 interface ConfirmPayload {
   token: string
@@ -23,7 +23,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Missing token' }), { status: 400 })
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY)
 
     // 1. Chercher le token valide et non expiré
     const { data: verificationData, error: fetchError } = await supabase
@@ -62,7 +62,7 @@ serve(async (req) => {
     const updateResponse = await fetch(adminApi, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        'Authorization': `Bearer ${SUPABASE_SECRET_KEY}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({

@@ -6,7 +6,7 @@ import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts"
 
 const ELASTICEMAIL_API_KEY = Deno.env.get('ELASTICEMAIL_API_KEY')
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+const SUPABASE_SECRET_KEY = Deno.env.get('SUPABASE_SECRET_KEY')
 
 interface VerificationPayload {
   userId: string
@@ -35,7 +35,7 @@ serve(async (req) => {
       .join('')
 
     // Insérer le token dans la base de données
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY)
 
     const { error: insertError } = await supabase
       .from('email_verification_tokens')
