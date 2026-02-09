@@ -58,8 +58,10 @@ SELECT
     )::jsonb,
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pbndvdW1mZ3V0YW1wY2dyY2JyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODczNzkwNywiZXhwIjoyMDc0MzEzOTA3fQ.mbgtSNOMqYrAnOnvyUsUb3ru9GRwdjb0ZetbCSoDbwA'
+      'Authorization', 'Bearer YOUR_SUPABASE_SERVICE_ROLE_KEY_HERE'
     )
+    -- ⚠️ NOTER: Cette clé exposée a été révoquée le 9 février 2026
+    -- ⚠️ Utiliser `supabase functions deploy` pour les Edge Functions (auto-inject la clé)
   ) as http_request_id
 FROM propositions p
 LEFT JOIN profiles prof ON prof.id = p.created_by

@@ -1,8 +1,24 @@
 // Diagnostic complet de l'authentification
 const { createClient } = require('@supabase/supabase-js');
+const fs = require('fs');
+const path = require('path');
 
-const supabaseUrl = 'https://minwoumfgutampcgrcbr.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pbndvdW1mZ3V0YW1wY2dyY2JyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3Mzc5MDcsImV4cCI6MjA3NDMxMzkwN30.PWbq0NaB8ZyBIR5XgSn2pD_VoiH9eMjyjUYvvLmA3ng';
+// Charger les variables d'environnement
+const envPath = path.resolve(process.cwd(), '.env.local');
+const envContent = fs.readFileSync(envPath, 'utf-8');
+const envVars = {};
+envContent.split('\n').forEach(line => {
+  const [key, ...valueParts] = line.trim().split('=');
+  if (key && !key.startsWith('#')) envVars[key] = valueParts.join('=');
+});
+
+const supabaseUrl = envVars.NEXT_PUBLIC_SUPABASE_URL || 'https://minwoumfgutampcgrcbr.supabase.co';
+const supabaseAnonKey = envVars.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('\u274c Erreur: NEXT_PUBLIC_SUPABASE_URL/ANON_KEY manquantes dans .env.local');
+  process.exit(1);
+}
 
 async function diagnostic() {
   console.log('🔍 DIAGNOSTIC AUTHENTIFICATION\n');

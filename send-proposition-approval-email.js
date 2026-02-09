@@ -1,9 +1,25 @@
 const { createClient } = require('@supabase/supabase-js');
+const fs = require('fs');
+const path = require('path');
 
-const supabase = createClient(
-  'https://dcezggqkjptsmbnhzhjt.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjZXpnZ3FranB0c21ibmh6aGp0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyOTM1NjMyNSwiZXhwIjoyMDQ0OTMyMzI1fQ.6iwvJevSolzDWPmgNpW3y3l-CQKRo1O1k76lffqISBI'
-);
+// Charger les variables d'environnement
+const envPath = path.resolve(process.cwd(), '.env.local');
+const envContent = fs.readFileSync(envPath, 'utf-8');
+const envVars = {};
+envContent.split('\n').forEach(line => {
+  const [key, ...valueParts] = line.trim().split('=');
+  if (key && !key.startsWith('#')) envVars[key] = valueParts.join('=');
+});
+
+const supabaseUrl = envVars.NEXT_PUBLIC_SUPABASE_URL || 'https://minwoumfgutampcgrcbr.supabase.co';
+const supabaseServiceKey = envVars.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseServiceKey) {
+  console.error('❌ Erreur: SUPABASE_SERVICE_ROLE_KEY manquante dans .env.local');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 const PROPOSITION_ID = '38b4d49d-15c8-48a9-912a-0593098d426e';
 
