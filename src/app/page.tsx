@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import OblongButtonLink from "../components/OblongButtonLink";
-import SearchAutocomplete from "../components/SearchAutocomplete";
+import IntegratedSearchBar from "../components/IntegratedSearchBar";
 import ChatbotIcon from "../components/ChatbotIcon";
 
 export default function HomePage() {
@@ -29,178 +29,52 @@ export default function HomePage() {
       </div>
 
       <div className="hero__content">
-    <h1 className="hero__title" style={{ marginTop: "4rem" }}>Trouvez votre habitat intermédiaire senior en France</h1>
+    <h1 className="hero__title">Trouvez votre habitat intermédiaire senior en France</h1>
 
-        {/* Barre de recherche centrale avec boutons carte et chatbot */}
-        <div style={{ 
-          position: "relative", 
-          display: "flex", 
-          alignItems: "flex-start", 
-          justifyContent: "center", 
-          gap: "1rem",
-          maxWidth: "800px",
-          width: "100%",
-          margin: "0 auto",
-          padding: "0 1rem",
-          boxSizing: "border-box"
-        }}>
-          {/* Bouton Carte de France */}
-          <Link
-            href="/plateforme?view=map"
-            className="map-btn"
-            style={{
-              position: "relative",
-              width: "60px",
-              height: "60px",
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-              border: "2px solid rgba(217, 135, 106, 0.3)",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 4px 24px rgba(217, 135, 106, 0.3)",
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              animation: "mapPulse 3s ease-in-out infinite",
-              flexShrink: 0,
-              textDecoration: "none",
-              overflow: "hidden"
-            }}
-            aria-label="Accéder à la carte"
-            title="Accéder à la carte"
-          >
-            <img 
-              src="/carte.png" 
-              alt="Carte" 
-              style={{ 
-                width: "70px", 
-                height: "70px", 
-                objectFit: "cover" 
-              }}
-            />
-          </Link>
-          
-          <div style={{ flex: 1, maxWidth: "100%" }}>
-            <SearchAutocomplete />
-          </div>
-          
-          {/* Icône Chatbot IA avec bulle élégante */}
-          <button
-            onClick={() => {
-              const event = new CustomEvent('openChatbot');
-              window.dispatchEvent(event);
-            }}
-            className="chatbot-btn"
-            style={{
-              position: "relative",
-              width: "60px",
-              height: "60px",
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #3d5568 100%)",
-              border: "none",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 4px 24px rgba(44, 62, 80, 0.4)",
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              animation: "chatbotPulse 3s ease-in-out infinite",
-              flexShrink: 0,
-              boxSizing: "border-box",
-              overflow: "hidden"
-            }}
-            aria-label="Assistant IA"
-            title="Assistant IA - Posez-moi vos questions !"
-          >
-            <img 
-              src="/ia.png" 
-              alt="Assistant IA" 
-              style={{ 
-                width: "70px", 
-                height: "70px", 
-                objectFit: "cover" 
-              }}
-            />
-          </button>
-        </div>
+        {/* Barre de recherche intégrée - Boîte oblongue unique */}
+        <IntegratedSearchBar />
         
         <style jsx>{`
-          @keyframes chatbotPulse {
-            0%, 100% { 
-              transform: scale(1);
-              box-shadow: 0 4px 24px rgba(44, 62, 80, 0.4), inset 0 1px 0 rgba(217, 135, 106, 0.1);
-            }
-            50% { 
-              transform: scale(1.08);
-              box-shadow: 0 6px 32px rgba(217, 135, 106, 0.5), 
-                          0 0 0 4px rgba(217, 135, 106, 0.1),
-                          inset 0 1px 0 rgba(217, 135, 106, 0.2);
-            }
-          }
-          
           @keyframes mapPulse {
             0%, 100% { 
               transform: scale(1);
-              box-shadow: 0 4px 24px rgba(217, 135, 106, 0.3);
+              box-shadow: 0 2px 12px rgba(217, 135, 106, 0.2);
             }
             50% { 
               transform: scale(1.08);
-              box-shadow: 0 6px 32px rgba(217, 135, 106, 0.5), 
+              box-shadow: 0 4px 20px rgba(217, 135, 106, 0.4), 
                           0 0 0 4px rgba(217, 135, 106, 0.1);
             }
           }
-          
-          .map-btn:hover {
-            transform: scale(1.15) !important;
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
-            box-shadow: 0 8px 36px rgba(217, 135, 106, 0.6), 
-                        0 0 0 6px rgba(217, 135, 106, 0.15) !important;
-            border-color: rgba(217, 135, 106, 0.5) !important;
-            animation: none !important;
+
+          .integrated-map-btn {
+            animation: mapPulse 3s ease-in-out infinite;
           }
-          
-          .map-btn:hover svg {
-            filter: brightness(1.1) drop-shadow(0 0 8px rgba(217, 135, 106, 0.4));
+
+          @keyframes chatbotPulse {
+            0%, 100% { 
+              transform: scale(1);
+              box-shadow: 0 2px 12px rgba(44, 62, 80, 0.3);
+            }
+            50% { 
+              transform: scale(1.08);
+              box-shadow: 0 4px 20px rgba(217, 135, 106, 0.5), 
+                          0 0 0 4px rgba(217, 135, 106, 0.1);
+            }
           }
-          
-          .map-btn:active {
-            transform: scale(1.05) !important;
+
+          .integrated-chatbot-btn {
+            animation: chatbotPulse 3s ease-in-out infinite;
           }
-          
-          .chatbot-btn:hover {
-            transform: scale(1.15) !important;
-            background: linear-gradient(135deg, #34495e 0%, #3d5568 50%, #2c3e50 100%) !important;
-            box-shadow: 0 8px 36px rgba(217, 135, 106, 0.6), 
-                        0 0 0 6px rgba(217, 135, 106, 0.15),
-                        inset 0 1px 0 rgba(217, 135, 106, 0.3) !important;
-            border-color: rgba(217, 135, 106, 0.4) !important;
-            animation: none !important;
-          }
-          
-          .chatbot-btn:hover svg {
-            filter: brightness(1.2) drop-shadow(0 0 8px rgba(244, 164, 96, 0.6));
-          }
-          
-          .chatbot-btn:active {
-            transform: scale(1.05) !important;
-          }
-          
+
           @media (max-width: 768px) {
-            .map-btn {
+            .integrated-map-btn {
               width: 52px !important;
               height: 52px !important;
             }
-            .map-btn svg {
-              width: 28px !important;
-              height: 28px !important;
-            }
-            .chatbot-btn {
-              width: 52px !important;
-              height: 52px !important;
-            }
-            .chatbot-btn svg {
-              width: 28px !important;
-              height: 28px !important;
+            .integrated-chatbot-btn {
+              width: 48px !important;
+              height: 48px !important;
             }
           }
         `}</style>

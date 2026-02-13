@@ -35,6 +35,7 @@ function MenuButton({ href, children }: { href: string; children: React.ReactNod
 
 export default function SecondaryMenu() {
   const [isMobile, setIsMobile] = React.useState(false);
+  const [menuOpen, setMenuOpen] = React.useState(false);
 
   React.useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -51,23 +52,24 @@ export default function SecondaryMenu() {
         className="secondary-menu"
         style={{
           width: "100%",
-          minHeight: 140,
+          minHeight: 70,
           background: `url(${bannerUrl}) center/cover no-repeat`,
           borderBottom: "1px solid #a85b2b",
           boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
-          padding: "1rem",
+          padding: "0.75rem 1rem",
           position: "sticky",
           top: 0,
           zIndex: 100,
           display: "flex",
-          flexDirection: "column",
+          flexDirection: "row",
           alignItems: "center",
-          justifyContent: "center"
+          justifyContent: "space-between"
         }}
       >
-        {/* Logo mobile centré */}
+        {/* Logo */}
         <Link
           href="/"
+          className="caveat-font"
           style={{
             display: "flex",
             alignItems: "center",
@@ -75,42 +77,163 @@ export default function SecondaryMenu() {
             background: "rgba(40,30,20,0.6)",
             color: "#fff",
             borderRadius: "24px",
-            fontFamily: "Pacifico, cursive",
-            fontSize: "0.85rem",
+            fontFamily: "'Caveat', cursive",
+            fontSize: "1.1rem",
             textDecoration: "none",
-            fontWeight: 500,
+            fontWeight: 700,
             backdropFilter: "blur(2px)",
             boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
             cursor: "pointer",
             padding: "8px 16px",
-            marginBottom: "12px"
+            transition: "all 0.3s ease",
+            flex: 1,
+            marginRight: "8px"
           }}
         >
-          <Image src="/logoDF.png" alt="Logo" width={28} height={28} />
+          <Image src="/logoDF.png" alt="Logo" width={24} height={24} />
           habitat-intermediaire.fr
         </Link>
 
-        {/* Menu mobile en grille */}
-        <nav style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "8px",
-          width: "100%",
-          maxWidth: "320px"
-        }}>
-          <Link href="/plateforme" style={mobileMenuBtnStyle}>
-            🏠 Plateforme
-          </Link>
-          <Link href="/aides" style={mobileMenuBtnStyle}>
-            💰 Aides
-          </Link>
-          <Link href="/solutions" style={mobileMenuBtnStyle}>
-            🔍 Solutions
-          </Link>
-          <Link href="/contact" style={mobileMenuBtnStyle}>
-            📞 Contact
-          </Link>
-        </nav>
+        {/* Bouton Menu Hamburger */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          style={{
+            background: "rgba(255,255,255,0.2)",
+            border: "none",
+            color: "#fff",
+            cursor: "pointer",
+            padding: "8px 12px",
+            borderRadius: "6px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "4px",
+            transition: "all 0.3s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(255,255,255,0.3)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(255,255,255,0.2)";
+          }}
+        >
+          <div style={{ width: "20px", height: "2px", background: "#fff" }}></div>
+          <div style={{ width: "20px", height: "2px", background: "#fff" }}></div>
+          <div style={{ width: "20px", height: "2px", background: "#fff" }}></div>
+        </button>
+
+        {/* Menu Mobile Dropdown */}
+        {menuOpen && (
+          <nav style={{
+            position: "absolute",
+            top: "100%",
+            left: 0,
+            right: 0,
+            background: "rgba(40,30,20,0.95)",
+            backdropFilter: "blur(8px)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "0",
+            borderBottom: "1px solid #a85b2b",
+            zIndex: 1000,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.2)"
+          }}>
+            <Link 
+              href="/plateforme"
+              onClick={() => setMenuOpen(false)}
+              style={{
+                padding: "12px 1rem",
+                color: "#fff",
+                textDecoration: "none",
+                fontSize: "0.95rem",
+                borderBottom: "1px solid rgba(255,255,255,0.1)",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                transition: "background 0.2s"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(255,255,255,0.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+              }}
+            >
+              <div style={{ width: "8px", height: "8px", background: "#d9876a", borderRadius: "2px" }}></div>
+              Plateforme
+            </Link>
+            <Link 
+              href="/aides"
+              onClick={() => setMenuOpen(false)}
+              style={{
+                padding: "12px 1rem",
+                color: "#fff",
+                textDecoration: "none",
+                fontSize: "0.95rem",
+                borderBottom: "1px solid rgba(255,255,255,0.1)",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                transition: "background 0.2s"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(255,255,255,0.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+              }}
+            >
+              <div style={{ width: "8px", height: "8px", background: "#d9876a", borderRadius: "2px" }}></div>
+              Aides
+            </Link>
+            <Link 
+              href="/solutions"
+              onClick={() => setMenuOpen(false)}
+              style={{
+                padding: "12px 1rem",
+                color: "#fff",
+                textDecoration: "none",
+                fontSize: "0.95rem",
+                borderBottom: "1px solid rgba(255,255,255,0.1)",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                transition: "background 0.2s"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(255,255,255,0.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+              }}
+            >
+              <div style={{ width: "8px", height: "8px", background: "#d9876a", borderRadius: "2px" }}></div>
+              Solutions
+            </Link>
+            <Link 
+              href="/contact"
+              onClick={() => setMenuOpen(false)}
+              style={{
+                padding: "12px 1rem",
+                color: "#fff",
+                textDecoration: "none",
+                fontSize: "0.95rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                transition: "background 0.2s"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(255,255,255,0.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+              }}
+            >
+              <div style={{ width: "8px", height: "8px", background: "#d9876a", borderRadius: "2px" }}></div>
+              Contact
+            </Link>
+          </nav>
+        )}
       </header>
     );
   }
@@ -145,29 +268,34 @@ export default function SecondaryMenu() {
       }}>
         <Link
           href="/"
+          className="caveat-font"
           style={{
             display: "flex",
             alignItems: "center",
             gap: 10,
-            background: "rgba(40,30,20,0.45)",
+            background: "rgba(40,30,20,0.6)",
             color: "#fff",
             borderRadius: "32px",
-            fontFamily: "Pacifico, cursive",
-            fontSize: "0.92rem",
+            fontFamily: "'Caveat', cursive",
+            fontSize: "1.3rem",
             textDecoration: "none",
-            fontWeight: 500,
+            fontWeight: 700,
             border: "none",
-            backdropFilter: "blur(1.5px)",
-            boxShadow: "0 2px 8px 0 rgba(0,0,0,0.08)",
+            backdropFilter: "blur(2px)",
+            boxShadow: "0 2px 8px 0 rgba(0,0,0,0.12)",
             marginRight: 18,
+            marginLeft: -12,
             cursor: "pointer",
             whiteSpace: "nowrap",
-            width: '295px',
-            maxWidth: '295px',
-            overflow: "visible",
-            textOverflow: "clip",
-            justifyContent: "center",
-            padding: "0.32rem 2.1rem"
+            padding: "0.4rem 2rem",
+            minWidth: "fit-content",
+            transition: "all 0.3s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.boxShadow = '0 2px 8px 0 rgba(0,0,0,0.12)';
           }}
         >
           <Image src="/logoDF.png" alt="Logo Habitat Intermédiaire" width={38} height={38} />

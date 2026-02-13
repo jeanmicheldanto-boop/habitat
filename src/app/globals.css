@@ -1,9 +1,17 @@
+/* Import Caveat font */
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap');
+
+/* Classe pour la police Caveat */
+.caveat-font {
+  font-family: 'Caveat', cursive !important;
+  font-weight: 700 !important;
+}
+
 /* Placeholder gris clair pour la barre de recherche */
 .search-bar-custom input::placeholder {
   color: #c2c2c2;
   opacity: 1;
 }
-/* =============== Variables =============== */
 :root{
   --white: #fff;
   --text-dark: #1f2937;
@@ -57,10 +65,19 @@ a{color:inherit;text-decoration:none}
 @media (max-width: 768px) {
   .hero {
     min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .hero__content {
-    padding: 0 1rem;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   .hero__content > div {
@@ -72,7 +89,10 @@ a{color:inherit;text-decoration:none}
     font-size: 1.8rem !important;
     line-height: 1.2;
     margin-bottom: 1.5rem;
-    margin-top: 8rem !important; /* Plus d'espace sur mobile */
+    margin-top: 8rem !important;
+    padding: 0 1rem;
+    width: 100%;
+    box-sizing: border-box;
   }
   
   .search-bar-custom {
@@ -145,7 +165,7 @@ a{color:inherit;text-decoration:none}
 /* Desktop - moins d'espace */
 @media (min-width: 769px) {
   .hero__title {
-    margin-top: 2rem !important; /* Moins d'espace sur desktop */
+    margin-top: 6rem !important; /* Espace augmenté sur desktop */
   }
 }
 
