@@ -11,8 +11,8 @@ type RateRecord = { count: number; resetAt: number };
 const rateStore: Map<string, RateRecord> = (globalThis as any).__chat_rate_store__ || new Map();
 (globalThis as any).__chat_rate_store__ = rateStore;
 
-const RATE_LIMIT_WINDOW_MS = 10_000; // 10s window
-const RATE_LIMIT_MAX = 5; // max 5 req / window / IP
+const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute window (plus réaliste pour tier payant)
+const RATE_LIMIT_MAX = 20; // max 20 req / minute / IP (permet conversations fluides)
 
 function getClientIp(req: Request): string {
   const xfwd = req.headers.get('x-forwarded-for');

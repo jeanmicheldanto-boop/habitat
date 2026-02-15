@@ -61,9 +61,20 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
-    // Throttle rapide pour éviter le spam (800ms)
+    // Throttle pour éviter le spam et respecter les quotas API (2 secondes minimum)
     const now = Date.now();
-    if (now - (lastSentRef.current || 0) < 800) return;
+    const minDelay = 2000; // 2 secondes entre chaque message
+    if (now - (lastSentRef.current || 0) < minDelay) {
+      // Feedback visuel si l'utilisateur spam
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: '⏱️ Veuillez patienter 2 secondes entre chaque message pour une meilleure qualité de réponse.',
+        },
+      ]);
+      return;
+    }
     lastSentRef.current = now;
 
     const userMessage: Message = { role: 'user', content: input.trim() };
