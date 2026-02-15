@@ -24,7 +24,7 @@ export default function MentionsLegales() {
             Société par Actions Simplifiée en cours d&apos;immatriculation<br/>
             Siège social : 55 rue de l&apos;Abbé Carton, 75014 Paris, France<br/>
             Capital social : 5 000 euros<br/>
-            Numéro SIRET : En cours d&apos;attribution<br/>
+            Numéro SIRET : 10081943200012<br/>
             RCS Paris : En cours d&apos;immatriculation</p>
             <p><strong>Directeur de la publication :</strong> Patrick Danto, Directeur Général<br/>
             <strong>Contact :</strong> <a href="mailto:contact@confidensia.fr" className="legal-link">contact@confidensia.fr</a></p>

@@ -102,7 +102,9 @@ export default function HomePage() {
         padding: "3rem 1rem",
         marginTop: "2rem",
         borderRadius: "24px",
-        margin: "2rem 1rem 0"
+        margin: "2rem 1rem 0",
+        width: "calc(100% - 2rem)",
+        boxSizing: "border-box"
       }}>
         <div style={{ 
           margin: "0 auto", 
