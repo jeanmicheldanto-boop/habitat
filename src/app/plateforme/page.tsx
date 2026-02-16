@@ -151,8 +151,13 @@ function PlateformeContent(): JSX.Element {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
   const [selectedCommune, setSelectedCommune] = useState<string>("");
-  // État pour la pagination des résultats
-  const [displayCount, setDisplayCount] = useState(25);
+  // États pour la pagination côté serveur
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const ITEMS_PER_PAGE = 25;
+  // État séparé pour les données de la carte (tous les résultats)
+  const [mapData, setMapData] = useState<Etablissement[]>([]);
   
   // État pour les sections collapsibles (style Airbnb)
   const [expandedSections, setExpandedSections] = useState<{[key: string]: boolean}>({
@@ -213,70 +218,137 @@ function PlateformeContent(): JSX.Element {
     if (searchParam) setSearch(searchParam);
   }, []);
 
-  // Reset du compteur d'affichage quand les filtres changent
+  // Reset de la page quand les filtres changent
   useEffect(() => {
-    setDisplayCount(25);
+    setCurrentPage(1);
   }, [selectedHabitatCategories, selectedSousCategories, selectedPrices, selectedServices, selectedRestauration, selectedLogementTypes, selectedCaracteristiques, selectedPublicCible, selectedDepartement, selectedCommune, selectedAvpEligibility, search]);
 
+  // ✅ OPTIMISATION : Chargement avec pagination côté serveur
   useEffect(() => {
     async function fetchData() {
-      // Récupérer TOUS les établissements en utilisant la pagination (max 1000 par page côté Supabase)
-      const allRows: Etablissement[] = [];
-      let page = 0;
-      const pageSize = 1000;
-      let hasMore = true;
+      setLoading(true);
+      setError(null);
 
-      while (hasMore) {
-        const { data: rows, error: err } = await supabase
-          .from("v_liste_publication_geoloc")
-          .select("*")
-          .range(page * pageSize, (page + 1) * pageSize - 1);
-        
+      try {
+        // Construction de la requête avec filtres côté serveur
+        let query = supabase
+          .from("mv_liste_publication_geoloc") // ✅ Vue matérialisée
+          .select("*", { count: "exact" });
+
+        // Filtres côté serveur pour les champs simples
+        if (search && search.length >= 2) {
+          query = query.or(
+            `nom.ilike.%${search}%,commune.ilike.%${search}%,departement.ilike.%${search}%,presentation.ilike.%${search}%`
+          );
+        }
+
+        if (selectedDepartement) {
+          query = query.ilike("departement", `%${selectedDepartement}%`);
+        }
+
+        if (selectedCommune) {
+          query = query.ilike("commune", `%${selectedCommune}%`);
+        }
+
+        if (selectedHabitatCategories.length > 0) {
+          query = query.in("habitat_type", selectedHabitatCategories);
+        }
+
+        if (selectedAvpEligibility) {
+          query = query.eq("eligibilite_statut", selectedAvpEligibility);
+        }
+
+        // Pagination
+        const from = (currentPage - 1) * ITEMS_PER_PAGE;
+        const to = from + ITEMS_PER_PAGE - 1;
+        query = query.range(from, to);
+
+        // Tri
+        query = query.order("nom", { ascending: true });
+
+        const { data: rows, error: err, count } = await query;
+
         if (err) {
           console.error("Erreur lors du chargement des données:", err);
           setError(err.message);
-          break;
+          setLoading(false);
+          return;
         }
-        
-        if (rows && rows.length > 0) {
-          allRows.push(...rows);
-          hasMore = rows.length === pageSize;
-          page++;
-        } else {
-          hasMore = false;
-        }
-      }
 
-      console.log("Données chargées:", allRows.length, "établissements");
-      if (allRows.length > 0) {
-        console.log("Premier établissement:", allRows[0]);
+        console.log(`Données chargées: ${rows?.length || 0} établissements (page ${currentPage})`);
+        setData(rows || []);
+        setTotalCount(count || 0);
+        setHasMore(count ? currentPage * ITEMS_PER_PAGE < count : false);
+      } catch (err) {
+        console.error("Erreur:", err);
+        setError(err instanceof Error ? err.message : "Erreur inconnue");
+      } finally {
+        setLoading(false);
       }
-      setData(allRows);
-      setLoading(false);
     }
-    async function fetchSousCategories() {
-      // Récupérer tous les services et types de logements avec pagination
-      const allRows: { services?: string[]; logements_types?: LogementType[]; habitat_type?: string }[] = [];
-      let page = 0;
-      const pageSize = 1000;
-      let hasMore = true;
 
-      while (hasMore) {
-        const { data: rows } = await supabase
-          .from("v_liste_publication_geoloc")
-          .select("services, logements_types, habitat_type")
-          .range(page * pageSize, (page + 1) * pageSize - 1);
-        
-        if (rows && rows.length > 0) {
-          allRows.push(...rows);
-          hasMore = rows.length === pageSize;
-          page++;
-        } else {
-          hasMore = false;
+    // ✅ OPTIMISATION : Chargement séparé pour la carte (tous les résultats, champs légers)
+    async function fetchMapData() {
+      try {
+        // Construction de la requête avec les mêmes filtres mais sans pagination
+        let mapQuery = supabase
+          .from("mv_liste_publication_geoloc")
+          .select("etab_id, nom, commune, departement, habitat_type, image_path, fourchette_prix, sous_categories, geom");
+
+        // Appliquer les mêmes filtres que pour la liste
+        if (search && search.length >= 2) {
+          mapQuery = mapQuery.or(
+            `nom.ilike.%${search}%,commune.ilike.%${search}%,departement.ilike.%${search}%`
+          );
         }
-      }
 
-      const rows = allRows;
+        if (selectedDepartement) {
+          mapQuery = mapQuery.ilike("departement", `%${selectedDepartement}%`);
+        }
+
+        if (selectedCommune) {
+          mapQuery = mapQuery.ilike("commune", `%${selectedCommune}%`);
+        }
+
+        if (selectedHabitatCategories.length > 0) {
+          mapQuery = mapQuery.in("habitat_type", selectedHabitatCategories);
+        }
+
+        if (selectedAvpEligibility) {
+          mapQuery = mapQuery.eq("eligibilite_statut", selectedAvpEligibility);
+        }
+
+        // Limiter à 3500 résultats max pour la carte
+        mapQuery = mapQuery.limit(3500);
+        mapQuery = mapQuery.order("nom", { ascending: true });
+
+        const { data: mapRows, error: mapErr } = await mapQuery;
+
+        if (mapErr) {
+          console.error("⚠️ Erreur chargement carte:", mapErr);
+          return;
+        }
+
+        console.log(`🗺️ Carte: ${mapRows?.length || 0} établissements chargés`);
+        setMapData(mapRows || []);
+      } catch (err) {
+        console.error("Erreur carte:", err);
+      }
+    }
+
+    fetchData();
+    fetchMapData();
+  }, [currentPage, selectedHabitatCategories, selectedSousCategories, selectedPrices, selectedServices, selectedRestauration, selectedLogementTypes, selectedCaracteristiques, selectedPublicCible, selectedDepartement, selectedCommune, selectedAvpEligibility, search]);
+
+  // Chargement des sous-catégories disponibles
+  useEffect(() => {
+    async function fetchSousCategories() {
+      // Récupérer un échantillon pour les filtres (optimisé)
+      const { data: rows } = await supabase
+        .from("mv_liste_publication_geoloc")
+        .select("services, logements_types")
+        .limit(500); // Échantillon suffisant pour avoir tous les types
+
       if (rows) {
         const allServ = rows.flatMap((row: { services?: string[] }) => row.services || []);
         const uniqueServices = Array.from(new Set(allServ)).sort();
@@ -288,92 +360,42 @@ function PlateformeContent(): JSX.Element {
         setAllLogementTypes(Array.from(new Set(allLogTypes)).sort());
       }
     }
-    fetchData();
+    
     fetchSousCategories();
   }, []);
 
-  // Autocomplétion : recherche des suggestions
+  // ✅ OPTIMISATION : Autocomplétion avec fonction RPC unique
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (search.length < 2) {
         setSuggestions([]);
+        setShowSuggestions(false);
         return;
       }
 
-      const allSuggestions: Array<{
-        type: 'departement' | 'commune' | 'etablissement';
-        value: string;
-        label: string;
-        metadata?: string;
-      }> = [];
-
       try {
-        // 1. Rechercher dans les départements (priorité 1)
-        const { data: depts } = await supabase
-          .from('v_liste_publication_geoloc')
-          .select('departement')
-          .ilike('departement', `%${search}%`)
-          .limit(3);
+        // ✅ 1 seule requête au lieu de 3 !
+        const { data, error } = await supabase.rpc('search_autocomplete_hybrid', {
+          search_query: search,
+          max_results: 8
+        });
 
-        if (depts) {
-          const uniqueDepts = Array.from(new Set(depts.map(d => d.departement)));
-          uniqueDepts.forEach(dept => {
-            if (dept) {
-              allSuggestions.push({
-                type: 'departement',
-                value: dept,
-                label: dept,
-                metadata: '📍 Département'
-              });
-            }
-          });
+        if (error) {
+          console.error('Erreur recherche autocomplétion:', error);
+          setSuggestions([]);
+          return;
         }
 
-        // 2. Rechercher dans les communes (priorité 2)
-        const { data: communes } = await supabase
-          .from('v_liste_publication_geoloc')
-          .select('commune, departement')
-          .ilike('commune', `%${search}%`)
-          .limit(5);
-
-        if (communes) {
-          const uniqueCommunes = Array.from(
-            new Map(communes.map(c => [c.commune, c])).values()
-          );
-          uniqueCommunes.forEach(item => {
-            if (item.commune) {
-              allSuggestions.push({
-                type: 'commune',
-                value: item.commune,
-                label: `${item.commune} (${item.departement})`,
-                metadata: '🏘️ Commune'
-              });
-            }
-          });
+        if (data && data.length > 0) {
+          setSuggestions(data);
+          setShowSuggestions(true);
+        } else {
+          setSuggestions([]);
+          setShowSuggestions(false);
         }
-
-        // 3. Rechercher dans les établissements (priorité 3)
-        const { data: etabs } = await supabase
-          .from('v_liste_publication_geoloc')
-          .select('etab_id, nom, commune')
-          .ilike('nom', `%${search}%`)
-          .limit(5);
-
-        if (etabs) {
-          etabs.forEach(etab => {
-            allSuggestions.push({
-              type: 'etablissement',
-              value: etab.etab_id,
-              label: etab.nom,
-              metadata: `🏠 ${etab.commune}`
-            });
-          });
-        }
-
-        setSuggestions(allSuggestions.slice(0, 8));
-        setShowSuggestions(allSuggestions.length > 0);
       } catch (error) {
         console.error('Erreur recherche suggestions:', error);
+        setSuggestions([]);
       }
     };
 
@@ -435,6 +457,21 @@ function PlateformeContent(): JSX.Element {
       setSelectedIndex(-1);
     }
   };
+
+  // Pagination handlers
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (hasMore) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   function getFilteredData(): Etablissement[] {
     const filtered = data.filter((etab: Etablissement) => {
@@ -610,6 +647,8 @@ function PlateformeContent(): JSX.Element {
   // Import dynamique de la carte pour CSR uniquement
   const EtabMap = nextDynamic(() => import("../../components/EtabMap"), { ssr: false });
 
+  // Note: getFilteredData() est conservée pour les filtres complexes côté client à implémenter plus tard
+  // Les filtres simples (search, departement, commune, habitat_type, AVP) sont maintenant côté serveur
   const filteredData = getFilteredData();
 
   // --- RENDU JSX ---
@@ -780,7 +819,7 @@ function PlateformeContent(): JSX.Element {
               cursor: "pointer",
             }}
           >
-            📋 Liste ({filteredData.length})
+            📋 Liste ({totalCount})
           </button>
           <button
             onClick={() => setTab("carte")}
@@ -805,7 +844,7 @@ function PlateformeContent(): JSX.Element {
           <div style={{ height: "calc(100vh - 200px)", padding: "16px" }}>
             {mounted && (
               <EtabMap
-                etablissements={filteredData.map((etab) => ({
+                etablissements={mapData.map((etab) => ({
                   ...etab,
                   longitude: etab.geom?.coordinates?.[0],
                   latitude: etab.geom?.coordinates?.[1],
@@ -815,11 +854,16 @@ function PlateformeContent(): JSX.Element {
           </div>
         ) : (
           <MobileResultsList 
-            results={filteredData as EtablissementResult[]} 
+            results={data as EtablissementResult[]} 
             publicCibleOptions={PUBLIC_CIBLE_OPTIONS} 
             restaurationOptions={RESTAURATION_OPTIONS as unknown as { key: string; label: string }[]}
-            displayCount={displayCount}
-            onLoadMore={() => setDisplayCount(prev => prev + 25)}
+            displayCount={data.length}
+            onLoadMore={handleNextPage}
+            onLoadPrevious={handlePreviousPage}
+            hasMore={hasMore}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalCount={totalCount}
           />
         ))}
 
@@ -860,7 +904,7 @@ function PlateformeContent(): JSX.Element {
           selectedCaracteristiques={selectedCaracteristiques}
           setSelectedCaracteristiques={setSelectedCaracteristiques}
           allServices={allServices}
-          resultsCount={filteredData.length}
+          resultsCount={totalCount}
         />
       </main>
     );
@@ -1717,7 +1761,7 @@ function PlateformeContent(): JSX.Element {
               <div style={{ width: "100%", maxWidth: 900, margin: "8px auto 0" }}>
                 {mounted && (
                   <EtabMap
-                    etablissements={filteredData.map((etab) => ({
+                    etablissements={mapData.map((etab) => ({
                       ...etab,
                       longitude: etab.geom?.coordinates?.[0],
                       latitude: etab.geom?.coordinates?.[1],
@@ -1728,7 +1772,7 @@ function PlateformeContent(): JSX.Element {
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "1rem", margin: 0, padding: 0, width: "100%", maxWidth: 900, marginLeft: "auto", marginRight: "auto", fontSize: "0.82rem" }}>
                 <div style={{ display: "grid", gap: "1rem" }}>
-                  {filteredData.slice(0, displayCount).map((etab) => (
+                  {data.map((etab) => (
                     <div
                       key={etab.etab_id}
                       style={{
@@ -1891,55 +1935,88 @@ function PlateformeContent(): JSX.Element {
                 ))}
               </div>
               
-              {/* Bouton "Voir plus" */}
-              {!loading && !error && tab === "liste" && displayCount < filteredData.length && (
-                <div style={{ textAlign: "center", marginTop: "2rem" }}>
+              {/* Contrôles de pagination */}
+              {!loading && !error && tab === "liste" && totalCount > 0 && (
+                <div style={{ 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center", 
+                  gap: "1rem", 
+                  marginTop: "2rem",
+                  padding: "1rem",
+                  flexWrap: "wrap"
+                }}>
                   <button
-                    onClick={() => setDisplayCount(prev => prev + 25)}
+                    onClick={handlePreviousPage}
+                    disabled={currentPage === 1}
                     style={{
-                      background: "linear-gradient(135deg, #a85b2b 0%, #d35400 100%)",
-                      color: "white",
+                      background: currentPage === 1 ? "#e0e0e0" : "linear-gradient(135deg, #a85b2b 0%, #d35400 100%)",
+                      color: currentPage === 1 ? "#999" : "white",
                       border: "none",
                       borderRadius: 12,
-                      padding: "14px 28px",
-                      fontSize: "1rem",
+                      padding: "12px 24px",
+                      fontSize: "0.95rem",
                       fontWeight: 600,
-                      cursor: "pointer",
-                      boxShadow: "0 4px 12px rgba(168, 91, 43, 0.3)",
+                      cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                      boxShadow: currentPage === 1 ? "none" : "0 4px 12px rgba(168, 91, 43, 0.3)",
                       transition: "all 0.3s ease",
                       display: "flex",
                       alignItems: "center",
-                      gap: 8,
-                      margin: "0 auto"
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.transform = "translateY(-2px)";
-                      e.currentTarget.style.boxShadow = "0 6px 16px rgba(168, 91, 43, 0.4)";
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(168, 91, 43, 0.3)";
+                      gap: 8
                     }}
                   >
-                    <span>Voir plus de résultats</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="6,9 12,15 18,9"></polyline>
+                      <polyline points="15,18 9,12 15,6"></polyline>
                     </svg>
-                    <span style={{ 
-                      background: "rgba(255,255,255,0.2)", 
-                      borderRadius: "12px", 
-                      padding: "4px 8px", 
-                      fontSize: "0.85rem",
-                      marginLeft: "4px"
-                    }}>
-                      +25
-                    </span>
+                    <span>Précédent</span>
+                  </button>
+                  
+                  <div style={{ 
+                    background: "#fff", 
+                    borderRadius: "12px", 
+                    padding: "12px 20px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                    border: "1.5px solid #e0e2e6",
+                    fontSize: "0.95rem",
+                    fontWeight: 600,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 4
+                  }}>
+                    <span style={{ color: "#333" }}>Page {currentPage} / {totalPages}</span>
+                    <span style={{ fontSize: "0.8rem", color: "#666" }}>{totalCount} résultat{totalCount > 1 ? 's' : ''}</span>
+                  </div>
+
+                  <button
+                    onClick={handleNextPage}
+                    disabled={!hasMore}
+                    style={{
+                      background: !hasMore ? "#e0e0e0" : "linear-gradient(135deg, #a85b2b 0%, #d35400 100%)",
+                      color: !hasMore ? "#999" : "white",
+                      border: "none",
+                      borderRadius: 12,
+                      padding: "12px 24px",
+                      fontSize: "0.95rem",
+                      fontWeight: 600,
+                      cursor: !hasMore ? "not-allowed" : "pointer",
+                      boxShadow: !hasMore ? "none" : "0 4px 12px rgba(168, 91, 43, 0.3)",
+                      transition: "all 0.3s ease",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8
+                    }}
+                  >
+                    <span>Suivant</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="9,18 15,12 9,6"></polyline>
+                    </svg>
                   </button>
                 </div>
               )}
 
               {/* Disclaimer en bas de liste */}
-              {!loading && !error && tab === "liste" && filteredData.length > 0 && (
+              {!loading && !error && tab === "liste" && data.length > 0 && (
                 <div style={{
                   marginTop: "3rem",
                   padding: "16px 20px",

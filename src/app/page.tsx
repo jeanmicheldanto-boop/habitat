@@ -100,10 +100,11 @@ export default function HomePage() {
         position: "relative",
         background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
         padding: "3rem 1rem",
-        marginTop: "2rem",
         borderRadius: "24px",
-        margin: "2rem 1rem 0",
-        width: "calc(100% - 2rem)",
+        marginTop: "2rem",
+        margin: "2rem auto 0",
+        width: "100%",
+        maxWidth: "min(1100px, calc(100% - 2rem))",
         boxSizing: "border-box"
       }}>
         <div style={{ 

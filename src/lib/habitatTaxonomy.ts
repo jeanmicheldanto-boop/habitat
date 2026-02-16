@@ -168,23 +168,42 @@ export const normalizeString = (str: string | null | undefined): string => {
 // Fonction pour rechercher une sous-catégorie avec tolérance
 export const findSousCategorieWithTolerance = (search: string): SousCategorie | undefined => {
   const normalizedSearch = normalizeString(search);
+  const allSousCategories = getAllSousCategories();
   
-  return getAllSousCategories().find(sc => {
-    // Vérifier d'abord par key exact (le plus fiable)
-    if (sc.key === search || normalizeString(sc.key) === normalizedSearch) return true;
+  // 1. Recherche EXACTE par key (priorité maximale)
+  let found = allSousCategories.find(sc => sc.key === search || normalizeString(sc.key) === normalizedSearch);
+  if (found) return found;
+  
+  // 2. Recherche EXACTE par label normalisé
+  found = allSousCategories.find(sc => normalizeString(sc.label) === normalizedSearch);
+  if (found) return found;
+  
+  // 3. Recherche EXACTE dans les aliases
+  found = allSousCategories.find(sc => 
+    sc.aliases?.some(alias => normalizeString(alias) === normalizedSearch)
+  );
+  if (found) return found;
+  
+  // 4. Recherche partielle : uniquement si la recherche CONTIENT le label/alias
+  // (évite les faux positifs où un alias court comme "ra" matcherait "intergenerationnel")
+  found = allSousCategories.find(sc => {
+    const normalizedLabel = normalizeString(sc.label);
     
-    // Vérifier le label principal
-    if (normalizeString(sc.label).includes(normalizedSearch) || normalizedSearch.includes(normalizeString(sc.label))) return true;
+    // Le label doit être contenu dans la recherche (pas l'inverse)
+    if (normalizedSearch.includes(normalizedLabel)) return true;
     
-    // Vérifier les aliases
+    // Vérifier les aliases de la même manière
     if (sc.aliases) {
-      return sc.aliases.some(alias => 
-        normalizeString(alias).includes(normalizedSearch) || normalizedSearch.includes(normalizeString(alias))
-      );
+      return sc.aliases.some(alias => {
+        const normalizedAlias = normalizeString(alias);
+        return normalizedSearch.includes(normalizedAlias);
+      });
     }
     
     return false;
   });
+  
+  return found;
 };
 
 // Obtenir la couleur d'une sous-catégorie selon le mapping centralisé

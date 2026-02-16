@@ -27,7 +27,7 @@ export default function MentionsLegales() {
             Numéro SIRET : 10081943200012<br/>
             RCS Paris : En cours d&apos;immatriculation</p>
             <p><strong>Directeur de la publication :</strong> Patrick Danto, Directeur Général<br/>
-            <strong>Contact :</strong> <a href="mailto:contact@confidensia.fr" className="legal-link">contact@confidensia.fr</a></p>
+            <strong>Contact :</strong> <a href="mailto:patrick.danto@confidensia.fr" className="legal-link">patrick.danto@confidensia.fr</a></p>
           </div>
         </section>
 
@@ -78,7 +78,7 @@ export default function MentionsLegales() {
           <p>Pour modifier, compléter ou supprimer les informations relatives à votre établissement :</p>
           <ul>
             <li>Connectez-vous à votre espace gestionnaire sur habitat-intermédiaire.fr</li>
-            <li>Ou contactez-nous à : <a href="mailto:contact@confidensia.fr" className="legal-link">contact@confidensia.fr</a></li>
+            <li>Ou contactez-nous à : <a href="mailto:patrick.danto@confidensia.fr" className="legal-link">patrick.danto@confidensia.fr</a></li>
           </ul>
           <p>Toute demande de rectification sera traitée dans un délai maximum de 30 jours.</p>
         </section>
@@ -95,7 +95,7 @@ export default function MentionsLegales() {
           </ul>
 
           <h3>API premium</h3>
-          <p>L&apos;accès à l&apos;API premium contenant les données enrichies fait l&apos;objet d&apos;un contrat spécifique. Pour toute demande : <a href="mailto:contact@confidensia.fr" className="legal-link">contact@confidensia.fr</a></p>
+          <p>L&apos;accès à l&apos;API premium contenant les données enrichies fait l&apos;objet d&apos;un contrat spécifique. Pour toute demande : <a href="mailto:patrick.danto@confidensia.fr" className="legal-link">patrick.danto@confidensia.fr</a></p>
         </section>
 
         <section className="legal-section">

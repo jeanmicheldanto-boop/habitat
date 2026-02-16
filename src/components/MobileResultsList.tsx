@@ -29,9 +29,25 @@ interface MobileResultsListProps {
   restaurationOptions: Array<{key: string, label: string}>;
   displayCount?: number;
   onLoadMore?: () => void;
+  onLoadPrevious?: () => void;
+  hasMore?: boolean;
+  currentPage?: number;
+  totalPages?: number;
+  totalCount?: number;
 }
 
-export default function MobileResultsList({ results, publicCibleOptions, restaurationOptions, displayCount = 25, onLoadMore }: MobileResultsListProps) {
+export default function MobileResultsList({ 
+  results, 
+  publicCibleOptions, 
+  restaurationOptions, 
+  displayCount = 25, 
+  onLoadMore,
+  onLoadPrevious,
+  hasMore = false,
+  currentPage = 1,
+  totalPages = 1,
+  totalCount = 0
+}: MobileResultsListProps) {
   if (!results || results.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '60px 20px' }}>
@@ -41,7 +57,7 @@ export default function MobileResultsList({ results, publicCibleOptions, restaur
   }
   return (
     <div style={{ padding: '0 16px 100px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {results.slice(0, displayCount).map((etab: EtablissementResult) => {
+      {results.map((etab: EtablissementResult) => {
         const sousCategorie = Array.isArray(etab.sous_categories) && etab.sous_categories.length > 0 
           ? etab.sous_categories[0] 
           : "habitat_alternatif";
@@ -148,45 +164,94 @@ export default function MobileResultsList({ results, publicCibleOptions, restaur
         );
       })}
       
-      {/* Bouton "Voir plus" pour mobile */}
-      {displayCount < results.length && onLoadMore && (
-        <div style={{ textAlign: 'center', marginTop: '1.5rem', paddingBottom: '20px' }}>
-          <button
-            onClick={onLoadMore}
-            style={{
-              background: "linear-gradient(135deg, #a85b2b 0%, #d35400 100%)",
-              color: "white",
-              border: "none",
-              borderRadius: 12,
-              padding: "16px 24px",
-              fontSize: "1rem",
-              fontWeight: 600,
-              cursor: "pointer",
-              boxShadow: "0 4px 12px rgba(168, 91, 43, 0.3)",
-              transition: "all 0.3s ease",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              margin: "0 auto",
-              minHeight: 48,
-              touchAction: "manipulation"
-            }}
-            onTouchStart={() => {}}
-          >
-            <span>Voir plus de résultats</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="6,9 12,15 18,9"></polyline>
-            </svg>
-            <span style={{ 
-              background: "rgba(255,255,255,0.2)", 
-              borderRadius: "12px", 
-              padding: "4px 8px", 
-              fontSize: "0.85rem",
-              marginLeft: "4px"
-            }}>
-              +25
-            </span>
-          </button>
+      {/* Contrôles de pagination pour mobile */}
+      {totalCount > 0 && (
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center', 
+          gap: '1rem', 
+          marginTop: '1.5rem',
+          paddingBottom: '20px'
+        }}>
+          <div style={{ 
+            background: '#fff', 
+            borderRadius: '12px', 
+            padding: '12px 20px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            border: '1.5px solid #e0e2e6',
+            fontSize: '0.95rem',
+            fontWeight: 600,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 4
+          }}>
+            <span style={{ color: '#333' }}>Page {currentPage} / {totalPages}</span>
+            <span style={{ fontSize: '0.8rem', color: '#666' }}>{totalCount} résultat{totalCount > 1 ? 's' : ''}</span>
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.75rem', width: '100%', maxWidth: '400px' }}>
+            <button
+              onClick={onLoadPrevious}
+              disabled={currentPage === 1}
+              style={{
+                flex: 1,
+                background: currentPage === 1 ? '#e0e0e0' : 'linear-gradient(135deg, #a85b2b 0%, #d35400 100%)',
+                color: currentPage === 1 ? '#999' : 'white',
+                border: 'none',
+                borderRadius: 12,
+                padding: '14px 20px',
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                boxShadow: currentPage === 1 ? 'none' : '0 4px 12px rgba(168, 91, 43, 0.3)',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                minHeight: 48,
+                touchAction: 'manipulation'
+              }}
+              onTouchStart={() => {}}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="15,18 9,12 15,6"></polyline>
+              </svg>
+              <span>Préc.</span>
+            </button>
+
+            <button
+              onClick={onLoadMore}
+              disabled={!hasMore}
+              style={{
+                flex: 1,
+                background: !hasMore ? '#e0e0e0' : 'linear-gradient(135deg, #a85b2b 0%, #d35400 100%)',
+                color: !hasMore ? '#999' : 'white',
+                border: 'none',
+                borderRadius: 12,
+                padding: '14px 20px',
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                cursor: !hasMore ? 'not-allowed' : 'pointer',
+                boxShadow: !hasMore ? 'none' : '0 4px 12px rgba(168, 91, 43, 0.3)',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                minHeight: 48,
+                touchAction: 'manipulation'
+              }}
+              onTouchStart={() => {}}
+            >
+              <span>Suiv.</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="9,18 15,12 9,6"></polyline>
+              </svg>
+            </button>
+          </div>
         </div>
       )}
     </div>

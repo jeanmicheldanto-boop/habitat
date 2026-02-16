@@ -21,79 +21,42 @@ export default function IntegratedSearchBar() {
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  // ✅ OPTIMISATION : 1 seule requête RPC au lieu de 3
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (query.length < 2) {
         setSuggestions([]);
+        setShowSuggestions(false);
         return;
       }
 
-      const allSuggestions: Suggestion[] = [];
-
       try {
-        const { data: depts } = await supabase
-          .from('v_liste_publication_geoloc')
-          .select('departement')
-          .ilike('departement', `%${query}%`)
-          .limit(3);
+        // ✅ Appel de la fonction SQL optimisée
+        const { data, error } = await supabase.rpc('search_autocomplete_hybrid', {
+          search_query: query,
+          max_results: 8
+        });
 
-        if (depts) {
-          const uniqueDepts = Array.from(new Set(depts.map(d => d.departement)));
-          uniqueDepts.forEach(dept => {
-            if (dept) {
-              allSuggestions.push({
-                type: 'departement',
-                value: dept,
-                label: dept,
-                metadata: '📍 Département'
-              });
-            }
-          });
+        if (error) {
+          console.error('❌ Erreur RPC search_autocomplete_hybrid:', error);
+          console.error('Message:', error.message);
+          console.error('Details:', error.details);
+          console.error('Hint:', error.hint);
+          console.error('Code:', error.code);
+          setSuggestions([]);
+          return;
         }
 
-        const { data: communes } = await supabase
-          .from('v_liste_publication_geoloc')
-          .select('commune, departement')
-          .ilike('commune', `%${query}%`)
-          .limit(5);
-
-        if (communes) {
-          const uniqueCommunes = Array.from(
-            new Map(communes.map(c => [c.commune, c])).values()
-          );
-          uniqueCommunes.forEach(item => {
-            if (item.commune) {
-              allSuggestions.push({
-                type: 'commune',
-                value: item.commune,
-                label: `${item.commune} (${item.departement})`,
-                metadata: '🏘️ Commune'
-              });
-            }
-          });
+        if (data && data.length > 0) {
+          setSuggestions(data);
+          setShowSuggestions(true);
+        } else {
+          setSuggestions([]);
+          setShowSuggestions(false);
         }
-
-        const { data: etabs } = await supabase
-          .from('v_liste_publication_geoloc')
-          .select('etab_id, nom, commune')
-          .ilike('nom', `%${query}%`)
-          .limit(5);
-
-        if (etabs) {
-          etabs.forEach(etab => {
-            allSuggestions.push({
-              type: 'etablissement',
-              value: etab.etab_id,
-              label: etab.nom,
-              metadata: `🏠 ${etab.commune}`
-            });
-          });
-        }
-
-        setSuggestions(allSuggestions.slice(0, 8));
-        setShowSuggestions(allSuggestions.length > 0);
       } catch (error) {
         console.error('Erreur recherche suggestions:', error);
+        setSuggestions([]);
       }
     };
 
